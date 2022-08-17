@@ -1,0 +1,16 @@
+version: '3.9'
+services:
+  mysql:
+    container_name: mysql
+    user: root
+    image: mysql
+    restart: 'always'
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 516489C@k
+      MYSQL_DATABASE: chatapp
+      MYSQL_USER: user
+      MYSQL_PASSWORD: 516489
