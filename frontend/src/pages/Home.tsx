@@ -7,7 +7,7 @@ type Props = {}
 
 export default function Home({}: Props) {
   return (
-    <Flex padding="1rem" height="100vh" boxSizing='border-box'>
+    <Flex  height="100vh" boxSizing='border-box' width={"100%"}>
       <LeftBar/>
       <Main/>
     </Flex>
