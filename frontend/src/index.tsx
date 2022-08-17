@@ -4,17 +4,29 @@ import './index.css';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
-import { ChakraProvider, ColorModeProvider, CSSReset, theme } from '@chakra-ui/react';
+import {
+  ChakraProvider,
+  ColorModeProvider,
+  CSSReset,
+  theme,
+} from '@chakra-ui/react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { socket, SocketContext } from './context/SocketProvider';
+import "./i18n"
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  <ChakraProvider theme={theme}>
-    <ColorModeProvider>
-    <CSSReset/>
-    <App />
-    </ColorModeProvider>
-  </ChakraProvider>
+  <Router>
+    <SocketContext.Provider value={socket}>
+      <ChakraProvider theme={theme}>
+        <ColorModeProvider>
+          <CSSReset />
+          <App />
+        </ColorModeProvider>
+      </ChakraProvider>
+    </SocketContext.Provider>
+  </Router>
 );
 
 // If you want your app to work offline and load faster, you can change
