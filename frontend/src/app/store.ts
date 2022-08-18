@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
+import conversationsSlice from './slices/conversations.slice'
 import globalSlice from './slices/global.slice'
 
 export const store = configureStore({
   reducer: {
-    globalSlice: globalSlice
+    globalSlice: globalSlice,
+    conversationsSlice: conversationsSlice
   },
 })
 

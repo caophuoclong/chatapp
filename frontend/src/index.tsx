@@ -13,11 +13,14 @@ import {
 import { BrowserRouter as Router } from 'react-router-dom';
 import { socket, SocketContext } from './context/SocketProvider';
 import "./i18n"
+import { Provider } from 'react-redux';
+import { store } from './app/store';
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <Router>
+    <Provider store={store}>
     <SocketContext.Provider value={socket}>
       <ChakraProvider theme={theme}>
         <ColorModeProvider>
@@ -26,6 +29,7 @@ root.render(
         </ColorModeProvider>
       </ChakraProvider>
     </SocketContext.Provider>
+    </Provider>
   </Router>
 );
 

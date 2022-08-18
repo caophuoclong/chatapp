@@ -19,7 +19,7 @@ export default function SearchBar({}: Props) {
         console.log(value);
     }
   return (
-    <InputGroup marginTop={"1rem"} padding={"10px 5px"} rounded={"2xl"} bg="gray.200" _dark={{
+    <InputGroup padding={"10px 5px"} rounded={"2xl"} bg="gray.200" _dark={{
         bg: "gray.700",
     }}>
       <IconButton height={"20px"} _hover={{

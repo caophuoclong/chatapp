@@ -12,7 +12,7 @@ const initialState: GlobalState = {
     chossenConversation: ""
 }
 
-export const counterSlice = createSlice({
+export const global = createSlice({
   name: 'global',
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
@@ -23,8 +23,8 @@ export const counterSlice = createSlice({
   },
 })
 
-export const { changeChoosenConversation } = counterSlice.actions
+export const { changeChoosenConversation } = global.actions
 
 // Other code such as selectors can use the imported `RootState` type
 
-export default counterSlice.reducer
+export default global.reducer

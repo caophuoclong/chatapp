@@ -1,14 +1,23 @@
 import React from 'react'
-import { Flex, Hide, Show } from '@chakra-ui/react';
+import { Box, Flex, Hide, Show } from '@chakra-ui/react';
+import Header from './Header';
+import MessagesBox from './MessagesBox';
+import InputBox from './InputBox';
 
 type Props = {}
 
 export default function Main({}: Props) {
   return (
-    <Show above="lg">
     <Flex width={{
-        lg: "70%"
-    }}  >Main</Flex>
-    </Show>
+        base: "100%",
+        lg: "82%"
+    }}  
+    boxSizing="border-box"
+    direction={"column"}
+    >
+      <Header/>
+      <MessagesBox/>
+      <InputBox/>
+    </Flex>
   )
 }
