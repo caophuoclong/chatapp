@@ -23,7 +23,6 @@ export default function ChangeLanguage({}: Props) {
     i18n.changeLanguage(lan);
     window.localStorage.setItem('lan', lan);
     moment.locale(lan === 'vn' ? 'vi' : 'es');
-    registerLocale(lan === 'vn' ? 'vi' : 'es', lan === 'vn' ? vi : es);
   }, [lan]);
   return (
     <Stack direction={'row'}>

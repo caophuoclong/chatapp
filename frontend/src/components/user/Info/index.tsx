@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { MouseEvent, useState } from 'react';
 import {
   AvatarBadge,
   AvatarGroup,
   Box,
+  Button,
   HStack,
   IconButton,
   Radio,
@@ -28,8 +29,11 @@ import { FaTimes } from 'react-icons/fa';
 type Props = {};
 
 export default function Info({}: Props) {
+  const [date, setDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const handleChangeDate = (e: Date) => {
-    console.log(e);
+    setDate(e);
+    setShowDatePicker(!showDatePicker);
   };
   const [isEnalbeInput, setIsEnabledInput] = useState(false);
   const lan = useAppSelector((state) => state.globalSlice.lan);
@@ -39,12 +43,17 @@ export default function Info({}: Props) {
 
     if (!isEnalbeInput) {
       inputArray.forEach((value) => {
-        (value as HTMLInputElement).disabled = false;
+        (value as HTMLInputElement | HTMLButtonElement).removeAttribute(
+          'disabled'
+        );
       });
       setIsEnabledInput(true);
     } else {
       inputArray.forEach((value) => {
-        (value as HTMLInputElement).disabled = true;
+        (value as HTMLInputElement | HTMLButtonElement).setAttribute(
+          'disabled',
+          'true'
+        );
       });
       setIsEnabledInput(false);
     }
@@ -98,14 +107,41 @@ export default function Info({}: Props) {
           <Text fontWeight={700} minWidth="80px">
             {t('DOB')}
           </Text>
-          <input
-            type="date"
-            name="begin"
-            placeholder="dd-mm-yyyy"
-            value=""
-            min="1997-01-01"
-            max="2030-12-31"
-          />
+          <Button
+            bg="none"
+            _hover={{
+              bg: 'none',
+            }}
+            _active={{
+              bg: 'none',
+            }}
+            _disabled={{
+              color: 'black',
+            }}
+            position="relative"
+            onClick={(e: MouseEvent<HTMLButtonElement>) => {
+              if (isEnalbeInput) setShowDatePicker(!showDatePicker);
+            }}
+          >
+            {new Date(date).toLocaleDateString('vi-VI')}
+            {isEnalbeInput && showDatePicker && (
+              <Box
+                position={'absolute'}
+                zIndex="50"
+                top="50%"
+                left="50%"
+                transform="translate(-25%, 10%)"
+              >
+                <DatePicker
+                  inline
+                  selected={date}
+                  onChange={handleChangeDate}
+                  locale={lan === 'vn' ? vi : ''}
+                  dateFormat="dd/MM/yyyy"
+                />
+              </Box>
+            )}
+          </Button>
         </Flex>
         <Flex alignItems="center" height="fit-content" width="100%" gap="1rem">
           <Text fontWeight={700} minWidth="80px">
@@ -162,7 +198,7 @@ export default function Info({}: Props) {
             aria-label="Accept"
             padding="1rem"
             icon={
-              <Flex alignItems="center" justifyContent={'center'}>
+              <Flex alignItems="center" justifyContent={'center'} gap="1rem">
                 <BsCheckLg size="24px" color="green" />
                 {t('Accept')}
               </Flex>
@@ -175,7 +211,7 @@ export default function Info({}: Props) {
               handleEnalbeInput();
             }}
             icon={
-              <Flex alignItems="center" justifyContent={'center'}>
+              <Flex alignItems="center" justifyContent={'center'} gap="1rem">
                 <FaTimes size="24px" color="red" />
                 {t('Decline')}
               </Flex>

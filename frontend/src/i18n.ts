@@ -21,7 +21,9 @@ const resources = {
       "Phone": "Phone",
       "Male": "Male", 
       "Female" :"Female",
-      "Edit": "Edit"
+      "Edit": "Edit",
+      "Accept": "Accept",
+      "Decline": "Decline"
     }
   },
   vn: {
@@ -40,7 +42,9 @@ const resources = {
       "Phone": "So dien thoai",
       "Male": "Nam", 
       "Female" :"Nu",
-      "Edit": "Chinh sua"
+      "Edit": "Chinh sua",
+      "Accept": "Dong y",
+      "Decline": "Huy"
     }
   }
 };

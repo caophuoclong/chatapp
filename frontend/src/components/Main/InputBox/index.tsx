@@ -111,7 +111,6 @@ export default function InputBox({}: Props) {
             top: '0',
             transform: isLargerThanHD ? 'translate(0,-100%)' : 'translate(0,0)',
             width: isLargerThanHD ? '258px' : '100%',
-            left: 0,
           }}
         />
       )}
