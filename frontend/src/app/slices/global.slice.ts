@@ -4,12 +4,22 @@ import type { RootState } from '@app/store'
 
 // Define a type for the slice state
 interface GlobalState {
-    chossenConversation: string,
+    conversation:{
+      choosenConversation: string,
+      showInfoConversation: boolean,
+    
+    },
+    lan: "vn" | "en",
+    
 }
 
 // Define the initial state using that type
 const initialState: GlobalState = {
-    chossenConversation: ""
+   conversation:{
+      choosenConversation: '',
+      showInfoConversation: false,
+   },
+   lan: "vn"
 }
 
 export const global = createSlice({
@@ -17,13 +27,16 @@ export const global = createSlice({
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
-    changeChoosenConversation: (state, action: PayloadAction<string>) => {
-        state.chossenConversation = action.payload
+    setShowInfoConversation: (state, action: PayloadAction<boolean>) => {
+      state.conversation.showInfoConversation = action.payload
+    },
+    handleChangeLanguage: (state, action: PayloadAction<"en" | "vn">) => {
+      state.lan = action.payload
     }
   },
 })
 
-export const { changeChoosenConversation } = global.actions
+export const { setShowInfoConversation, handleChangeLanguage } = global.actions
 
 // Other code such as selectors can use the imported `RootState` type
 

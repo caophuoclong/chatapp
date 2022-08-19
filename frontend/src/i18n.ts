@@ -10,7 +10,18 @@ const resources = {
       "Welcome": "Welcome to React and react-i18next",
       "Language": "Language",
       "Theme": "Theme",
-      "SearchFriend": "Find on messenger"
+      "Search": "Search",
+      "LastActive": (time: string)=> `Active ${time} ago`,
+      "Active": "Active now",
+      "Option": "Options",
+      "Setting": "Settings",
+      "Contact": "Contacts",
+      "Gender": "Gender",
+      "DOB": "DOB",
+      "Phone": "Phone",
+      "Male": "Male", 
+      "Female" :"Female",
+      "Edit": "Edit"
     }
   },
   vn: {
@@ -18,7 +29,18 @@ const resources = {
       "Welcome": "Chao mung ban den voi react-i18next",
       "Language": "Ngon ngu",
       "Theme": "Giao dien",
-        "SearchFriend": "Tim kiem trong messenger"
+      "Search": "Tim kiem ",
+      "LastActive": (time: string)=> `Hoat dong ${time} truoc`,
+      "Active": "Dang hoat dong",
+      "Option": "Tuy chon",
+      "Setting": "Cai Dat",
+      "Contact": "Danh Ba",
+      "Gender": "Gioi tinh",
+      "DOB": "Ngay sinh",
+      "Phone": "So dien thoai",
+      "Male": "Nam", 
+      "Female" :"Nu",
+      "Edit": "Chinh sua"
     }
   }
 };

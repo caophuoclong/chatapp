@@ -17,7 +17,7 @@ export default function Home({}: Props) {
           <Main />
         </>
       ) : id ? (
-        <Main/>
+        <Main />
       ) : (
         <LeftBar />
       )}
