@@ -15,7 +15,13 @@ export default function AddFriend({}: Props) {
   };
   return (
     <Flex direction={'column'} height="100vh">
-      <Flex gap="1rem" alignItems={'center'} paddingY=".5rem" bg="blue.500">
+      <Flex
+        gap="1rem"
+        alignItems={'center'}
+        paddingY=".5rem"
+        bg="blue.500"
+        color="white"
+      >
         <IconButton
           aria-label="Back to contacts"
           bg="none"

@@ -1,4 +1,11 @@
-import { Box, Flex, IconButton, Input, useMediaQuery } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  IconButton,
+  Input,
+  useColorMode,
+  useMediaQuery,
+} from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { HiOutlineEmojiHappy, HiPhotograph } from 'react-icons/hi';
 import { GrAttachment } from 'react-icons/gr';
@@ -11,6 +18,7 @@ export default function InputBox({}: Props) {
   const [isLargerThanHD] = useMediaQuery(['(min-width: 1024px)']);
   const [message, setMessage] = useState('');
   const [isPickerShow, setIsPickerShow] = useState(false);
+  const { colorMode } = useColorMode();
   const onPickerClick = (
     event: any,
     emoji: {
@@ -28,11 +36,19 @@ export default function InputBox({}: Props) {
         base: '6%',
         lg: '5%',
       }}
+      _dark={{
+        bg: 'gray.800',
+      }}
       bg="gray.100"
       paddingX={{
         base: '0rem',
         lg: '1rem',
       }}
+      borderTop={
+        colorMode === 'dark'
+          ? '1px solid rgba(255, 255, 255,0.3)'
+          : '1px solid  rgba(0, 0, 0, 0.08)'
+      }
       paddingY="0.3rem"
     >
       {isLargerThanHD && (

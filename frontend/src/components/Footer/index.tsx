@@ -32,7 +32,13 @@ export default function Footer({}: Props) {
     >
       <IconButton
         aria-label="home"
-        bg={location.pathname === '/' ? 'gray.200' : ''}
+        bg={
+          location.pathname === '/'
+            ? colorMode === 'dark'
+              ? 'gray.700'
+              : 'gray.200'
+            : ''
+        }
         icon={
           <AiFillHome
             size="24px"
@@ -45,7 +51,13 @@ export default function Footer({}: Props) {
       />
       <IconButton
         aria-label="contact"
-        bg={location.pathname.includes('contacts') ? 'gray.200' : ''}
+        bg={
+          location.pathname.includes('contacts')
+            ? colorMode === 'dark'
+              ? 'gray.700'
+              : 'gray.200'
+            : ''
+        }
         onClick={() => {
           navigate('/contacts');
         }}
@@ -58,7 +70,13 @@ export default function Footer({}: Props) {
       />
       <IconButton
         aria-label="user"
-        bg={location.pathname.includes('user') ? 'gray.200' : ''}
+        bg={
+          location.pathname.includes('user')
+            ? colorMode === 'dark'
+              ? 'gray.700'
+              : 'gray.200'
+            : ''
+        }
         icon={
           <FaUserAlt
             size="24px"

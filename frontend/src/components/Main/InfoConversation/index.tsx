@@ -43,7 +43,8 @@ export default function InfoConversation({}: Props) {
         }}
         paddingX="1rem"
         paddingY=".3rem"
-        bg="blue.100"
+        bg="blue.500"
+        color="white"
         alignItems={'center'}
       >
         <IconButton
@@ -51,7 +52,7 @@ export default function InfoConversation({}: Props) {
           aria-label="Back to message"
           icon={<ArrowBackIcon fontSize={'24px'} />}
           onClick={() => {
-            navigate(`/message/${id}`);
+            navigate(-1);
           }}
         />
         <Text fontWeight={600}>{t('Option')}</Text>
