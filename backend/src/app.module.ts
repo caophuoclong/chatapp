@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -19,6 +20,10 @@ import { FriendshipModule } from './friendship/friendship.module';
 import { AttachmentModule } from './attachment/attachment.module';
 import { UnreadModule } from './unread/unread.module';
 import { UnRead } from './unread/entities/unread.entity';
+import { AuthvalidationMiddleware } from './authvalidation.middleware';
+import { LocalStrategy } from '~/auth/local.strategy';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './auth/jwt.strategy';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -41,8 +46,22 @@ import { UnRead } from './unread/entities/unread.entity';
 
       }
     },
-  }),UserModule, ConversationModule, MessageModule, FriendshipModule, AttachmentModule, UnreadModule],
+  }),UserModule, ConversationModule, MessageModule, FriendshipModule, AttachmentModule, UnreadModule, PassportModule, JwtModule.registerAsync({
+    useFactory: ()=>{
+      return {
+        secret: config().jwtSecret,
+        signOptions: { expiresIn: '1d' }
+      }
+    }
+  })],
   controllers: [AppController],
-  providers: [AppService, SocketGateway],
+  providers: [AppService, SocketGateway, AuthService, LocalStrategy, JwtStrategy],
 })
-export class AppModule {}
+export class AppModule{
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer
+  //   .apply(AuthvalidationMiddleware)
+  //   .exclude("/api/user/login", "/api/user/register")
+  //   .forRoutes("*")
+  // }
+}

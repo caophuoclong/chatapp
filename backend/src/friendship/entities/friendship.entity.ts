@@ -6,9 +6,9 @@ export class FriendShip{
     @PrimaryGeneratedColumn()
     _id: number;
     @ManyToOne(type => User, user => user._id )
-    userRequest: string;
+    userRequest: User;
     @ManyToOne(type => User, user=> user._id)
-    userAddress: string;
+    userAddress: User;
     @ManyToOne(type => Status, s => s.code)
-    statusCode: string;
+    statusCode: Status;
 }

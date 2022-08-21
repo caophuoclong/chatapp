@@ -96,7 +96,11 @@ export default function Info({}: Props) {
           <Text fontWeight={700} minWidth="80px">
             {t('Gender')}
           </Text>
-          <RadioGroup value={'1'} onChange={() => {}}>
+          <RadioGroup
+            isDisabled={!isEnalbeInput}
+            value={'1'}
+            onChange={() => {}}
+          >
             <HStack gap="1rem">
               <Radio value="1">{t('Male')}</Radio>
               <Radio value="2">{t('Female')}</Radio>
