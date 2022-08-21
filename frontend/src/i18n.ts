@@ -23,7 +23,20 @@ const resources = {
       "Female" :"Female",
       "Edit": "Edit",
       "Accept": "Accept",
-      "Decline": "Decline"
+      "Decline": "Decline",
+      "Cancel": "Cancel",
+      "Close": "Close",
+      "AddFriend": "Add friend",
+      "Username": "Username",
+      "Password": "Password",
+      "Message": "Message",
+      "PersonalInfo": "Personal Info",
+      "ShareContact": "Share Contact",
+      "CommonGroup": "Common Group",
+      "Report": "Report",
+      "Block": "Block",
+      "Search_second": "Search"
+
     }
   },
   vn: {
@@ -31,7 +44,7 @@ const resources = {
       "Welcome": "Chao mung ban den voi react-i18next",
       "Language": "Ngon ngu",
       "Theme": "Giao dien",
-      "Search": "Tim kiem ",
+      "Search": "Tim kiem",
       "LastActive": (time: string)=> `Hoat dong ${time} truoc`,
       "Active": "Dang hoat dong",
       "Option": "Tuy chon",
@@ -44,7 +57,19 @@ const resources = {
       "Female" :"Nu",
       "Edit": "Chinh sua",
       "Accept": "Dong y",
-      "Decline": "Huy"
+      "Decline": "Huy",
+      "Cancel": "Huy",
+      "Close": "Dong",
+      "AddFriend": "Them Ban",
+      "Username": "Ten dang nhap",
+      "Password": "Mat khau",
+      "Message": "Nhan tin",
+      "PersonalInfo": "Thong tin ca nhan",
+      "ShareContact": "Chia se danh ba",
+      "CommonGroup": "Nhom chung",
+      "Report": "Bao cao",
+      "Block": "Chan",
+      "Search_second": "Tim"
     }
   }
 };

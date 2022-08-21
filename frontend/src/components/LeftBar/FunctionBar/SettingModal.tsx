@@ -45,7 +45,7 @@ export default function SettingModal({ isOpen, onClose }: Props) {
               onClose(false);
             }}
           >
-            Close
+            {t('Close')}
           </Button>
         </ModalFooter>
       </ModalContent>

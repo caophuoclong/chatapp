@@ -19,6 +19,8 @@ import { registerLocale } from 'react-datepicker';
 import vi from 'date-fns/locale/vi';
 import es from 'date-fns/locale/es';
 import { handleChangeLanguage } from './app/slices/global.slice';
+import AddFriend from './components/Contacts/AddFriend';
+import FoundUser from './components/Contacts/AddFriend/FoundUser';
 
 function App() {
   const { toggleColorMode, colorMode } = useColorMode();
@@ -52,7 +54,9 @@ function App() {
       <Route path="/message/:id/*" element={<Home />} />
       <Route path="/user" element={<User />} />
       <Route path="/contacts" element={<Contacts />} />
-
+      <Route path="/contacts/add" element={<AddFriend />} />
+      <Route path="/contacts/add/:id" element={<FoundUser />} />
+      <Route path="/friends" element={<Home />} />
       <Route path="/signup" element={<Register />} />
       <Route path="/login" element={<Login />} />
     </Routes>
