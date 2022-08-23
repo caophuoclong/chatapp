@@ -26,16 +26,19 @@ import vi from 'date-fns/locale/vi';
 import { useAppSelector } from '~/app/hooks';
 import { BsCheckLg } from 'react-icons/bs';
 import { FaTimes } from 'react-icons/fa';
+import { useColorMode } from '@chakra-ui/react';
 type Props = {};
 
 export default function Info({}: Props) {
   const [date, setDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const { colorMode } = useColorMode();
   const handleChangeDate = (e: Date) => {
     setDate(e);
     setShowDatePicker(!showDatePicker);
   };
   const [isEnalbeInput, setIsEnabledInput] = useState(false);
+  const user = useAppSelector((state) => state.userSlice.info);
   const lan = useAppSelector((state) => state.globalSlice.lan);
   const { t } = useTranslation();
   const handleEnalbeInput = () => {
@@ -67,7 +70,7 @@ export default function Info({}: Props) {
         gap="5px"
       >
         <button>
-          <Avatar width="72px" height="72px" src="https://picsum.photos/200">
+          <Avatar width="72px" height="72px" src={user.avatarUrl}>
             <AvatarBadge
               borderColor="papayawhip"
               bg="gray"
@@ -81,15 +84,15 @@ export default function Info({}: Props) {
           id="changeName"
           disabled
           _disabled={{
-            color: 'black',
+            color: colorMode === 'light' ? 'black' : 'white',
           }}
           textAlign={'center'}
-          value={'Tran cao Phuoc Long'}
+          value={user.name}
           variant="unstyled"
           border={'none'}
         />
 
-        <Text fontSize={'12px'}>@Ai_cung_co</Text>
+        <Text fontSize={'12px'}>@{user.username}</Text>
       </Flex>
       <VStack spacing="3" divider={<StackDivider />}>
         <Flex alignItems="center" height="fit-content" width="100%" gap="1rem">
@@ -120,14 +123,18 @@ export default function Info({}: Props) {
               bg: 'none',
             }}
             _disabled={{
-              color: 'black',
+              color: colorMode === 'light' ? 'black' : 'white',
             }}
             position="relative"
             onClick={(e: MouseEvent<HTMLButtonElement>) => {
               if (isEnalbeInput) setShowDatePicker(!showDatePicker);
             }}
           >
-            {new Date(date).toLocaleDateString('vi-VI')}
+            {new Date(
+              user.birthday.year,
+              user.birthday.month - 1,
+              user.birthday.day
+            ).toLocaleDateString('vi-VI')}
             {isEnalbeInput && showDatePicker && (
               <Box
                 position={'absolute'}
@@ -153,10 +160,10 @@ export default function Info({}: Props) {
           </Text>
           <Input
             className="input__info"
-            value={'caophuoclong@gmail.com'}
+            value={user.email}
             disabled
             _disabled={{
-              color: 'black',
+              color: colorMode === 'light' ? 'black' : 'white',
             }}
             outline="none"
             border={'none'}
@@ -169,10 +176,10 @@ export default function Info({}: Props) {
           </Text>
           <Input
             className="input__info"
-            value={'+84 326 031 442'}
+            value={user.phone}
             disabled
             _disabled={{
-              color: 'black',
+              color: colorMode === 'light' ? 'black' : 'white',
             }}
             outline="none"
             border={'none'}

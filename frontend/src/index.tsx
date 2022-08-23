@@ -11,11 +11,12 @@ import {
   theme,
 } from '@chakra-ui/react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { socket, SocketContext } from './context/SocketProvider';
 import './i18n';
 import { Provider } from 'react-redux';
 import { store } from './app/store';
 import 'react-datepicker/dist/react-datepicker.css';
+import LocalDatabaseProvider from './providers/LocalDatabaseProvider';
+import SocketProvider from './providers/SocketProvider';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -23,14 +24,14 @@ const root = ReactDOM.createRoot(
 root.render(
   <Router>
     <Provider store={store}>
-      <SocketContext.Provider value={socket}>
+      <SocketProvider>
         <ChakraProvider theme={theme}>
           <ColorModeProvider>
             <CSSReset />
             <App />
           </ColorModeProvider>
         </ChakraProvider>
-      </SocketContext.Provider>
+      </SocketProvider>
     </Provider>
   </Router>
 );

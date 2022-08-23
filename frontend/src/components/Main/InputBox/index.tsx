@@ -12,10 +12,13 @@ import { GrAttachment } from 'react-icons/gr';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { FcLike } from 'react-icons/fc';
 import Picker from 'emoji-picker-react';
+import { useAppSelector } from '~/app/hooks';
 type Props = {};
 
 export default function InputBox({}: Props) {
-  const [isLargerThanHD] = useMediaQuery(['(min-width: 1024px)']);
+  const isLargerThanHD = useAppSelector(
+    (state) => state.globalSlice.isLargerThanHD
+  );
   const [message, setMessage] = useState('');
   const [isPickerShow, setIsPickerShow] = useState(false);
   const { colorMode } = useColorMode();

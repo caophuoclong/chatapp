@@ -1,23 +1,10 @@
-import {
-  Box,
-  Flex,
-  Hide,
-  HStack,
-  IconButton,
-  Show,
-  Text,
-  useColorMode,
-  VStack,
-} from '@chakra-ui/react';
+import { Flex, useColorMode } from '@chakra-ui/react';
 import React from 'react';
-import { MdOutlineMoreHoriz } from 'react-icons/md';
-import ChangeLanguage from '../Settings/ChangeLanguage';
-import ToggleTheme from '../Settings/ToggleTheme';
+
 import Conversations from './Conversations';
 import FunctionBar from './FunctionBar';
 import SearchBar from './SearchBar';
-import { AiFillHome } from 'react-icons/ai';
-import { RiContactsBook2Fill, RiSettings3Fill } from 'react-icons/ri';
+
 import { useLocation, useNavigate } from 'react-router-dom';
 import Footer from '../Footer';
 import LeftFunction from './LeftFunction/index';
@@ -63,7 +50,7 @@ export default function LeftBar({}: Props) {
           <FunctionBar />
           <SearchBar />
         </Flex>
-        {location.pathname.includes('/friends') ? (
+        {location.pathname.includes('/contacts') ? (
           <LeftFriends />
         ) : (
           <Conversations />

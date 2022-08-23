@@ -40,7 +40,7 @@ export default function AddFriendsModal({ setShow }: Props) {
               overflow={'auto'}
               maxHeight="700px"
             >
-              <FoundUser />
+              {false && <FoundUser />}
             </Box>
           </Flex>
         </ModalBody>

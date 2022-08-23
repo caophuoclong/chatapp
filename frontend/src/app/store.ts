@@ -3,6 +3,7 @@ import conversationsSlice from './slices/conversations.slice'
 import globalSlice from './slices/global.slice'
 import messageSlice from './slices/messages.slice'
 import userSlice from './slices/user.slice'
+import friendsSlice from './slices/friends.slice';
 
 export const store = configureStore({
   reducer: {
@@ -10,7 +11,12 @@ export const store = configureStore({
     conversationsSlice: conversationsSlice,
     userSlice: userSlice,
     messageSlice: messageSlice,
+    friendsSlice: friendsSlice
   },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+    serializableCheck: false,
+  }),
+
 })
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

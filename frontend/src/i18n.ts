@@ -35,7 +35,20 @@ const resources = {
       "CommonGroup": "Common Group",
       "Report": "Report",
       "Block": "Block",
-      "Search_second": "Search"
+      "Search_second": "Search",
+      "Login": "Login",
+      "Register": "Register",
+      "Details__Login": "Please enter your username and password",
+      "Forgot__Password": "Forgot password?",
+      "Not__Registered": "Not a member yet? ",
+      "Already__User": "Already a user?",
+      "Confirm__Password": "Confirm password",
+      "IsExist": (t: string)=> `${t} is already exist`,
+      "Success__Register": "Register success",
+      "Error__Register": "Register error",
+      "Error": "Error",
+      "Friends": "Friends",
+      "Info__Conversation": "Info conversation",
 
     }
   },
@@ -69,7 +82,20 @@ const resources = {
       "CommonGroup": "Nhóm chung",
       "Report": "Báo cáo",
       "Block": "Chặn",
-      "Search_second": "Tìm"
+      "Search_second": "Tìm",
+      "Login": "Đăng nhập",
+      "Details__Login": "Vui lòng nhập tên đăng nhập và mật khẩu",
+      "Register": "Đăng ký",
+      "Forgot__Password": "Quên mật khẩu?",
+      "Not__Registered": "Bạn chưa đăng ký? ",
+      "Already__User": "Bạn đã có tài khoản?",
+      "Confirm__Password": "Nhập lại mật khẩu",
+      "IsExist": (t: string)=> `${t} đã tồn tại`,
+      "Success__Register": "Đăng ký thành công",
+      "Error__Register": "Đăng ký thất bại",
+      "Error": "Lỗi",
+      "Friends": "Bạn bè",
+      "Info__Conversation": "Thông tin cuộc hội thoại"
     }
   }
 };

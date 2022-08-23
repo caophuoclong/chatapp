@@ -1,11 +1,12 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { useMediaQuery } from '@chakra-ui/react';
+import Desktop from './Desktop';
 import Mobile from './Mobile';
-import { useAppSelector, useAppDispatch } from '../../app/hooks';
-import Desktop from './Desktop/index';
+import { useAppSelector } from '~/app/hooks';
 
 type Props = {};
 
-export default function Contacts({}: Props) {
+export default function Register({}: Props) {
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );

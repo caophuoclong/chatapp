@@ -22,7 +22,9 @@ export default function Conversation({
 }: IConversation) {
   const { colorMode } = useColorMode();
   const { id } = useParams();
-  const [isLargerThanHD] = useMediaQuery(['(min-width: 1024px)']);
+  const isLargerThanHD = useAppSelector(
+    (state) => state.globalSlice.isLargerThanHD
+  );
   return (
     <Link to={`/message/${_id}`}>
       <Stack

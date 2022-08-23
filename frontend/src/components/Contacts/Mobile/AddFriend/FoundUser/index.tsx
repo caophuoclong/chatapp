@@ -95,10 +95,10 @@ export default function FoundUser({}: Props) {
           aria-label="add"
           _dark={{
             bg: 'white',
-            color: 'black',
+            color: 'white',
           }}
           bg="white"
-          color="black"
+          color="white"
           fontSize={'18px'}
           icon={<AiOutlineUserAdd />}
         />

@@ -26,15 +26,10 @@ export default function InfoConversation({}: Props) {
     <Box
       width={{
         base: '100%',
-        lg: '30%',
       }}
-      height="100%"
+      minHeight="60%"
+      maxHeight="90%"
       boxSizing="border-box"
-      borderLeft={
-        colorMode === 'dark'
-          ? '1px solid rgba(255, 255, 255,0.3)'
-          : '1px solid  rgba(0, 0, 0, 0.08)'
-      }
     >
       <Flex
         display={{

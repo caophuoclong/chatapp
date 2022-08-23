@@ -12,7 +12,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AiOutlineIdcard, AiOutlineStop } from 'react-icons/ai';
 import { GrGroup } from 'react-icons/gr';
-import { MdOutlineReportGmailerrorred } from 'react-icons/md';
+import { MdOutlineGroups, MdOutlineReportGmailerrorred } from 'react-icons/md';
 
 type Props = {};
 
@@ -78,7 +78,7 @@ export default function FoundUser({}: Props) {
         >
           <Flex direction="column" gap="1rem">
             <Flex gap="1rem">
-              <GrGroup fontSize={'24px'} />
+              <MdOutlineGroups fontSize={'24px'} />
               <Box borderBottom="2px solid rgba(0,0,0,0.08)" width="100%">
                 <Text>{t('CommonGroup')} (0)</Text>
               </Box>

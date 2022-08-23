@@ -7,8 +7,8 @@ interface GlobalState {
     conversation:{
       choosenConversation: string,
       showInfoConversation: boolean,
-    
     },
+    isLargerThanHD: boolean,
     lan: "vn" | "en",
     
 }
@@ -19,7 +19,8 @@ const initialState: GlobalState = {
       choosenConversation: '',
       showInfoConversation: false,
    },
-   lan: "vn"
+   lan: "vn",
+   isLargerThanHD: false
 }
 
 export const global = createSlice({
@@ -32,11 +33,14 @@ export const global = createSlice({
     },
     handleChangeLanguage: (state, action: PayloadAction<"en" | "vn">) => {
       state.lan = action.payload
+    },
+    handleSetLargerThanHD: (state, action: PayloadAction<boolean>) => {
+      state.isLargerThanHD = action.payload
     }
   },
 })
 
-export const { setShowInfoConversation, handleChangeLanguage } = global.actions
+export const { setShowInfoConversation, handleChangeLanguage, handleSetLargerThanHD } = global.actions
 
 // Other code such as selectors can use the imported `RootState` type
 
