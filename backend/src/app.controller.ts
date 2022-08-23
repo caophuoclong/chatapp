@@ -17,6 +17,8 @@ export class AppController {
   }
   @Post("/auth/register")
   register(@Body() createUserDto: CreateUserDto){
+    // console.log(createUserDto);
+    // return "123"
     return this.authService.register(createUserDto);
   }
 }

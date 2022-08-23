@@ -124,9 +124,32 @@ export class UserService {
         where: {
           _id,
         },
+        
+      });
+      if (!user) {
+        throw new HttpException('User not found', 400);
+      }
+      delete user.salt;
+      delete user.password;
+      
+      return {
+        statusCode: 200,
+        message: 'User found',
+        data: user,
+      };
+    } catch (error) {
+      throw new HttpException(error.message, 400);
+    }
+  }
+  async getListFriend(_id: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: {
+          _id,
+        },
         relations: {
           friendRequest: {
-            userRequest: true,
+            userAddress: true,
             statusCode: true,
           },
           friendAddress: {
@@ -138,29 +161,71 @@ export class UserService {
       if (!user) {
         throw new HttpException('User not found', 400);
       }
-      delete user.salt;
-      delete user.password;
-      console.log(user);
-      const data = {
-        ...user,
-        friends: [
-          (() => {
-            const friends = user.friendRequest.filter(
-              (friend) => friend.statusCode.code === 'a',
-            );
-            const friends1 = user.friendAddress.filter(
-              (friend) => friend.statusCode.code === 'a',
-            );
-            return [...friends, ...friends1];
-          })(),
-        ],
-      };
-      delete data.friendAddress;
-      delete data.friendRequest;
+
+      const friends = 
+        (() => {
+          const friends = user.friendRequest.filter(
+            (friend) => {
+              delete friend.userAddress.salt;
+              delete friend.userAddress.password;
+              return friend.statusCode.code === 'a'
+            },
+          );
+          const friends1 = user.friendAddress.filter(
+            (friend) => {
+              delete friend.userRequest.salt;
+              delete friend.userRequest.password;
+              return friend.statusCode.code === 'a'},
+          );
+          const mergeFriend = [];
+          friends.forEach((friend) => {
+            mergeFriend.push({
+              friendShipId: friend._id,
+              statusCode: friend.statusCode,
+              user: friend.userAddress,
+            })
+          })
+          friends1.forEach((friend) => {
+            mergeFriend.push({
+              friendShipId: friend._id,
+              statusCode: friend.statusCode,
+              user: friend.userRequest,
+            })
+          }
+          )
+          return mergeFriend;
+        })()
+      
+
       return {
         statusCode: 200,
         message: 'User found',
-        data: data,
+        data: friends,
+      };
+    } catch (error) {
+      throw new HttpException(error.message, 400);
+    }
+
+  }
+  async getListConversations(_id: string){
+    try {
+      const user = await this.userRepository.findOne({
+        where: {
+          _id,
+        },
+        relations: {
+          conversations: {
+            participants: true,
+          }
+        },
+      });
+      if (!user) {
+        throw new HttpException('User not found', 400);
+      }
+      return {
+        statusCode: 200,
+        message: 'User found',
+        data: user.conversations,
       };
     } catch (error) {
       throw new HttpException(error.message, 400);

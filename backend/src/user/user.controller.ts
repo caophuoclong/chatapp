@@ -38,6 +38,16 @@ export class UserController {
     const _id = req.user._id;
     return this.userService.getMe(_id);
   }
+  @Get("friends")
+  getListFriend(@Request() req) {
+    const _id = req.user._id;
+    return this.userService.getListFriend(_id);
+  }
+  @Get("conversations")
+  getConversations(@Request() req) {
+    const _id = req.user._id;
+    return this.userService.getListConversations(_id);
+  }
   @Get('/:_id')
   getOther(@Param('_id') id) {
     const _id = id;

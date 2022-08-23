@@ -23,14 +23,20 @@ export class User {
         unique: true
     })
     email: string;
-    @Column()
+    @Column({
+        nullable: true,
+        default: null
+    })
     phone: string;
     @Column({
         nullable: true,
         default: null
     })
     avatarUrl: string;
-    @Column()
+    @Column({
+        nullable: true,
+        default: null
+    })
     birthday: string;
     @Column()
     salt: string;
