@@ -1,26 +1,33 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '@app/store'
+export enum ENUM_SCREEN {
+  CONVERSATIONS,
+  CONTACTS
+}
+
 
 // Define a type for the slice state
 interface GlobalState {
     conversation:{
-      choosenConversation: string,
+      choosenConversationID: string,
       showInfoConversation: boolean,
     },
     isLargerThanHD: boolean,
     lan: "vn" | "en",
+    showScreen: ENUM_SCREEN,
     
 }
 
 // Define the initial state using that type
 const initialState: GlobalState = {
    conversation:{
-      choosenConversation: '',
+      choosenConversationID: '',
       showInfoConversation: false,
    },
    lan: "vn",
-   isLargerThanHD: false
+   isLargerThanHD: false,
+   showScreen: ENUM_SCREEN.CONVERSATIONS
 }
 
 export const global = createSlice({
@@ -36,11 +43,17 @@ export const global = createSlice({
     },
     handleSetLargerThanHD: (state, action: PayloadAction<boolean>) => {
       state.isLargerThanHD = action.payload
+    },
+    setShowScreen: (state, action: PayloadAction<ENUM_SCREEN>) => {
+      state.showScreen = action.payload
+    },
+    setChoosenConversationID: (state, action: PayloadAction<string>) => {
+      state.conversation.choosenConversationID = action.payload
     }
   },
 })
 
-export const { setShowInfoConversation, handleChangeLanguage, handleSetLargerThanHD } = global.actions
+export const { setShowInfoConversation, handleChangeLanguage, handleSetLargerThanHD, setShowScreen, setChoosenConversationID } = global.actions
 
 // Other code such as selectors can use the imported `RootState` type
 

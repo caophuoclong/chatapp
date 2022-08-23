@@ -27,9 +27,13 @@ import { useAppSelector } from '~/app/hooks';
 import { BsCheckLg } from 'react-icons/bs';
 import { FaTimes } from 'react-icons/fa';
 import { useColorMode } from '@chakra-ui/react';
-type Props = {};
+import { IUser } from '../../../interfaces/IUser';
+type Props = {
+  user: IUser;
+  id?: string;
+};
 
-export default function Info({}: Props) {
+export default function Info({ user, id }: Props) {
   const [date, setDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const { colorMode } = useColorMode();
@@ -38,9 +42,9 @@ export default function Info({}: Props) {
     setShowDatePicker(!showDatePicker);
   };
   const [isEnalbeInput, setIsEnabledInput] = useState(false);
-  const user = useAppSelector((state) => state.userSlice.info);
   const lan = useAppSelector((state) => state.globalSlice.lan);
   const { t } = useTranslation();
+  const myId = useAppSelector((state) => state.userSlice.info._id);
   const handleEnalbeInput = () => {
     const inputArray = document.querySelectorAll('.input__info');
 
@@ -187,48 +191,52 @@ export default function Info({}: Props) {
           />
         </Flex>
       </VStack>
-      {!isEnalbeInput ? (
-        <IconButton
-          display="flex"
-          width="90%"
-          marginY="10px"
-          marginX="auto"
-          aria-label="edit info"
-          gap="1rem"
-          onClick={() => handleEnalbeInput()}
-          icon={
-            <>
-              <AiOutlineEdit size="24px" />
-              <Text fontSize={'12px'}>{t('Edit')}</Text>
-            </>
-          }
-        />
+      {id === myId || !id ? (
+        !isEnalbeInput ? (
+          <IconButton
+            display="flex"
+            width="90%"
+            marginY="10px"
+            marginX="auto"
+            aria-label="edit info"
+            gap="1rem"
+            onClick={() => handleEnalbeInput()}
+            icon={
+              <>
+                <AiOutlineEdit size="24px" />
+                <Text fontSize={'12px'}>{t('Edit')}</Text>
+              </>
+            }
+          />
+        ) : (
+          <Flex justifyContent="space-around" marginY="1rem">
+            <IconButton
+              aria-label="Accept"
+              padding="1rem"
+              icon={
+                <Flex alignItems="center" justifyContent={'center'} gap="1rem">
+                  <BsCheckLg size="24px" color="green" />
+                  {t('Accept')}
+                </Flex>
+              }
+            />
+            <IconButton
+              aria-label="Decline"
+              padding="1rem"
+              onClick={() => {
+                handleEnalbeInput();
+              }}
+              icon={
+                <Flex alignItems="center" justifyContent={'center'} gap="1rem">
+                  <FaTimes size="24px" color="red" />
+                  {t('Decline')}
+                </Flex>
+              }
+            />
+          </Flex>
+        )
       ) : (
-        <Flex justifyContent="space-around" marginY="1rem">
-          <IconButton
-            aria-label="Accept"
-            padding="1rem"
-            icon={
-              <Flex alignItems="center" justifyContent={'center'} gap="1rem">
-                <BsCheckLg size="24px" color="green" />
-                {t('Accept')}
-              </Flex>
-            }
-          />
-          <IconButton
-            aria-label="Decline"
-            padding="1rem"
-            onClick={() => {
-              handleEnalbeInput();
-            }}
-            icon={
-              <Flex alignItems="center" justifyContent={'center'} gap="1rem">
-                <FaTimes size="24px" color="red" />
-                {t('Decline')}
-              </Flex>
-            }
-          />
-        </Flex>
+        ''
       )}
     </Box>
   );

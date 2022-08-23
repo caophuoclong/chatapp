@@ -18,7 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ModalShowInfo from '~/components/ModalShowInfo';
 import { IUser } from '~/interfaces/IUser';
-import { useAppSelector } from '~/app/hooks';
+import { useAppSelector } from '../../../app/hooks';
 
 type Props = {
   user: IUser;
@@ -72,7 +72,7 @@ export default function Friend({ user, isOnline, friendShipId }: Props) {
         <MenuList>
           <MenuItem
             onClick={() => {
-              navigate('/user/' + user._id);
+              setShowInfo(true);
             }}
           >
             {t('Show__Info')}

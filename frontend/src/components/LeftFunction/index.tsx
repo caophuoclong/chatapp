@@ -18,10 +18,12 @@ import { AiFillHome } from 'react-icons/ai';
 import { FaUserAlt } from 'react-icons/fa';
 import { RiContactsBook2Fill } from 'react-icons/ri';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAppSelector } from '../../../app/hooks';
+import { useAppSelector, useAppDispatch } from '../../app/hooks';
 import { useTranslation } from 'react-i18next';
 import Info from '~/components/user/Info';
 import { useColorMode } from '@chakra-ui/react';
+import { ENUM_SCREEN, setShowScreen } from '~/app/slices/global.slice';
+import ModalShowInfo from '../ModalShowInfo';
 
 type Props = {};
 
@@ -32,6 +34,9 @@ export default function LeftFunction({}: Props) {
   const [showInfo, setShowInfo] = React.useState(false);
   const user = useAppSelector((state) => state.userSlice.info);
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const showScreen = useAppSelector((state) => state.globalSlice.showScreen);
+
   return (
     <Flex
       display={{
@@ -52,9 +57,7 @@ export default function LeftFunction({}: Props) {
     >
       <Tooltip label={t('Show__info')} placement="right-end">
         <Avatar
-          src={
-            'https://images.unsplash.com/photo-1657516478869-b81f8c25d7e2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80'
-          }
+          src={user.avatarUrl}
           marginY="1rem"
           cursor={'pointer'}
           onClick={() => {
@@ -66,67 +69,37 @@ export default function LeftFunction({}: Props) {
         height="60px"
         aria-label="home"
         width="full"
-        bg={
-          location.pathname === '/' || location.pathname.includes('message')
-            ? 'gray.200'
-            : ''
-        }
+        bg={showScreen === ENUM_SCREEN.CONVERSATIONS ? 'gray.200' : ''}
         icon={
           <AiFillHome
             size="32px"
-            color={
-              location.pathname === '/' || location.pathname.includes('message')
-                ? '#63B3ED'
-                : ''
-            }
+            color={showScreen === ENUM_SCREEN.CONVERSATIONS ? '#63B3ED' : ''}
           />
         }
         onClick={() => {
-          navigate('/');
+          dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
         }}
       />
       <IconButton
         height="60px"
         aria-label="home"
         width="full"
-        bg={location.pathname === '/contacts' ? 'bg.200' : ''}
+        bg={showScreen === ENUM_SCREEN.CONTACTS ? 'gray.200' : ''}
         icon={
           <RiContactsBook2Fill
             size="32px"
-            color={location.pathname === '/contacts' ? '#63B3ED' : ''}
+            color={showScreen === ENUM_SCREEN.CONTACTS ? '#63B3ED' : ''}
           />
         }
         onClick={() => {
-          navigate('/contacts');
+          dispatch(setShowScreen(ENUM_SCREEN.CONTACTS));
         }}
       />
-      <Modal
-        isOpen={showInfo}
-        onClose={() => {
-          setShowInfo(false);
-        }}
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>{user.name}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Info />
-          </ModalBody>
-
-          <ModalFooter>
-            <Button
-              colorScheme="blue"
-              mr={3}
-              onClick={() => {
-                setShowInfo(false);
-              }}
-            >
-              {t('Close')}
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <ModalShowInfo
+        setShowInfo={(f: boolean) => setShowInfo(f)}
+        showInfo={showInfo}
+        user={user}
+      />
     </Flex>
   );
 }

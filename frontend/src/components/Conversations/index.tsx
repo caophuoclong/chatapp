@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Conversation from './Conversation';
-import IConversation from '../../../interfaces/IConversation';
+import IConversation from '../../interfaces/IConversation';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@chakra-ui/react';
 import { useAppSelector } from '~/app/hooks';

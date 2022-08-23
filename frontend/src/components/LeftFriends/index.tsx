@@ -3,7 +3,7 @@ import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import { AiOutlineUserAdd, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import AddFriendsModal from './Modals/AddFriendsModal';
 import CreateGroupModal from './Modals/CreateGroupModal';
-import { useAppSelector } from '../../../app/hooks';
+import { useAppSelector } from '../../app/hooks';
 import Friend from './Friend';
 import { useTranslation } from 'react-i18next';
 
@@ -40,8 +40,8 @@ export default function LeftFriends({}: Props) {
         {friends.map((friendShip, index) => (
           <Friend
             key={index}
+            user={friendShip.user}
             friendShipId={friendShip.friendShipId}
-            name={friendShip.user.name}
             friendId={friendShip.user._id}
             avatarUrl={friendShip.user.avatarUrl}
           />

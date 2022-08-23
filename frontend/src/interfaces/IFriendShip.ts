@@ -5,5 +5,5 @@ export default interface IFriendShip {
         code: "a" | "r" | "p" | "b",
         name: "Accepted" | "Rejected" | "Pending" | "Blocked",
     },
-    user: Omit<IUser, "username">
+    user: IUser
 }

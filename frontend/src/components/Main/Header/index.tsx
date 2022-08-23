@@ -13,17 +13,21 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BsCameraVideoFill } from 'react-icons/bs';
 import { IoCallSharp } from 'react-icons/io5';
-import { useAppSelector } from '~/app/hooks';
+import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import { GiHamburgerMenu } from 'react-icons/gi';
+import {
+  setShowInfoConversation,
+  setChoosenConversationID,
+} from '~/app/slices/global.slice';
 type Props = {};
 
 export default function Header({}: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { id } = useParams();
   const showInfo = useAppSelector(
     (state) => state.globalSlice.conversation.showInfoConversation
   );
+  const dispatch = useAppDispatch();
   const { colorMode } = useColorMode();
   return (
     <Flex
@@ -42,15 +46,16 @@ export default function Header({}: Props) {
           : '1px solid  rgba(0, 0, 0, 0.08)'
       }
     >
-      <Link to="/">
-        <ArrowBackIcon
-          fontSize={'1.5rem'}
-          display={{
-            base: 'block',
-            lg: 'none',
-          }}
-        />
-      </Link>
+      <ArrowBackIcon
+        fontSize={'1.5rem'}
+        display={{
+          base: 'block',
+          lg: 'none',
+        }}
+        onClick={() => {
+          dispatch(setChoosenConversationID(''));
+        }}
+      />
       <Avatar
         width="40px"
         height="40px"
@@ -84,8 +89,7 @@ export default function Header({}: Props) {
         />
         <IconButton
           onClick={() => {
-            if (!showInfo) navigate(`/message/${id}/info`);
-            else navigate(`/message/${id}`);
+            dispatch(setShowInfoConversation(true));
           }}
           bg={
             showInfo ? (colorMode === 'dark' ? 'gray.700' : 'gray.200') : 'none'

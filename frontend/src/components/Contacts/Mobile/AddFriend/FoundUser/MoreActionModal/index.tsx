@@ -30,6 +30,7 @@ export default function MoreActionModal({ setShow }: Props) {
         <ModalCloseButton />
         <ModalBody>
           <Button
+            width="100%"
             display={'block'}
             textAlign="left"
             bg="none"
@@ -48,6 +49,7 @@ export default function MoreActionModal({ setShow }: Props) {
             </Flex>
           </Button>
           <Button
+            width="100%"
             display={'block'}
             textAlign="left"
             bg="none"
@@ -66,6 +68,7 @@ export default function MoreActionModal({ setShow }: Props) {
             </Flex>
           </Button>
           <Button
+            width="100%"
             display={'block'}
             textAlign="left"
             bg="none"

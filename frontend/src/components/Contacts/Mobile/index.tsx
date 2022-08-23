@@ -46,7 +46,7 @@ export default function Contacts({}: Props) {
           <Friend
             key={index}
             friendShipId={friendShip.friendShipId}
-            name={friendShip.user.name}
+            user={friendShip.user}
             friendId={friendShip.user._id}
             avatarUrl={friendShip.user.avatarUrl}
           />

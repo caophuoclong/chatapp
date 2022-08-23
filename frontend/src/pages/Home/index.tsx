@@ -12,6 +12,10 @@ export default function Home({}: Props) {
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate('/');
+  }, [isLargerThanHD]);
 
   return <>{isLargerThanHD ? <Desktop /> : <Mobile />}</>;
 }

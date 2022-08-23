@@ -49,6 +49,8 @@ const resources = {
       "Error": "Error",
       "Friends": "Friends",
       "Info__Conversation": "Info conversation",
+      "Show__Info": "Show info",
+      "Delete__Friend": "Delete friend",
 
     }
   },
@@ -95,7 +97,9 @@ const resources = {
       "Error__Register": "Đăng ký thất bại",
       "Error": "Lỗi",
       "Friends": "Bạn bè",
-      "Info__Conversation": "Thông tin cuộc hội thoại"
+      "Info__Conversation": "Thông tin cuộc hội thoại",
+      "Show__Info": "Xem thông tin",
+      "Delete__Friend": "Xóa bạn",
     }
   }
 };

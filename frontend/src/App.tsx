@@ -72,8 +72,8 @@ function App() {
   return (
     <Routes>
       <Route path={'/'} element={<Home />} />
-      <Route path="/message/:id/*" element={<Home />} />
       <Route path="/user" element={<User />} />
+      <Route path="/user/:id" element={<User />} />
       <Route path="/contacts" element={<Contacts />} />
       <Route path="/contacts/add" element={<AddFriend />} />
       <Route path="/contacts/add/:id" element={<FoundUser />} />
