@@ -168,14 +168,14 @@ export class UserService {
             (friend) => {
               delete friend.userAddress.salt;
               delete friend.userAddress.password;
-              return friend.statusCode.code === 'a'
+              return friend.statusCode
             },
           );
           const friends1 = user.friendAddress.filter(
             (friend) => {
               delete friend.userRequest.salt;
               delete friend.userRequest.password;
-              return friend.statusCode.code === 'a'},
+              return friend.statusCode},
           );
           const mergeFriend = [];
           friends.forEach((friend) => {
@@ -183,6 +183,7 @@ export class UserService {
               friendShipId: friend._id,
               statusCode: friend.statusCode,
               user: friend.userAddress,
+              flag: 'sender',
             })
           })
           friends1.forEach((friend) => {
@@ -190,6 +191,7 @@ export class UserService {
               friendShipId: friend._id,
               statusCode: friend.statusCode,
               user: friend.userRequest,
+              flag: 'target',
             })
           }
           )
@@ -256,19 +258,19 @@ export class UserService {
       .then((response) => response)
       .catch((error) => new HttpException(error.message, 400));
   }
-  async removeFriend(_id: string, friendshipId: number) {
+  async removeFriend(_id: string, friendShipId: string) {
     return this.friendShipService
-      .removeFriend(_id, friendshipId)
+      .removeFriend(_id, friendShipId)
       .then((response) => response)
       .catch((error) => new HttpException(error.message, error.code));
   }
-  async acceptFriend(_id: string, friendShipId: number) {
+  async acceptFriend(_id: string, friendShipId: string) {
     return this.friendShipService
       .acceptFriend(_id, friendShipId)
       .then((response) => response)
       .catch((error) => new HttpException(error, 400));
   }
-  async rejectFriend(_id: string, friendShipId: number) {
+  async rejectFriend(_id: string, friendShipId: string) {
     return this.friendShipService
       .rejectFriend(_id, friendShipId)
       .then((response) => response)
@@ -295,6 +297,8 @@ export class UserService {
           statusCode: 200,
           message: 'Friendship found',
           data: isFriend.statusCode,
+          flag: "sender",
+          friendShipId: isFriend._id
         };
       }else{
         const isFriend = user.friendAddress.find(
@@ -305,10 +309,12 @@ export class UserService {
             statusCode: 200,
             message: 'Friendship found',
             data: isFriend.statusCode,
+            flag: "target",
+            friendShipId: isFriend._id
           };
         }else{
           return {
-            statusCode: 200,
+            statusCode: 404,
             message: 'Friendship not found',
             data: null,
           };
@@ -322,7 +328,35 @@ export class UserService {
     }
     
   }
-  async blockFriend(_id: string, friendShipId: number) {
+  async getUserByUsername(_id: string, username: string){
+    const user = await this.userRepository.findOne({
+      where: {
+        username: username
+      }
+    })
+    if(user){
+      delete user.password;
+      delete user.salt;
+      const friendShip = await this.getFriendShip(_id, user._id);
+      return {
+        statusCode: 200,
+        message: 'User found',
+        data: {
+          user: user,
+          friendShip: friendShip.data,
+          flag: friendShip.flag,
+          friendShipId: friendShip.friendShipId
+        },
+      }
+      
+    }else{
+      return {
+        statusCode: 404,
+        message: 'User not found',
+      }
+    }
+  }
+  async blockFriend(_id: string, friendShipId: string) {
     return this.friendShipService
       .blockFriend(_id, friendShipId)
       .then((response) => response)

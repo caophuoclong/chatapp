@@ -9,7 +9,8 @@ import {
   Request,
   UseGuards,
   Inject,
-  ParseIntPipe,
+  Query,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,7 +22,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { JWTAuthGuard } from '../auth/jwt-auth.guard';
 import { AuthService } from '~/auth/auth.service';
 import Utils from '~/utils';
-import { ApiTags, ApiHeader, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiHeader, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 @ApiTags('User')
 @ApiBearerAuth()
 @UseGuards(JWTAuthGuard)
@@ -65,31 +66,40 @@ export class UserController {
       req.user._id,
     );
   }
-  @Post("/friends/add/:_id")
-  @ApiParam({ name: '_id', description: 'User id' })
-  addFriend(@Request() req, @Param("_id") _id){
+  @Post("/friends/add/")
+  @ApiQuery({ name: '_id', description: 'User id' })
+  addFriend(@Request() req, @Query("_id") _id){
+
     return this.userService.addFriend(req.user._id, _id)
   }
-  @Post("/friends/remove/:_id")
-  @ApiParam({ name: '_id', description: 'friendship id' })
+  @Post("/friends/remove/")
+  @ApiQuery({ name: '_id', description: 'friendship id' })
 
-  removeFriend(@Request() req,  @Param( "_id", ParseIntPipe) _id){
+  removeFriend(@Request() req,  @Query( "_id", ParseUUIDPipe) _id){
     return this.userService.removeFriend(req.user._id, _id)
   }
-  @Post("/friends/accept/:_id")
-  @ApiParam({ name: '_id', description: 'friendship id' })
-
-  acceptFriend(@Request() req, @Param( "_id", ParseIntPipe) _id){
+  @Post("/friends/accept/")
+  @ApiQuery({ name: '_id', description: 'friendship id' })
+  acceptFriend(@Request() req, @Query( "_id", ParseUUIDPipe) _id){
     return this.userService.acceptFriend(req.user._id, _id)
   }
-  @Post("/friends/reject/:_id")
-  @ApiParam({ name: '_id', description: 'friendship id' })
-  rejectFriend(@Request() req, @Param( "_id", ParseIntPipe) _id){
+  @Post("/friends/reject/")
+  @ApiQuery({ name: '_id', description: 'friendship id' })
+  rejectFriend(@Request() req, @Query( "_id", ParseUUIDPipe) _id){
     return this.userService.rejectFriend(req.user._id, _id)
   }
-  @Get("/friend/:userId")
-  @ApiParam({ name: 'userId', description: 'User id' })
-  getFriendShip(@Request() req, @Param("userId") userId){
+  @Get("/friend/username/")
+  @ApiQuery({ name: 'username', description: 'Username' })
+  getUserByUsername(@Request() req, @Query("username") username){
+    const _id = req.user._id;
+   return this.userService.getUserByUsername(_id, username)
+  }
+  @Get("/friend/")
+  @ApiQuery({ name: 'userId', description: 'User id' })
+  getFriendShip(@Request() req, @Query("userId") userId){
     return this.userService.getFriendShip(req.user._id, userId)
   }
+  
+
+  
 }

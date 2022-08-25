@@ -3,9 +3,10 @@ import { User } from "~/user/entities/user.entity";
 import { Status } from "../../entities/status.entity";
 @Entity()
 export class FriendShip{
-    @PrimaryGeneratedColumn()
-    _id: number;
+    @PrimaryGeneratedColumn("uuid")
+    _id: string;
     @ManyToOne(type => User, user => user._id )
+    @JoinTable({name: "userRequest"})
     userRequest: User;
     @ManyToOne(type => User, user=> user._id)
     userAddress: User;

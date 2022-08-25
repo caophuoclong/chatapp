@@ -58,4 +58,6 @@ export class User {
     messages: Message[];
     @OneToMany(type => UnRead, unread => unread.user)
     unreadMessages: UnRead[];
+    @OneToMany(type => Conversation, c => c._id)
+    conversationBlocked: Conversation[];
 }

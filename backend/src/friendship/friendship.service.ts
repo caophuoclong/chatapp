@@ -13,30 +13,61 @@ export class FriendshipService {
   ) {}
   async addFreiend(requestId: string, addressId: string) {
     try {
-      const friendship = {
-        userRequest: {
-          _id: requestId,
-        },
-        userAddress: {
-          _id: addressId,
-        },
-        statusCode: {
-          code: 'p',
-        },
-      };
-      this.friendShip.create(friendship);
-      await this.friendShip.save(friendship);
-      return {
-        statusCode: 200,
-        message: 'Friendship created successfully',
-      };
+      //  Check exist friendship
+      const isFriendShip = await this.friendShip
+        .createQueryBuilder()
+        .where({
+          userRequest: requestId,
+          userAddress: addressId,
+        })
+        .getOne();
+      if (isFriendShip) {
+        return {
+          statusCode: 200,
+          message: 'Already existed friend ship with _id',
+          _id: isFriendShip._id,
+        };
+      } else {
+        const isFriendShip = await this.friendShip
+          .createQueryBuilder()
+          .where({
+            userRequest: addressId,
+            userAddress: requestId,
+          })
+          .getOne();
+        if (isFriendShip) {
+          return {
+            statusCode: 200,
+            message: 'Already existed friend ship with _id',
+            _id: isFriendShip._id,
+          };
+        } else {
+          const friendship = {
+            userRequest: {
+              _id: requestId,
+            },
+            userAddress: {
+              _id: addressId,
+            },
+            statusCode: {
+              code: 'p',
+            },
+          };
+          this.friendShip.create(friendship);
+          await this.friendShip.save(friendship);
+          return {
+            statusCode: 200,
+            message: 'Friendship created successfully',
+          };
+        }
+      }
     } catch (error) {
       return {
         message: error.message,
       };
     }
   }
-  async removeFriend(requestId: string, friendShipId: number) {
+  async removeFriend(requestId: string, friendShipId: string) {
     const friendship = await this.friendShip.findOne({
       where: { _id: friendShipId },
       relations: {
@@ -69,7 +100,7 @@ export class FriendshipService {
       message: 'Friendship not found',
     };
   }
-  async acceptFriend(requestId: string, friendShipId: number) {
+  async acceptFriend(requestId: string, friendShipId: string) {
     try {
       const friendShip = await this.friendShip.findOne({
         where: {
@@ -107,7 +138,7 @@ export class FriendshipService {
       };
     }
   }
-  async rejectFriend(requestId: string, friendShipId: number) {
+  async rejectFriend(requestId: string, friendShipId: string) {
     try {
       const friendShip = await this.friendShip.findOne({
         where: {
@@ -145,7 +176,7 @@ export class FriendshipService {
       };
     }
   }
-  async blockFriend(requestId: string, friendShipId: number) {
+  async blockFriend(requestId: string, friendShipId: string) {
     try {
       const friendship = await this.friendShip.findOne({
         where: {
@@ -183,38 +214,46 @@ export class FriendshipService {
       };
     }
   }
-//   async getFriendShip(user1: string, user2: string) {
-//     try {
-//         let friendship = await this.friendShip.findOne({
-//             where: {
-//                 userRequest_id: user1,
-//                 userAddress_id: user2,
-//             }
-//         })
-//         if(!friendship){
-//             friendship = await this.friendShip.findOne({
-//                 where: {
-//                     userRequest: user2,
-//                     userAddress: user1,
-//                 }
-//             })
-//             if(!friendship){
-//                 return {
-//                     statusCode: 404,
-//                     message: 'Friendship not found',
-//                 }
-//             }else{
-//                 return {
-//                     statusCode: 200,
-//                     message: 'Friendship found',
-//                     friendship: friendship,
-//                 }
-//             }
-//         }
-//     } catch (error) {
-//       return {
-//         message: error.message,
-//       };
-//     }
-//   }
+  async getOne(friendShipId: string){
+    return this.friendShip.findOne({
+      where:{
+        _id: friendShipId
+      },
+      relations:["userRequest", "userAddress", "statusCode"]
+    })
+  }
+  //   async getFriendShip(user1: string, user2: string) {
+  //     try {
+  //         let friendship = await this.friendShip.findOne({
+  //             where: {
+  //                 userRequest_id: user1,
+  //                 userAddress_id: user2,
+  //             }
+  //         })
+  //         if(!friendship){
+  //             friendship = await this.friendShip.findOne({
+  //                 where: {
+  //                     userRequest: user2,
+  //                     userAddress: user1,
+  //                 }
+  //             })
+  //             if(!friendship){
+  //                 return {
+  //                     statusCode: 404,
+  //                     message: 'Friendship not found',
+  //                 }
+  //             }else{
+  //                 return {
+  //                     statusCode: 200,
+  //                     message: 'Friendship found',
+  //                     friendship: friendship,
+  //                 }
+  //             }
+  //         }
+  //     } catch (error) {
+  //       return {
+  //         message: error.message,
+  //       };
+  //     }
+  //   }
 }
