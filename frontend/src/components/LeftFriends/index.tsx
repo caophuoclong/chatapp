@@ -6,12 +6,14 @@ import CreateGroupModal from './Modals/CreateGroupModal';
 import { useAppSelector } from '../../app/hooks';
 import Friend from './Friend';
 import { useTranslation } from 'react-i18next';
+import friendsSlice from '../../app/slices/friends.slice';
 
 type Props = {};
 
 export default function LeftFriends({}: Props) {
   const [show, setShow] = useState<'addfriend' | 'creategroup' | ''>('');
-  const friends = useAppSelector((state) => state.friendsSlice.friends);
+  // console.log());
+  const friendShips = useAppSelector((state) => state.friendsSlice.friendShips);
   const { t } = useTranslation();
   return (
     <Flex direction={'column'}>
@@ -35,17 +37,51 @@ export default function LeftFriends({}: Props) {
       </Flex>
       <Box paddingX="1rem">
         <Text fontWeight={600}>
-          {t('Friends')} ({friends.length})
+          {t('Friends__Request')} (
+          {
+            friendShips
+              .filter((friendship) => friendship.statusCode.code === 'p')
+              .filter((f) => f.flag === 'target').length
+          }
+          )
         </Text>
-        {friends.map((friendShip, index) => (
-          <Friend
-            key={index}
-            user={friendShip.user}
-            friendShipId={friendShip.friendShipId}
-            friendId={friendShip.user._id}
-            avatarUrl={friendShip.user.avatarUrl}
-          />
-        ))}
+        {friendShips
+          .filter((friendship) => friendship.statusCode.code === 'p')
+          .map(
+            (friendShip, index) =>
+              friendShip.flag === 'target' && (
+                <Friend
+                  key={index}
+                  user={friendShip.user}
+                  friendShipId={friendShip.friendShipId}
+                  friendId={friendShip.user._id}
+                  avatarUrl={friendShip.user.avatarUrl}
+                  isPending={true}
+                />
+              )
+          )}
+      </Box>
+      <Box paddingX="1rem">
+        <Text fontWeight={600}>
+          {t('Friends')} (
+          {
+            friendShips.filter(
+              (friendship) => friendship.statusCode.code === 'a'
+            ).length
+          }
+          )
+        </Text>
+        {friendShips
+          .filter((friendship) => friendship.statusCode.code === 'a')
+          .map((friendShip, index) => (
+            <Friend
+              key={index}
+              user={friendShip.user}
+              friendShipId={friendShip.friendShipId}
+              friendId={friendShip.user._id}
+              avatarUrl={friendShip.user.avatarUrl}
+            />
+          ))}
       </Box>
       {show === 'addfriend' && <AddFriendsModal setShow={() => setShow('')} />}
       {show === 'creategroup' && <CreateGroupModal />}

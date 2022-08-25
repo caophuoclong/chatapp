@@ -24,7 +24,7 @@ type Props = {
   user: IUser;
   avatarUrl: string;
   isOnline?: boolean;
-  friendShipId: number;
+  friendShipId: string;
   friendId: string;
 };
 

@@ -8,6 +8,7 @@ const axiosClient = axios.create({
         "Accept": "application/json",
         "Access-Control-Allow-Origin": "*",
     },
+    paramsSerializer: (params) => queryString.stringify(params),
 });
 axiosClient.interceptors.request.use(config =>{
     if(config){
@@ -15,5 +16,13 @@ axiosClient.interceptors.request.use(config =>{
             config.headers.Authorization = "Bearer " + localStorage.getItem("access_token");
     }
     return config;
+})
+axiosClient.interceptors.response.use(response =>response, error=>{
+    if(error.response.status === 403 || error.response.status === 401){
+        localStorage.removeItem("access_token");
+        window.location.href = "/login";
+    }else{
+        throw error;
+    }
 })
 export default axiosClient; 

@@ -51,7 +51,13 @@ const resources = {
       "Info__Conversation": "Info conversation",
       "Show__Info": "Show info",
       "Delete__Friend": "Delete friend",
-
+      "Send__Request__Success": "Send request success",
+      "Send__Request__Fail": "Send request fail",
+      "Friends__Request": "Friends request",
+      "Reject": "Reject",
+      "Went__wrong": "Something went wrong, please try again!",
+      "Accept__Success": "Accept friend success",
+      "Reject__Success": "Reject friend success",
     }
   },
   vn: {
@@ -100,6 +106,13 @@ const resources = {
       "Info__Conversation": "Thông tin cuộc hội thoại",
       "Show__Info": "Xem thông tin",
       "Delete__Friend": "Xóa bạn",
+      "Send__Request__Success": "Gửi yêu cầu thành công",
+      "Send__Request__Fail": "Gửi yêu cầu thất bại",
+      "Friends__Request": "Lời mời kết bạn",
+      "Reject": "Từ chối",
+      "Went__wrong": "Có lỗi xảy ra, vui lòng thử lại!",
+      "Accept__Success": "Đồng ý kết bạn thành công",
+      "Reject__Success": "Từ chối kết bạn thành công",
     }
   }
 };

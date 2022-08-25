@@ -21,7 +21,9 @@ type Props = {};
 
 export default function Contacts({}: Props) {
   const navigate = useNavigate();
-  const friends = useAppSelector((state) => state.friendsSlice.friends);
+  const friends = useAppSelector(
+    (state) => state.friendsSlice.friendShips
+  ).filter((f) => f.statusCode.code === 'a');
   return (
     <Flex direction={'column'} height="100vh">
       <Flex

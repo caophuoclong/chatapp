@@ -5,5 +5,5 @@ export default class UserApi{
 
     static async getMe(){
         return await axiosClient.get<IUser>("/user");
-    }
+}
 }

@@ -59,16 +59,7 @@ function App() {
   useEffect(() => {
     dispatch(handleSetLargerThanHD(isLargerThanHD));
   }, [isLargerThanHD]);
-  const navigate = useNavigate();
-  useEffect(() => {
-    const access_token = localStorage.getItem('access_token');
-    if (!access_token) {
-      navigate('/login');
-    } else {
-      dispatch(getMe());
-      dispatch(getFriendsList());
-    }
-  }, []);
+
   return (
     <Routes>
       <Route path={'/'} element={<Home />} />

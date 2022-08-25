@@ -11,10 +11,14 @@ import {
   ModalHeader,
   ModalOverlay,
   useDisclosure,
+  useToast,
 } from '@chakra-ui/react';
-import React from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import FriendsApi from '~/services/apis/Friends.api';
 import FoundUser from './FoundUser';
+import { IUser } from '~/interfaces/IUser';
+import { StatusCode } from '../../../interfaces/IFriendShip';
 
 type Props = {
   setShow: () => void;
@@ -22,6 +26,37 @@ type Props = {
 
 export default function AddFriendsModal({ setShow }: Props) {
   const { t } = useTranslation();
+  const [username, setUsername] = useState('');
+  const [foundUsers, setFoundUsers] = useState<IUser>();
+  const [friendShipStatus, setFriendShipStatus] = useState<StatusCode | null>(
+    null
+  );
+  const [friendShipId, setFriendShipId] = useState('');
+  const [flag, setFlag] = useState<'sender' | 'target' | ''>('');
+  const toast = useToast();
+  const handleSearch = async () => {
+    try {
+      const response = await FriendsApi.getUserByUsername(username);
+      console.log(response);
+      const data = response.data.data;
+      const user = data.user as IUser;
+      setFriendShipStatus(data.friendShip as StatusCode | null);
+      setFlag(data.flag);
+      setFriendShipId(data.friendShipId);
+      setFoundUsers(user);
+      if (!user) {
+        toast({
+          title: t('UserNotFound'),
+          description: t('UserNotFoundDescription'),
+          status: 'error',
+          duration: 3000,
+          position: 'top-right',
+        });
+      }
+    } catch (error) {
+      // console.log(error);
+    }
+  };
   return (
     <Modal onClose={setShow} size={'sm'} isOpen={true}>
       <ModalOverlay />
@@ -32,7 +67,14 @@ export default function AddFriendsModal({ setShow }: Props) {
           <Flex direction={'column'}>
             <Flex boxSizing="border-box" paddingX=".5rem">
               {/* <label htmlFor="">{t('Username')}</label> */}
-              <Input placeholder={t('Username')} variant={'flushed'} />
+              <Input
+                placeholder={t('Username')}
+                variant={'flushed'}
+                value={username}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setUsername(e.target.value);
+                }}
+              />
             </Flex>
             <Box
               marginY="1rem"
@@ -40,7 +82,17 @@ export default function AddFriendsModal({ setShow }: Props) {
               overflow={'auto'}
               maxHeight="700px"
             >
-              {false && <FoundUser />}
+              {foundUsers && (
+                <FoundUser
+                  user={foundUsers}
+                  friendShipStatusCode={friendShipStatus}
+                  setFrienShipStatus={(s: StatusCode | null) =>
+                    setFriendShipStatus(s)
+                  }
+                  friendShipId={friendShipId}
+                  flag={flag}
+                />
+              )}
             </Box>
           </Flex>
         </ModalBody>
@@ -48,7 +100,7 @@ export default function AddFriendsModal({ setShow }: Props) {
           <Button onClick={setShow}>{t('Cancel')}</Button>
           <Button
             bg="blue.100"
-            onClick={setShow}
+            onClick={handleSearch}
             _hover={{
               bg: 'blue.300',
             }}

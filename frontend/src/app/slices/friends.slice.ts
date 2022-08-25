@@ -3,7 +3,9 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '@app/store';
 import IConversation from '../../interfaces/IConversation';
 import FriendsApi from '../../services/apis/Friends.api';
-import IFriendShip from '../../interfaces/IFriendShip';
+import IFriendShip, { code } from '../../interfaces/IFriendShip';
+import { IoTerminal } from 'react-icons/io5';
+import { StatusCode } from '../../interfaces/IFriendShip';
 
 export const getFriendsList = createAsyncThunk('get friends list', async () => {
   try {
@@ -15,13 +17,21 @@ export const getFriendsList = createAsyncThunk('get friends list', async () => {
 });
 // Define a type for the slice state
 interface Friends {
-  friends: Array<IFriendShip>;
+  // friendShips: {
+  //   friends: Array<IFriendShip>,
+  //   friendsRequest: Array<IFriendShip>,
+  // };
+  friendShips: Array<IFriendShip>
   isLoading: boolean;
 }
 
 // Define the initial state using that type
 const initialState: Friends = {
-  friends: [],
+  // friendShips: {
+  //   friends: [],
+  //   friendsRequest: [],
+  // },
+  friendShips: [],
   isLoading: false,
 };
 
@@ -29,7 +39,23 @@ export const friendsSlice = createSlice({
   name: 'friends',
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
-  reducers: {},
+  reducers: {
+    changeStatusCode: (state: Friends, action: PayloadAction<{
+      friendShipId: string,
+      statusCode: StatusCode 
+    }>) =>{
+      state.friendShips.forEach((friendShip)=>{
+        if(action.payload.friendShipId === friendShip.friendShipId){
+          friendShip.statusCode = action.payload.statusCode;
+        }
+      })
+    },
+    rejectFriendShip: (state: Friends, action: PayloadAction<string>)=>{
+      console.log(action.payload);
+      const xxx = state.friendShips.filter((friendShip)=> friendShip.friendShipId !== action.payload);
+      state.friendShips = xxx;
+    }
+  },
   extraReducers(builder) {
     builder.addCase(
       getFriendsList.pending,
@@ -40,9 +66,20 @@ export const friendsSlice = createSlice({
     builder.addCase(
       getFriendsList.fulfilled,
       (state: Friends, action: PayloadAction<any>) => {
+        console.log(123);
         state.isLoading = false;
-        console.log(action.payload.data)
-        state.friends = action.payload.data;
+        const friends = action.payload.data as Array<IFriendShip>;
+        // state.friendShips.friends = friends.filter(friend => friend.statusCode.code === 'a')
+        // state.friendShips.friendsRequest = friends.filter(friend => friend.statusCode.code === 'p')
+        // (action.payload.data as Array<IFriendShip>).forEach((item)=>{
+        //   if(item.statusCode.code === "a"){
+        //     state.friendShips.friends.push(item);
+        //   }else if (item.statusCode.code === "p"){
+        //     state.friendShips.friendsRequest.push(item);
+        //   }
+        // })
+        state.friendShips = friends;
+
       }
     );
     builder.addCase(
@@ -54,7 +91,7 @@ export const friendsSlice = createSlice({
   },
 });
 
-export const {} = friendsSlice.actions;
+export const {changeStatusCode, rejectFriendShip} = friendsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 

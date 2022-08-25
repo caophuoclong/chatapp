@@ -20,7 +20,7 @@ type Props = {};
 
 function DetectShow(show: 'info' | 'settings', id?: string) {
   let user = useAppSelector((state) => state.userSlice.info);
-  const friends = useAppSelector((state) => state.friendsSlice.friends);
+  const friends = useAppSelector((state) => state.friendsSlice.friendShips);
 
   if (id) {
     friends.forEach((friendShip) => {
