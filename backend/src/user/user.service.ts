@@ -1,6 +1,6 @@
-import { HttpException, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, JoinTable } from 'typeorm';
+import { Repository, JoinTable, In } from 'typeorm';
 import { IUtils } from '~/interfaces/IUtils';
 import Utils from '~/utils';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -9,6 +9,7 @@ import { User } from './entities/user.entity';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { FriendshipService } from '~/friendship/friendship.service';
+import { ConversationService } from '../conversation/conversation.service';
 
 @Injectable()
 export class UserService {
@@ -18,6 +19,8 @@ export class UserService {
     @Inject('IUtils')
     private readonly utils: IUtils,
     private readonly friendShipService: FriendshipService,
+    @Inject(forwardRef(()=> ConversationService))
+    private readonly conversationService: ConversationService
   ) {}
   async register(createUserDto: CreateUserDto) {
     try {
@@ -42,6 +45,13 @@ export class UserService {
         where: {
           username: loginUserDto.username,
         },
+        select:{
+          _id: true,
+          salt: true,
+          password: true,
+          username: true,
+          name: true
+        }
       });
       if (!user) {
         throw new HttpException('User not found', 400);
@@ -52,7 +62,7 @@ export class UserService {
         user.password,
       );
       if (!verified) {
-        throw new HttpException('Invalid password', 403);
+        throw new HttpException('Password does not match', 403);
       }
       delete user.salt;
       delete user.password;
@@ -97,12 +107,33 @@ export class UserService {
       throw new HttpException(error.message, 403);
     }
   }
+  async getUsers(
+    usersId: Array<string>
+  ){
+    try{
+      const users = await this.userRepository.find({
+        where:{
+          _id: In(usersId.map(us => us))
+        },
+
+      })
+      return {
+        statusCode: 200,
+        message: 'Users found',
+        data: users,
+      }
+    }
+    catch(error){
+      throw new HttpException(error.message, 400);
+    }
+  }
   async get(_id: string) {
     try {
       const user = await this.userRepository.findOne({
         where: {
           _id: _id,
         },
+
       });
       if (!user) {
         throw new HttpException('User not found', 400);
@@ -180,7 +211,7 @@ export class UserService {
           const mergeFriend = [];
           friends.forEach((friend) => {
             mergeFriend.push({
-              friendShipId: friend._id,
+              _id: friend._id,
               statusCode: friend.statusCode,
               user: friend.userAddress,
               flag: 'sender',
@@ -188,7 +219,7 @@ export class UserService {
           })
           friends1.forEach((friend) => {
             mergeFriend.push({
-              friendShipId: friend._id,
+              _id: friend._id,
               statusCode: friend.statusCode,
               user: friend.userRequest,
               flag: 'target',
@@ -217,17 +248,39 @@ export class UserService {
         },
         relations: {
           conversations: {
-            participants: true,
+            owner: true,
+            blockBy: true,
+            lastMessage: true,
+            friendship:{
+              userAddress: true,
+              userRequest: true,
+              statusCode: true
+            }
+          },
+        },
+        order:{
+          conversations: {
+            lastMessage:{
+              createdAt: 'DESC'
+            }
           }
         },
+
       });
+      
       if (!user) {
         throw new HttpException('User not found', 400);
+      }
+      const conversations = user.conversations;
+      for(let i = 0; i < conversations.length; i++){
+        const co = conversations[i];
+      const participants = await this.conversationService.getUserOfConversation(co._id, co.type);
+      conversations[i].participants = participants.data;
       }
       return {
         statusCode: 200,
         message: 'User found',
-        data: user.conversations,
+        data: conversations,
       };
     } catch (error) {
       throw new HttpException(error.message, 400);
@@ -253,12 +306,16 @@ export class UserService {
     }
   }
   async addFriend(_id: string, friendId: string) {
+    if(_id === friendId){
+      throw new HttpException('You can not add yourself as friend', 400);
+    }
     return this.friendShipService
       .addFreiend(_id, friendId)
       .then((response) => response)
       .catch((error) => new HttpException(error.message, 400));
   }
   async removeFriend(_id: string, friendShipId: string) {
+    
     return this.friendShipService
       .removeFriend(_id, friendShipId)
       .then((response) => response)

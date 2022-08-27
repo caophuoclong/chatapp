@@ -53,7 +53,7 @@ export default function LeftFriends({}: Props) {
                 <Friend
                   key={index}
                   user={friendShip.user}
-                  friendShipId={friendShip.friendShipId}
+                  friendShipId={friendShip._id}
                   friendId={friendShip.user._id}
                   avatarUrl={friendShip.user.avatarUrl}
                   isPending={true}
@@ -77,7 +77,7 @@ export default function LeftFriends({}: Props) {
             <Friend
               key={index}
               user={friendShip.user}
-              friendShipId={friendShip.friendShipId}
+              friendShipId={friendShip._id}
               friendId={friendShip.user._id}
               avatarUrl={friendShip.user.avatarUrl}
             />

@@ -1,4 +1,4 @@
-import { Module, NestModule } from '@nestjs/common';
+import { Module, NestModule, forwardRef } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,8 +11,9 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from '~/auth/local.strategy';
 import { AuthService } from '~/auth/auth.service';
 import { AuthModule } from '~/auth/auth.module';
+import { ConversationModule } from '../conversation/conversation.module';
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), FriendshipModule],
+  imports: [TypeOrmModule.forFeature([User]), FriendshipModule, forwardRef(()=> ConversationModule)],
   controllers: [UserController],
   providers: [UserService, {
     provide: "IUtils",

@@ -22,19 +22,19 @@ export default function LeftBar({}: Props) {
     <Flex
       width={{
         base: '100%',
-        lg: '500px',
+        lg: '20%',
       }}
+      borderRight={
+        colorMode === 'dark'
+          ? '1px solid rgba(255, 255, 255,0.3)'
+          : '1px solid  rgba(0, 0, 0, 0.08)'
+      }
     >
       <Flex
         width={{
           base: '100%',
         }}
         boxSizing="border-box"
-        borderRight={
-          colorMode === 'dark'
-            ? '1px solid rgba(255, 255, 255,0.3)'
-            : '1px solid  rgba(0, 0, 0, 0.08)'
-        }
         direction="column"
       >
         <Flex

@@ -9,6 +9,7 @@ import SearchBar from '../LeftBar/SearchBar';
 import ToggleTheme from './ToggleTheme';
 import ChangeLanguage from './ChangeLanguage';
 import Footer from '../Footer';
+import Logout from './Logout';
 
 type Props = {};
 
@@ -20,6 +21,7 @@ export default function Setting({}: Props) {
     <Flex direction={'column'} height="100vh" boxSizing="border-box">
       <ToggleTheme />
       <ChangeLanguage />
+      <Logout />
       <Footer />
     </Flex>
   );

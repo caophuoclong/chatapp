@@ -22,10 +22,13 @@ import InfoConversation from '../InfoConversation/index';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import { setShowInfoConversation } from '~/app/slices/global.slice';
 import { useTranslation } from 'react-i18next';
+import IConversation from '../../../interfaces/IConversation';
 
-type Props = {};
+type Props = {
+  choosenConversation: IConversation;
+};
 
-export default function Main({}: Props) {
+export default function Main({ choosenConversation }: Props) {
   let location = useLocation();
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
@@ -41,16 +44,21 @@ export default function Main({}: Props) {
       ? dispatch(setShowInfoConversation(true))
       : dispatch(setShowInfoConversation(false));
   }, [location]);
-  return (
+  return choosenConversation ? (
     <Flex
       width={{
         base: '100%',
-        lg: '82%',
+        lg: '80%',
       }}
       boxSizing="border-box"
       direction={'column'}
     >
-      <Header />
+      <Header
+        name={choosenConversation.name}
+        avatarUrl={choosenConversation.avatarUrl}
+        friendShip={choosenConversation.friendship}
+        type={choosenConversation.type}
+      />
       <MessagesBox />
       <InputBox />
       <Drawer
@@ -73,5 +81,7 @@ export default function Main({}: Props) {
         </DrawerContent>
       </Drawer>
     </Flex>
+  ) : (
+    <Flex width="80%"></Flex>
   );
 }

@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useAppSelector } from '~/app/hooks';
 import Conversations from '~/components/Conversations';
 import LeftBar from '~/components/LeftBar/Mobile';
-import Main from '~/components/Main/Mobile';
+import Main from '~/components/Main';
 
 type Props = {};
 

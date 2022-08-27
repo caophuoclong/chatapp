@@ -3,15 +3,18 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   Timestamp,
 } from 'typeorm';
 import { Message } from '~/message/entities/message.entity';
 import { User } from '~/user/entities/user.entity';
+import { FriendShip } from '../../friendship/entities/friendship.entity';
 
 @Entity()
 export class Conversation {
@@ -35,13 +38,13 @@ export class Conversation {
   @Column({
     default: 'direct',
   })
-  type: string;
+  type: "group" | "direct";
   @Column({
     type: Boolean,
     default: false,
   })
   visible: boolean;
-  @OneToMany((type) => Message, (message) => message._id)
+  @OneToMany((type) => Message, (message) => message.destination)
   messages: Message[];
   @ManyToOne((type) => User, (user) => user._id)
   owner: User;
@@ -66,4 +69,17 @@ export class Conversation {
   deletedAt: Date;
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)" })
   createdAt: Date;
+  @OneToOne(type => Message, m => m._id)
+  @JoinColumn({
+    name: "lastmessage"
+  })
+  lastMessage: Message
+  @OneToOne(type => FriendShip, f => f._id,{
+    onDelete: "NO ACTION",
+    
+  })
+  @JoinColumn({
+    name: "friendship",
+  })
+  friendship: FriendShip
 }

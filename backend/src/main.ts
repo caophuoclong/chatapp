@@ -13,7 +13,6 @@ async function bootstrap() {
     .setTitle('Chat app server API')
     .setDescription('This page provide how to use chat app server API')
     .setVersion('1.0')
-    .addTag('cats')
     .build()
   app.setGlobalPrefix("/api")
   app.useGlobalPipes(new ValidationPipe())

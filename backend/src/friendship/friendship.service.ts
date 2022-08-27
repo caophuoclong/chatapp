@@ -219,7 +219,7 @@ export class FriendshipService {
       where:{
         _id: friendShipId
       },
-      relations:["userRequest", "userAddress", "statusCode"]
+      relations:["userRequest", "userAddress", "statusCode"],
     })
   }
   //   async getFriendShip(user1: string, user2: string) {

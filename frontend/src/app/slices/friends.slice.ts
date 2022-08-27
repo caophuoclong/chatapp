@@ -45,14 +45,14 @@ export const friendsSlice = createSlice({
       statusCode: StatusCode 
     }>) =>{
       state.friendShips.forEach((friendShip)=>{
-        if(action.payload.friendShipId === friendShip.friendShipId){
+        if(action.payload.friendShipId === friendShip._id){
           friendShip.statusCode = action.payload.statusCode;
         }
       })
     },
     rejectFriendShip: (state: Friends, action: PayloadAction<string>)=>{
       console.log(action.payload);
-      const xxx = state.friendShips.filter((friendShip)=> friendShip.friendShipId !== action.payload);
+      const xxx = state.friendShips.filter((friendShip)=> friendShip._id !== action.payload);
       state.friendShips = xxx;
     }
   },
@@ -66,7 +66,6 @@ export const friendsSlice = createSlice({
     builder.addCase(
       getFriendsList.fulfilled,
       (state: Friends, action: PayloadAction<any>) => {
-        console.log(123);
         state.isLoading = false;
         const friends = action.payload.data as Array<IFriendShip>;
         // state.friendShips.friends = friends.filter(friend => friend.statusCode.code === 'a')

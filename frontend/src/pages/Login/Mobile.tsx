@@ -22,11 +22,12 @@ export default function Mobile({}: Props) {
     try {
       const response = await Auth.login(data);
       window.localStorage.setItem('access_token', response.data.access_token);
+      console.log(response);
       toast({
         title: t('Success'),
         description: t('Success__Login'),
         status: 'success',
-        position: 'top-right',
+        position: 'bottom',
         duration: 1000,
         onCloseComplete: () => {
           navigate('/');
@@ -35,9 +36,9 @@ export default function Mobile({}: Props) {
     } catch (error: any) {
       toast({
         title: t('Error'),
-        description: t('Error__Login'),
+        description: t('Password__NotMatch'),
         status: 'error',
-        position: 'top-right',
+        position: 'bottom',
         duration: 3000,
         isClosable: true,
       });
@@ -113,6 +114,7 @@ export default function Mobile({}: Props) {
                 </Text>
               </Link>
               <Button
+                type="submit"
                 bg="none"
                 borderRadius={'15px'}
                 color="#00FF29"

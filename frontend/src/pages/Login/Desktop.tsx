@@ -22,7 +22,6 @@ export default function Desktop({}: Props) {
     try {
       const response = await Auth.login(data);
       window.localStorage.setItem('access_token', response.data.access_token);
-
       toast({
         title: t('Success'),
         description: t('Success__Login'),
@@ -36,7 +35,7 @@ export default function Desktop({}: Props) {
     } catch (error: any) {
       toast({
         title: t('Error'),
-        description: t('Error__Login'),
+        description: t('Password__NotMatch'),
         status: 'error',
         position: 'top-right',
         duration: 3000,

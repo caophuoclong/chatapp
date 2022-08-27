@@ -21,8 +21,16 @@ import { IUser } from '~/interfaces/IUser';
 import FriendsApi from '~/services/apis/Friends.api';
 import { StatusCode } from '../../../interfaces/IFriendShip';
 import { useToast } from '@chakra-ui/react';
-import { useAppDispatch } from '~/app/hooks';
+import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import { changeStatusCode, rejectFriendShip } from '~/app/slices/friends.slice';
+import ConversationsApi from '~/services/apis/Conversations.api';
+import IConversation from '~/interfaces/IConversation';
+import {
+  ENUM_SCREEN,
+  setChoosenConversationID,
+  setShowScreen,
+} from '~/app/slices/global.slice';
+import { addConversation } from '~/app/slices/conversations.slice';
 
 type Props = {
   user: IUser;
@@ -192,6 +200,7 @@ export default function FoundUser({
 }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
+  const myId = useAppSelector((state) => state.userSlice.info._id);
   const handleAddFriend = async () => {
     try {
       const response = await FriendsApi.addFriend(user._id);
@@ -217,6 +226,20 @@ export default function FoundUser({
         position: 'top-right',
       });
     }
+  };
+  const dispatch = useAppDispatch();
+  const handleCreateConversation = () => {
+    ConversationsApi.createConversationByFriendShip(friendShipId).then(
+      (response) => {
+        if (response) {
+          const data = response.data.data as IConversation;
+          console.log(data);
+          dispatch(addConversation(data));
+          dispatch(setChoosenConversationID(data._id));
+          dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
+        }
+      }
+    );
   };
   return (
     <Box boxSizing="border-box" maxHeight={'600px'}>
@@ -244,10 +267,19 @@ export default function FoundUser({
         </Flex>
       </Box>
       {/* action */}
-      <Flex gap="1rem" justifyContent={'center'} marginX=".5rem">
-        {ShowButton(friendShipStatusCode, handleAddFriend, flag, friendShipId)}
-        <Button width="50%">{t('Message')}</Button>
-      </Flex>
+      {myId !== user._id && (
+        <Flex gap="1rem" justifyContent={'center'} marginX=".5rem">
+          {ShowButton(
+            friendShipStatusCode,
+            handleAddFriend,
+            flag,
+            friendShipId
+          )}
+          <Button width="50%" onClick={handleCreateConversation}>
+            {t('Message')}
+          </Button>
+        </Flex>
+      )}
       <Box
         border="3px solid rgba(0,0,0,0.02)"
         bg="rgba(0,0,0,0.02)"

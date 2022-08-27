@@ -19,6 +19,15 @@ import { useTranslation } from 'react-i18next';
 import ModalShowInfo from '~/components/ModalShowInfo';
 import { IUser } from '~/interfaces/IUser';
 import { useAppSelector } from '~/app/hooks';
+import { useAppDispatch } from '../../../../app/hooks';
+import ConversationsApi from '~/services/apis/Conversations.api';
+import IConversation from '../../../../interfaces/IConversation';
+import { addConversation } from '~/app/slices/conversations.slice';
+import {
+  setChoosenConversationID,
+  setShowScreen,
+} from '~/app/slices/global.slice';
+import { ENUM_SCREEN } from '../../../../app/slices/global.slice';
 
 type Props = {
   user: IUser;
@@ -35,10 +44,24 @@ export default function Friend({ user, isOnline, friendShipId }: Props) {
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
+  const dispatch = useAppDispatch();
+  const createConversation = (e: React.MouseEvent<HTMLDivElement>) => {
+    ConversationsApi.createConversationByFriendShip(friendShipId).then(
+      (response) => {
+        if (response) {
+          const data = response.data.data as IConversation;
+          navigate('/');
+          dispatch(addConversation(data));
+          dispatch(setChoosenConversationID(data._id));
+          dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
+        }
+      }
+    );
+  };
   return (
     <Flex
       paddingY="1rem"
-      paddingX=".5rem"
+      paddingX="1rem"
       rounded="md"
       _hover={{
         bg: 'blue.300',
@@ -46,6 +69,7 @@ export default function Friend({ user, isOnline, friendShipId }: Props) {
       alignItems="center"
       gap="1rem"
       role="group"
+      onClick={createConversation}
     >
       <Avatar src={user.avatarUrl}>
         <AvatarBadge
@@ -66,12 +90,16 @@ export default function Friend({ user, isOnline, friendShipId }: Props) {
           _groupHover={{
             display: 'flex',
           }}
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+          }}
         >
           <FiMoreHorizontal fontSize={'24px'} />
         </MenuButton>
         <MenuList>
           <MenuItem
-            onClick={() => {
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+              e.stopPropagation();
               navigate('/user/' + user._id);
             }}
           >

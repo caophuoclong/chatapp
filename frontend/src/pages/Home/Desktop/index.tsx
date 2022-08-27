@@ -2,7 +2,7 @@ import { Flex } from '@chakra-ui/react';
 import React, { useEffect } from 'react';
 import LeftBar from '~/components/LeftBar/Desktop';
 import LeftFunction from '~/components/LeftFunction';
-import Main from '~/components/Main/Desktop';
+import Main from '~/components/Main';
 import { useAppDatabase } from '../../../app/hooks';
 
 type Props = {};

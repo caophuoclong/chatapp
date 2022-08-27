@@ -16,23 +16,23 @@ import SearchBar from '../../LeftBar/SearchBar';
 import Footer from '../../Footer';
 import { useAppSelector } from '~/app/hooks';
 import Friend from './Friend';
+import TabContacts from './TabContacts';
 
 type Props = {};
 
 export default function Contacts({}: Props) {
   const navigate = useNavigate();
-  const friends = useAppSelector(
-    (state) => state.friendsSlice.friendShips
-  ).filter((f) => f.statusCode.code === 'a');
+
   return (
     <Flex direction={'column'} height="100vh">
       <Flex
         direction={'row'}
-        height="10%"
+        // height="10%"
         paddingX="1rem"
         justifyContent={'center'}
         alignItems="center"
         gap="1rem"
+        height="75px"
       >
         <SearchBar />
         <IconButton
@@ -43,17 +43,7 @@ export default function Contacts({}: Props) {
           onClick={() => navigate('/contacts/add')}
         />
       </Flex>
-      <Box paddingX="1rem" height="85%">
-        {friends.map((friendShip, index) => (
-          <Friend
-            key={index}
-            friendShipId={friendShip.friendShipId}
-            user={friendShip.user}
-            friendId={friendShip.user._id}
-            avatarUrl={friendShip.user.avatarUrl}
-          />
-        ))}
-      </Box>
+      <TabContacts />
 
       <Footer />
     </Flex>

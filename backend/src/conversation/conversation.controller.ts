@@ -61,7 +61,7 @@ export class ConversationController {
     const {_id} = req.user;
     return this.conversationService.outConversation(_id,slug);
   }
-  @Patch("/delete/:slug")
+  @Delete("/delete/:slug")
   @ApiParam({name: "slug", description: "The _id of conversation"})
   deleteConversation(@Param("slug", ParseUUIDPipe) slug , @Request() req){
     const {_id} = req.user;

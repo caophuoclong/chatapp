@@ -1,15 +1,22 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { CreateConversationDtoFromFriendshipDto } from './dto/create-conversation-friend';
-import { DataSource, getManager, In, Repository } from 'typeorm';
+import {
+  ArrayContainedBy,
+  ArrayContains,
+  DataSource,
+  getManager,
+  In,
+  Repository,
+} from 'typeorm';
 import { FriendShip } from '../friendship/entities/friendship.entity';
 import { User } from '../user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from '../user/user.service';
 import { FriendshipService } from '~/friendship/friendship.service';
 import { Conversation } from './entities/conversation.entity';
-import moment from "moment"
+import moment from 'moment';
 
 @Injectable()
 export class ConversationService {
@@ -20,6 +27,7 @@ export class ConversationService {
     private readonly friendShip: Repository<FriendShip>,
     @InjectRepository(Conversation)
     private readonly conversation: Repository<Conversation>,
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     private readonly friendshipService: FriendshipService,
   ) {}
@@ -27,26 +35,29 @@ export class ConversationService {
     createFromFriendShipDto: CreateConversationDtoFromFriendshipDto,
   ) {
     const { friendShipId } = createFromFriendShipDto;
+    console.log(friendShipId);
     try {
       const friendShip = await this.friendshipService.getOne(friendShipId);
       if (friendShip) {
-        delete friendShip.userAddress.password;
-        delete friendShip.userAddress.salt;
-
-        delete friendShip.userRequest.password;
-        delete friendShip.userRequest.salt;
-
         const user = [friendShip.userAddress, friendShip.userRequest];
+
         // check if two  user are in conversation exist
         const existConversation = await this.conversation.findOne({
-          relations: ['participants'],
-          where: {
-            participants: {
-              _id: In(user.map((u) => u._id)),
+          relations: {
+            participants: true,
+            lastMessage: true,
+            friendship: {
+              userAddress: true,
+              userRequest: true,
+              statusCode: true,
             },
+          },
+          where: {
+            friendship: friendShip,
           },
         });
         if (existConversation) {
+          console.log(existConversation._id);
           return {
             statusCode: 200,
             message: 'success',
@@ -55,11 +66,13 @@ export class ConversationService {
         }
         const conversation = await this.conversation.create();
         conversation.participants = user;
-        await this.conversation.save(conversation);
+        conversation.lastMessage = null;
+        conversation.friendship = friendShip;
+        const con = await this.conversation.save(conversation);
         return {
           statusCode: 200,
           message: 'success',
-          data: conversation,
+          data: con,
         };
       } else {
         return {
@@ -78,47 +91,23 @@ export class ConversationService {
   }
   async create(ownerId: string, createConversationDto: CreateConversationDto) {
     try {
-      console.log(ownerId);
+      // console.log(ownerId);
+      // console.log(createConversationDto.participants);
       const conversation = this.conversation.create();
-      const users = await this.user.find({
-        where: {
-          _id: In(createConversationDto.participants.map((u) => u)),
-        },
-        select: {
-          _id: true,
-          username: true,
-          name: true,
-          email: true,
-          phone: true,
-          avatarUrl: true,
-          birthday: true,
-        },
-      });
-      const owner = await this.user.findOne({
-        where: {
-          _id: ownerId,
-        },
-        select: {
-          _id: true,
-          username: true,
-          name: true,
-          email: true,
-          phone: true,
-          avatarUrl: true,
-          birthday: true,
-        },
-      });
+      const users = await (
+        await this.userService.getUsers(createConversationDto.participants)
+      ).data;
+      const owner = await (await this.userService.get(ownerId)).data;
       conversation.name = createConversationDto.name;
       conversation.participants = users;
       conversation.owner = owner;
       conversation.type = 'group';
       conversation.visible = createConversationDto.visible;
-      await this.conversation.save(conversation);
-      // console.log(createConversationDto.visible)
+      const saved = await this.conversation.save(conversation);
       return {
         statusCode: 200,
         message: 'create group conversation success',
-        data: conversation,
+        data: saved,
       };
     } catch (error) {
       return {
@@ -128,26 +117,75 @@ export class ConversationService {
       };
     }
   }
+  async getMessagesConversation(conversationId: string) {
+    try {
+      const conversation = await this.conversation.findOne({
+        where: {
+          _id: conversationId,
+        },
+        relations: {
+          messages: {
+            sender: true,
+          },
+        },
+      });
+      if (!conversation)
+        return {
+          statusCode: 404,
+          message: 'conversation not found',
+          data: null,
+        };
+      else {
+        return {
+          statusCode: 200,
+          message: 'success',
+          data: conversation.messages,
+        };
+      }
+    } catch (error) {
+      return {
+        statusCode: 500,
+        message: error.message,
+        data: null,
+      };
+    }
+  }
+  async getParticipants(conversationId: string) {
+    try {
+      const conversation = await this.conversation.findOne({
+        where: {
+          _id: conversationId,
+        },
+        relations: {
+          participants: true,
+        },
+      });
+      if (!conversation)
+        return {
+          statusCode: 404,
+          message: 'conversation not found',
+          data: null,
+        };
+      else {
+        return {
+          statusCode: 200,
+          message: 'success',
+          data: conversation.participants,
+        };
+      }
+    } catch (error) {
+      return {
+        statusCode: 500,
+        message: error.message,
+        data: null,
+      };
+    }
+  }
+  async getOwnerConversation(conversationId: string) {}
   async getConversationById(conversationId: string) {
     try {
       const conversation = await this.conversation.findOne({
         where: { _id: conversationId },
-        relations: {
-          participants: true,
-          owner: true,
-          blockBy: true,
-        },
-        select: {
-          participants: {
-            _id: true,
-            username: true,
-            name: true,
-            email: true,
-            phone: true,
-            avatarUrl: true,
-            birthday: true,
-          },
-        },
       });
 
       return {
@@ -163,6 +201,32 @@ export class ConversationService {
       };
     }
   }
+  async getUserOfConversation(
+    conversationId: string,
+    type: 'group' | 'direct',
+    perpage: number = 5,
+    page: number = 0,
+  ) {
+    try {
+      const participants = await this.user
+        .createQueryBuilder('user')
+        .innerJoin("isMember", "iM", "iM.user_id = user._id")
+        .where("iM.conversation_id = :id", { id: conversationId })
+        .limit(type === "group" ? perpage : 2)
+        .skip(type === "group" ? page * perpage : 0)
+        .getMany();
+      return {
+        data: participants,
+      };
+    } catch (error) {
+      console.log(error.message);
+      return {
+        statusCode: 500,
+        message: error.message,
+        data: null,
+      };
+    }
+  }
   async updateConversation(
     _id: string,
     updateConversationDto: UpdateConversationDto,
@@ -173,15 +237,6 @@ export class ConversationService {
         where: {
           _id: _id,
         },
-        select: {
-          _id: true,
-          username: true,
-          name: true,
-          email: true,
-          phone: true,
-          avatarUrl: true,
-          birthday: true,
-        },
       });
       const conversation = await this.conversation.findOne({
         where: {
@@ -191,35 +246,6 @@ export class ConversationService {
           participants: true,
           owner: true,
           blockBy: true,
-        },
-        select: {
-          participants: {
-            _id: true,
-            username: true,
-            name: true,
-            email: true,
-            phone: true,
-            avatarUrl: true,
-            birthday: true,
-          },
-          owner: {
-            _id: true,
-            username: true,
-            name: true,
-            email: true,
-            phone: true,
-            avatarUrl: true,
-            birthday: true,
-          },
-          blockBy: {
-            _id: true,
-            username: true,
-            name: true,
-            email: true,
-            phone: true,
-            avatarUrl: true,
-            birthday: true,
-          },
         },
       });
       if (!conversation)
@@ -253,15 +279,6 @@ export class ConversationService {
               where: {
                 _id: In(updateConversationDto.participants.map((u) => u)),
               },
-              select: {
-                _id: true,
-                username: true,
-                name: true,
-                email: true,
-                phone: true,
-                avatarUrl: true,
-                birthday: true,
-              },
             });
             const uniq = (a) => {
               let seen = {};
@@ -276,9 +293,9 @@ export class ConversationService {
             ]);
           }
           // Check if user is in conversation, if has remove user from conversation
-          if(updateConversationDto.removeParticipants){
+          if (updateConversationDto.removeParticipants) {
             const ownerId = conversation.owner._id;
-            if(updateConversationDto.removeParticipants.includes(ownerId)){
+            if (updateConversationDto.removeParticipants.includes(ownerId)) {
               return {
                 statusCode: 400,
                 message: 'you can not remove owner from conversation',
@@ -289,17 +306,10 @@ export class ConversationService {
               where: {
                 _id: In(updateConversationDto.removeParticipants.map((u) => u)),
               },
-              select: {
-                _id: true,
-                username: true,
-                name: true,
-                email: true,
-                phone: true,
-                avatarUrl: true,
-                birthday: true,
-              },
             });
-            conversation.participants = conversation.participants.filter(con => !users.find(us => us._id === con._id))
+            conversation.participants = conversation.participants.filter(
+              (con) => !users.find((us) => us._id === con._id),
+            );
           }
         } else {
           return {
@@ -322,32 +332,32 @@ export class ConversationService {
       };
     }
   }
-  async outConversation(_id: string, slug: string){
+  async outConversation(_id: string, slug: string) {
     const conversation = await this.conversation.findOne({
       where: {
-        _id: slug
+        _id: slug,
       },
-      relations:{
+      relations: {
         owner: true,
-        participants: true
-      }
-    })
-    if(conversation.type === "direct"){
+        participants: true,
+      },
+    });
+    if (conversation.type === 'direct') {
       return {
         statusCode: 400,
         message: 'you can not out direct conversation',
         data: null,
       };
     }
-    if(!conversation){
+    if (!conversation) {
       return {
         statusCode: 404,
         message: 'conversation not found',
         data: null,
       };
     }
-    
-    if(conversation.owner._id === _id){
+
+    if (conversation.owner._id === _id) {
       return {
         statusCode: 400,
         message: 'you can not out from conversation',
@@ -355,15 +365,17 @@ export class ConversationService {
       };
     }
     // check if id is in conversation
-    const index = conversation.participants.findIndex(p => p._id === _id);
-    if(index === -1){
+    const index = conversation.participants.findIndex((p) => p._id === _id);
+    if (index === -1) {
       return {
         statusCode: 400,
         message: 'user is not in conversation',
         data: null,
       };
     }
-    conversation.participants = conversation.participants.filter(con => con._id !== _id)
+    conversation.participants = conversation.participants.filter(
+      (con) => con._id !== _id,
+    );
     await this.conversation.save(conversation);
     return {
       statusCode: 200,
@@ -379,15 +391,15 @@ export class ConversationService {
       relations: {
         owner: true,
       },
-    })
-    if (!conversation){
+    });
+    if (!conversation) {
       return {
         statusCode: 404,
         message: 'conversation not found',
         data: null,
       };
     }
-    if(conversation.type === "group" && conversation.owner._id !== _id){
+    if (conversation.type === 'group' && conversation.owner._id !== _id) {
       return {
         statusCode: 403,
         message: 'you are not permitted to do this action',
@@ -395,13 +407,33 @@ export class ConversationService {
       };
     }
     conversation.isDeleted = true;
-    conversation.deletedAt = new Date()    
-    await this.conversation.save(conversation)
+    conversation.deletedAt = new Date();
+    await this.conversation.save(conversation);
     return {
       statusCode: 200,
       message: 'delete conversation success',
       data: null,
     };
-
+  }
+  async getListConversationsById(id: string[]) {
+    try {
+      const response = await this.conversation.find({
+        where: {
+          _id: In(id),
+        },
+        relations: {
+          participants: true,
+          owner: true,
+          blockBy: true,
+        },
+      });
+      return response;
+    } catch (error) {
+      return {
+        statusCode: 500,
+        message: error.message,
+        data: null,
+      };
+    }
   }
 }

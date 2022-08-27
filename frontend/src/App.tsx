@@ -32,10 +32,12 @@ import FoundUser from './components/Contacts/Mobile/AddFriend/FoundUser';
 import Login from './pages/Login';
 import { getMe } from './app/slices/user.slice';
 import { getFriendsList } from './app/slices/friends.slice';
+import NewGroup from './components/NewGroup';
 
 function App() {
   const { toggleColorMode, colorMode } = useColorMode();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const brakePoints = {
     sm: '320px',
     md: '768px',
@@ -59,6 +61,12 @@ function App() {
   useEffect(() => {
     dispatch(handleSetLargerThanHD(isLargerThanHD));
   }, [isLargerThanHD]);
+  useEffect(() => {
+    const access_token = localStorage.getItem('access_token');
+    if (!access_token) {
+      navigate('/login');
+    }
+  }, []);
 
   return (
     <Routes>
@@ -68,6 +76,7 @@ function App() {
       <Route path="/contacts" element={<Contacts />} />
       <Route path="/contacts/add" element={<AddFriend />} />
       <Route path="/contacts/add/:id" element={<FoundUser />} />
+      <Route path="/newgroup" element={<NewGroup />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
     </Routes>

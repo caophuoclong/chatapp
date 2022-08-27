@@ -73,16 +73,20 @@ export default function Info({ user, id }: Props) {
         direction={'column'}
         gap="5px"
       >
-        <button>
-          <Avatar width="72px" height="72px" src={user.avatarUrl}>
-            <AvatarBadge
-              borderColor="papayawhip"
-              bg="gray"
-              boxSize="1.25em"
-              children={<AiFillCamera color="#f5f5f5" />}
-            />
-          </Avatar>
-        </button>
+        {user._id === myId ? (
+          <button>
+            <Avatar width="72px" height="72px" src={user.avatarUrl}>
+              <AvatarBadge
+                borderColor="papayawhip"
+                bg="gray"
+                boxSize="1.25em"
+                children={<AiFillCamera color="#f5f5f5" />}
+              />
+            </Avatar>
+          </button>
+        ) : (
+          <Avatar width="72px" height="72px" src={user.avatarUrl}></Avatar>
+        )}
         <Input
           className="input__info"
           id="changeName"
@@ -105,12 +109,15 @@ export default function Info({ user, id }: Props) {
           </Text>
           <RadioGroup
             isDisabled={!isEnalbeInput}
-            value={'1'}
+            value={
+              user.gender === null ? '3' : user.gender === true ? '1' : '2'
+            }
             onChange={() => {}}
           >
             <HStack gap="1rem">
               <Radio value="1">{t('Male')}</Radio>
               <Radio value="2">{t('Female')}</Radio>
+              <Radio value="3">{t('Other')}</Radio>
             </HStack>
           </RadioGroup>
         </Flex>
@@ -134,11 +141,43 @@ export default function Info({ user, id }: Props) {
               if (isEnalbeInput) setShowDatePicker(!showDatePicker);
             }}
           >
-            {new Date(
-              user.birthday.year,
-              user.birthday.month - 1,
-              user.birthday.day
-            ).toLocaleDateString('vi-VI')}
+            {user.birthday &&
+              (() => {
+                const birthday = user.birthday;
+                const state = {
+                  info: {
+                    birthday: {
+                      day: 0,
+                      month: 0,
+                      year: 0,
+                    },
+                  },
+                };
+                if (birthday.includes('-')) {
+                  state.info.birthday = {
+                    day: +birthday.split('-')[0],
+                    month: +birthday.split('-')[1],
+                    year: +birthday.split('-')[2],
+                  };
+                } else if (birthday.includes('/')) {
+                  state.info.birthday = {
+                    day: +birthday.split('/')[0],
+                    month: +birthday.split('/')[1],
+                    year: +birthday.split('/')[2],
+                  };
+                } else if (birthday.includes('.')) {
+                  state.info.birthday = {
+                    day: +birthday.split('.')[0],
+                    month: +birthday.split('.')[1],
+                    year: +birthday.split('.')[2],
+                  };
+                }
+                return new Date(
+                  state.info.birthday.year,
+                  state.info.birthday.month - 1,
+                  state.info.birthday.day
+                ).toLocaleDateString('vi-VI');
+              })()}
             {isEnalbeInput && showDatePicker && (
               <Box
                 position={'absolute'}
@@ -191,7 +230,7 @@ export default function Info({ user, id }: Props) {
           />
         </Flex>
       </VStack>
-      {id === myId || !id ? (
+      {user._id === myId ? (
         !isEnalbeInput ? (
           <IconButton
             display="flex"

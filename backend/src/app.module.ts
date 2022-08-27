@@ -24,6 +24,7 @@ import { AuthvalidationMiddleware } from './authvalidation.middleware';
 import { LocalStrategy } from '~/auth/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './auth/jwt.strategy';
+import { Attachment } from './attachment/entities/attachment.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -40,13 +41,13 @@ import { JwtStrategy } from './auth/jwt.strategy';
         username: config.user,
         password: config.password,
         database: config.database,
-        entities: [User, Status, FriendShip, Conversation, Message, UnRead],
+        entities: [User, Status, FriendShip, Conversation, Message, UnRead, Attachment],
         autoLoadEntities: true,
         synchronize: true
 
       }
     },
-  }),UserModule, ConversationModule, MessageModule, FriendshipModule, AttachmentModule, UnreadModule, PassportModule, JwtModule.registerAsync({
+  }),UserModule, MessageModule, ConversationModule, AttachmentModule,PassportModule, JwtModule.registerAsync({
     useFactory: ()=>{
       return {
         secret: config().jwtSecret,

@@ -15,7 +15,9 @@ export class User {
         unique: true
     })
     username: string;
-    @Column()
+    @Column({
+        select: false
+    })
     password: string;
     @Column()
     name: string;
@@ -38,7 +40,9 @@ export class User {
         default: null
     })
     birthday: string;
-    @Column()
+    @Column({
+        select: false
+    })
     salt: string;
     @OneToMany(type => FriendShip, fri => fri.userRequest)
     friendRequest: FriendShip[];
@@ -60,4 +64,8 @@ export class User {
     unreadMessages: UnRead[];
     @OneToMany(type => Conversation, c => c._id)
     conversationBlocked: Conversation[];
+    @Column({
+        default: null
+    })
+    gender: boolean
 }

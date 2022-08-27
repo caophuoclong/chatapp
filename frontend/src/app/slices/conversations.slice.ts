@@ -1,94 +1,22 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '@app/store'
 import IConversation from '../../interfaces/IConversation';
+import ConversationsApi from '~/services/apis/Conversations.api';
 
 // Define a type for the slice state
+export const getMyConversations = createAsyncThunk("Get my conversations",()=>{
+    return ConversationsApi.getConversation();
+})
 interface Conversations {
-    conversations: Array<IConversation>
+    conversations: Array<IConversation>,
+    isLoading: boolean,
 }
 
 // Define the initial state using that type
 const initialState: Conversations = {
-    conversations: [{
-        _id: "ksf",
-        avatarUrl: "https://picsum.photos/128",
-        lastMessage: "Hi chao ban",
-        lastMessageTime: "2022-01-26T11:41:09Z",
-        name: "Tran Cao Phuoc Long",
-        unreadMessageCount: 0
-    },
-    {
-        _id: "kjui",
-        avatarUrl: "https://picsum.photos/128",
-        lastMessage: "Xin chao ban hien",
-        lastMessageTime: "2022-02-19T11:18:49Z",
-        name: "Cristiano",
-        unreadMessageCount: 0
-    },{
-        _id: "kjui",
-        avatarUrl: "https://picsum.photos/128",
-        lastMessage: "Xin chao ban hien",
-        lastMessageTime: "2022-02-19T11:18:49Z",
-        name: "Cristiano",
-        unreadMessageCount: 0
-    },{
-        _id: "kjui",
-        avatarUrl: "https://picsum.photos/128",
-        lastMessage: "Xin chao ban hien",
-        lastMessageTime: "2022-02-19T11:18:49Z",
-        name: "Cristiano",
-        unreadMessageCount: 0
-    },{
-        _id: "kjui",
-        avatarUrl: "https://picsum.photos/128",
-        lastMessage: "Xin chao ban hien",
-        lastMessageTime: "2022-02-19T11:18:49Z",
-        name: "Cristiano",
-        unreadMessageCount: 0
-    },{
-        _id: "kjui",
-        avatarUrl: "https://picsum.photos/128",
-        lastMessage: "Xin chao ban hien",
-        lastMessageTime: "2022-02-19T11:18:49Z",
-        name: "Cristiano",
-        unreadMessageCount: 0
-    },{
-        _id: "kjui",
-        avatarUrl: "https://picsum.photos/128",
-        lastMessage: "Xin chao ban hien",
-        lastMessageTime: "2022-02-19T11:18:49Z",
-        name: "Cristiano",
-        unreadMessageCount: 0
-    },{
-        _id: "kjui",
-        avatarUrl: "https://picsum.photos/128",
-        lastMessage: "Xin chao ban hien",
-        lastMessageTime: "2022-02-19T11:18:49Z",
-        name: "Cristiano",
-        unreadMessageCount: 0
-    },{
-        _id: "kjui",
-        avatarUrl: "https://picsum.photos/128",
-        lastMessage: "Xin chao ban hien",
-        lastMessageTime: "2022-02-19T11:18:49Z",
-        name: "Cristiano",
-        unreadMessageCount: 0
-    },{
-        _id: "kjui",
-        avatarUrl: "https://picsum.photos/128",
-        lastMessage: "Xin chao ban hien",
-        lastMessageTime: "2022-02-19T11:18:49Z",
-        name: "Cristiano",
-        unreadMessageCount: 0
-    },{
-        _id: "kjui",
-        avatarUrl: "https://picsum.photos/128",
-        lastMessage: "Xin chao ban hien",
-        lastMessageTime: "2022-02-19T11:18:49Z",
-        name: "Cristiano",
-        unreadMessageCount: 0
-    }]
+    conversations: [],
+    isLoading: false
 }
 
 export const conversationsSlice = createSlice({
@@ -96,11 +24,31 @@ export const conversationsSlice = createSlice({
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
+    addConversation: (state: Conversations, action:PayloadAction<IConversation>)=>{
+        // check exist conversation
+        const existConversation = state.conversations.find(conversation=>{
+            return conversation._id === action.payload._id;
+        }
+        )
+        if(existConversation){
+            return;
+        }
+        state.conversations.push(action.payload);
+    }
     
+  },
+  extraReducers(builder) {
+      builder.addCase(getMyConversations.pending, (state)=>{
+        state.isLoading = true;
+      })
+      builder.addCase(getMyConversations.fulfilled, (state, action)=>{
+        state.conversations = action.payload.data.data;
+        state.isLoading = false;
+      })
   },
 })
 
-export const {  } = conversationsSlice.actions
+export const { addConversation } = conversationsSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 

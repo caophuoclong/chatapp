@@ -1,13 +1,10 @@
 export interface IUser {
     _id: string;
-    name: "",
-    username: "",
-    avatarUrl: "",
-    email: "",
-    phone: "",
-    birthday: {
-        day: number,
-        month: number,
-        year: number
-    },
+    name: string,
+    username: string,
+    avatarUrl: string,
+    email: string,
+    phone: string,
+    birthday: string,
+    gender: boolean | null
 }

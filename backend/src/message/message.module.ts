@@ -4,9 +4,14 @@ import { MessageService } from './message.service';
 import { MessageController } from './message.controller';
 import { Message } from './entities/message.entity';
 import { AttachmentModule } from '../attachment/attachment.module';
+import { ConversationModule } from '~/conversation/conversation.module';
+import { User } from '~/user/entities/user.entity';
+import { Conversation } from '~/conversation/entities/conversation.entity';
+import { Attachment } from '../attachment/entities/attachment.entity';
+import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Message]), AttachmentModule],
+  imports: [TypeOrmModule.forFeature([Message, User, Conversation, Attachment]), ConversationModule, UserModule],
   controllers: [MessageController],
   providers: [MessageService]
 })

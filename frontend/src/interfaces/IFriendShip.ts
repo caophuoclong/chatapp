@@ -6,7 +6,7 @@ export interface StatusCode{
     name: codeName,
 }
 export default interface IFriendShip {
-    friendShipId: string;
+    _id: string;
     statusCode:StatusCode,
     user: IUser,
     flag: "sender" | "target"

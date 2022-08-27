@@ -13,12 +13,21 @@ import IConversation from '@interfaces/IConversation';
 import moment from 'moment';
 import { Link, useParams } from 'react-router-dom';
 import { setChoosenConversationID } from '~/app/slices/global.slice';
+import { IUser } from '../../../interfaces/IUser';
+
+const renderDirectConversation = (participants: IUser[], myId: string) => {
+  return {
+    avatarUrl: participants.filter((item) => item._id !== myId)[0].avatarUrl,
+    name: participants.filter((item) => item._id !== myId)[0].name,
+  };
+};
 
 export default function Conversation({
   name,
   avatarUrl,
   lastMessage,
-  lastMessageTime,
+  participants,
+  type,
   _id,
 }: IConversation) {
   const { colorMode } = useColorMode();
@@ -26,6 +35,7 @@ export default function Conversation({
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
+  const user = useAppSelector((state) => state.userSlice.info);
   const dispatch = useAppDispatch();
   const choosenConversationID = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
@@ -57,7 +67,19 @@ export default function Conversation({
       }}
       cursor="pointer"
     >
-      <Avatar size="lg" name="Christian Nwamba" src={avatarUrl} />
+      <Avatar
+        size="lg"
+        name={
+          type === 'group'
+            ? name
+            : renderDirectConversation(participants, user._id).name
+        }
+        src={
+          type === 'group'
+            ? avatarUrl
+            : renderDirectConversation(participants, user._id).avatarUrl
+        }
+      />
       <Box>
         <Text
           fontSize="md"
@@ -67,11 +89,20 @@ export default function Conversation({
             color: 'gray.200',
           }}
         >
-          {name}
+          {type === 'group'
+            ? name
+            : renderDirectConversation(participants, user._id).name}
         </Text>
-        <Text fontSize="sm" noOfLines={1} color="gray.500">
-          {lastMessage} · {moment(lastMessageTime).fromNow(true)}
-        </Text>
+        {lastMessage ? (
+          <Text fontSize="sm" noOfLines={1} color="gray.500">
+            {lastMessage.content} ·{' '}
+            {moment(lastMessage.createdAt).fromNow(true)}
+          </Text>
+        ) : (
+          <Text fontSize="sm" noOfLines={1} color="gray.500">
+            You are not have a message in this conversation
+          </Text>
+        )}
       </Box>
     </Stack>
   );

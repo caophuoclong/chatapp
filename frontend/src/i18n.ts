@@ -58,6 +58,24 @@ const resources = {
       "Went__wrong": "Something went wrong, please try again!",
       "Accept__Success": "Accept friend success",
       "Reject__Success": "Reject friend success",
+      "Password__NotMatch": "Username or password not match",
+      "Waitting": "Waitting",
+      "Pending": "Pending",
+      "Group": "Group",
+      "Other": "Other",
+      "Logout": "Logout",
+      "Confirm__Logout": "Logout of this account?",
+      "Success": "Success",
+      "Sucess__Login": "Login successfully!",
+      "Create__New__Group": "Create new group",
+      "Group__Joined": "Joined groups",
+      "Set__Group__Name": "Set group name",
+      "New__Group": "New Group",
+      "Fail": "Fail",
+      "Create__Group__Fail": "Create group fail",
+      "Create__Group__Success": "Create group success",
+
+
     }
   },
   vn: {
@@ -113,6 +131,23 @@ const resources = {
       "Went__wrong": "Có lỗi xảy ra, vui lòng thử lại!",
       "Accept__Success": "Đồng ý kết bạn thành công",
       "Reject__Success": "Từ chối kết bạn thành công",
+      "Password__NotMatch": "Tên đăng nhập hoặc mật khẩu không đúng",
+      "Waitting": "Đang chờ",
+      "Pending": "Đang chờ",
+      "Group": "Nhóm",
+      "Other": "Khác",
+      "Logout": "Đăng xuất",
+      "Confirm__Logout": "Đăng xuất khỏi tài khoản này?",
+      "Success": "Thành công",
+      "Success__Login": "Đăng nhập thành công!",
+      "Create__New__Group": "Tạo nhóm mới",
+      "Group__Joined": "Nhóm đang tham gia",
+      "Set__Group__Name": "Tên nhóm",
+      "New__Group": "Nhóm mới",
+      "Fail": "Thất bại",
+      "Create__Group__Fail": "Tạo nhóm thất bại",
+      "Create__Group__Success": "Tạo nhóm thành công",
+
     }
   }
 };

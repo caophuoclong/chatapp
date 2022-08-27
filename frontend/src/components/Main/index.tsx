@@ -1,111 +1,39 @@
-import React, { useEffect } from 'react';
-import {
-  Box,
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerOverlay,
-  Flex,
-  Hide,
-  Show,
-  useMediaQuery,
-  Button,
-} from '@chakra-ui/react';
-import Header from './Header';
-import MessagesBox from './MessagesBox';
-import InputBox from './InputBox';
-import { useLocation, useParams } from 'react-router-dom';
-import { useState } from 'react';
-import InfoConversation from './InfoConversation/index';
-import { useAppDispatch, useAppSelector } from '~/app/hooks';
-import { setShowInfoConversation } from '~/app/slices/global.slice';
-import { useTranslation } from 'react-i18next';
+import React from 'react';
+import { useAppSelector } from '../../app/hooks';
+import Desktop from './Desktop';
+import Mobile from './Mobile';
 
 type Props = {};
 
 export default function Main({}: Props) {
-  let location = useLocation();
+  const myId = useAppSelector((state) => state.userSlice.info)._id;
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
-  const showInfo = useAppSelector(
-    (state) => state.globalSlice.conversation.showInfoConversation
+  const choosenConversation = useAppSelector(
+    (state) => state.globalSlice.conversation.choosenConversationID
   );
-  const dispatch = useAppDispatch();
-  const r = new RegExp('/message/[A-Za-z0-9]{3,16}/info');
-  const { t } = useTranslation();
-  useEffect(() => {
-    r.test(location.pathname)
-      ? dispatch(setShowInfoConversation(true))
-      : dispatch(setShowInfoConversation(false));
-  }, [location]);
-  return (
-    <Flex
-      width={{
-        base: '100%',
-        lg: '82%',
-      }}
-      boxSizing="border-box"
-      direction={'column'}
-    >
-      {isLargerThanHD ? (
-        <>
-          <Header />
-          <MessagesBox />
-          <InputBox />
-          <Drawer
-            isOpen={showInfo}
-            placement="right"
-            onClose={() => {
-              dispatch(setShowInfoConversation(false));
-            }}
-          >
-            <DrawerOverlay />
-            <DrawerContent>
-              <DrawerCloseButton />
-              <DrawerHeader textAlign={'center'}>
-                {t('Info__Conversation')}
-              </DrawerHeader>
-
-              <DrawerBody margin="0" padding="0">
-                <InfoConversation />
-              </DrawerBody>
-            </DrawerContent>
-          </Drawer>
-        </>
-      ) : showInfo ? (
-        <>
-          <Header />
-          <MessagesBox />
-          <InputBox />
-        </>
-      ) : (
-        <InfoConversation />
-      )}
-      {/* {!showInfo ? (
-        
-      ) : isLargerThanHD ? (
-        <Flex height={'100%'}>
-          <Flex
-            width={{
-              base: '100%',
-              lg: '82%',
-            }}
-            height="100%"
-            boxSizing="border-box"
-            direction={'column'}
-          >
-            <Header />
-            <MessagesBox />
-            <InputBox />
-          </Flex>
-          <InfoConversation />
-        </Flex>
-      ) : (
-      )} */}
-    </Flex>
+  const conversations = useAppSelector(
+    (state) => state.conversationsSlice.conversations
+  );
+  let conversation = conversations.find(
+    (con) => con._id === choosenConversation
+  );
+  if (conversation && conversation.type === 'direct') {
+    const x = conversation.participants.filter((item) => item._id !== myId)[0];
+    const name = (conversation = {
+      ...conversation,
+      name: x.name,
+      avatarUrl: x.avatarUrl,
+    });
+  }
+  return conversation ? (
+    isLargerThanHD ? (
+      <Desktop choosenConversation={conversation} />
+    ) : (
+      <Mobile choosenConversation={conversation} />
+    )
+  ) : (
+    <></>
   );
 }

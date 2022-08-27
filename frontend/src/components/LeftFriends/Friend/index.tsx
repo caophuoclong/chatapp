@@ -22,6 +22,14 @@ import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { useToast } from '@chakra-ui/react';
 import FriendsApi from '../../../services/apis/Friends.api';
 import { changeStatusCode, rejectFriendShip } from '~/app/slices/friends.slice';
+import ConversationsApi from '../../../services/apis/Conversations.api';
+import IConversation from '../../../interfaces/IConversation';
+import { addConversation } from '~/app/slices/conversations.slice';
+import {
+  ENUM_SCREEN,
+  setChoosenConversationID,
+  setShowScreen,
+} from '~/app/slices/global.slice';
 
 type Props = {
   user: IUser;
@@ -46,6 +54,19 @@ export default function Friend({
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
+  const createConversation = (e: React.MouseEvent<HTMLDivElement>) => {
+    ConversationsApi.createConversationByFriendShip(friendShipId).then(
+      (response) => {
+        if (response) {
+          const data = response.data.data as IConversation;
+          console.log(data);
+          dispatch(addConversation(data));
+          dispatch(setChoosenConversationID(data._id));
+          dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
+        }
+      }
+    );
+  };
   const onAccept = async () => {
     try {
       await FriendsApi.handleAccept(friendShipId);
@@ -111,6 +132,8 @@ export default function Friend({
       alignItems="center"
       gap="1rem"
       role="group"
+      onClick={createConversation}
+      cursor="pointer"
     >
       <Avatar src={user.avatarUrl}>
         {!isPending && (
@@ -133,18 +156,40 @@ export default function Friend({
           _groupHover={{
             display: 'flex',
           }}
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+          }}
         >
           <FiMoreHorizontal fontSize={'24px'} />
         </MenuButton>
         {isPending ? (
-          <MenuList>
-            <MenuItem onClick={onAccept}>{t('Accept')}</MenuItem>
-            <MenuItem onClick={onReject}>{t('Reject')}</MenuItem>
+          <MenuList
+            onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+              e.stopPropagation();
+            }}
+          >
+            <MenuItem
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                e.stopPropagation();
+                onAccept();
+              }}
+            >
+              {t('Accept')}
+            </MenuItem>
+            <MenuItem
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                e.stopPropagation();
+                onReject();
+              }}
+            >
+              {t('Reject')}
+            </MenuItem>
           </MenuList>
         ) : (
           <MenuList>
             <MenuItem
-              onClick={() => {
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                e.stopPropagation();
                 setShowInfo(true);
               }}
             >

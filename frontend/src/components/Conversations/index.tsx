@@ -21,7 +21,7 @@ export default function Conversations({}: Props) {
       paddingX="1rem"
       boxSizing="border-box"
     >
-      {conversations.map((item, index) => (
+      {conversations.map((item: IConversation, index) => (
         <Conversation {...item} key={index} />
       ))}
     </Box>

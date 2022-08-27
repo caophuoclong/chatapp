@@ -11,8 +11,10 @@ export default function Footer({}: Props) {
   const navigate = useNavigate();
   const { colorMode } = useColorMode();
   const location = useLocation();
+
   return (
     <Flex
+      bg={colorMode === 'dark' ? '#1A202C' : 'white'}
       marginTop="auto"
       minHeight="5%"
       boxSizing="border-box"
@@ -29,6 +31,7 @@ export default function Footer({}: Props) {
           : '1px solid  rgba(0, 0, 0, 0.08)'
       }
       paddingY=".5rem"
+      zIndex="100"
     >
       <IconButton
         aria-label="home"
