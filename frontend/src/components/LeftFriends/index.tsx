@@ -84,7 +84,9 @@ export default function LeftFriends({}: Props) {
           ))}
       </Box>
       {show === 'addfriend' && <AddFriendsModal setShow={() => setShow('')} />}
-      {show === 'creategroup' && <CreateGroupModal />}
+      {show === 'creategroup' && (
+        <CreateGroupModal setShow={() => setShow('')} />
+      )}
     </Flex>
   );
 }

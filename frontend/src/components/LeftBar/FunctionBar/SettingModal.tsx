@@ -13,6 +13,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import ChangeLanguage from '~/components/Settings/ChangeLanguage';
 import ToggleTheme from '~/components/Settings/ToggleTheme';
+import Logout from '../../Settings/Logout';
 
 type Props = {
   isOpen: boolean;
@@ -35,6 +36,7 @@ export default function SettingModal({ isOpen, onClose }: Props) {
         <ModalBody>
           <ToggleTheme />
           <ChangeLanguage />
+          <Logout />
         </ModalBody>
 
         <ModalFooter>

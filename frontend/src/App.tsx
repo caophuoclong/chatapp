@@ -19,7 +19,6 @@ import Setting from './components/Settings';
 import Contacts from './components/Contacts/';
 import User from './components/user';
 import i18n from './i18n';
-import moment from 'moment';
 import { registerLocale } from 'react-datepicker';
 import vi from 'date-fns/locale/vi';
 import es from 'date-fns/locale/es';
@@ -33,7 +32,7 @@ import Login from './pages/Login';
 import { getMe } from './app/slices/user.slice';
 import { getFriendsList } from './app/slices/friends.slice';
 import NewGroup from './components/NewGroup';
-
+import moment from 'moment-timezone';
 function App() {
   const { toggleColorMode, colorMode } = useColorMode();
   const dispatch = useAppDispatch();
@@ -53,9 +52,11 @@ function App() {
   useEffect(() => {
     const lan = (window.localStorage.getItem('lan') || 'vn') as 'en' | 'vn';
     dispatch(handleChangeLanguage(lan));
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     i18n.changeLanguage(lan);
     window.localStorage.setItem('lan', lan);
     moment.locale(lan === 'vn' ? 'vi' : 'es');
+    moment.tz.setDefault('Asia/Ho_Chi_Minh');
   }, []);
   const [isLargerThanHD] = useMediaQuery('(min-width: 1024px)');
   useEffect(() => {

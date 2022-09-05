@@ -6,30 +6,76 @@ import {
   useColorMode,
   useMediaQuery,
 } from '@chakra-ui/react';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { HiOutlineEmojiHappy, HiPhotograph } from 'react-icons/hi';
 import { GrAttachment } from 'react-icons/gr';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { FcLike } from 'react-icons/fc';
 import Picker from 'emoji-picker-react';
-import { useAppSelector } from '~/app/hooks';
+import { useAppDispatch, useAppSelector } from '~/app/hooks';
+import MessagesApi from '../../../services/apis/Messages.api';
+import { addMessage } from '~/app/slices/messages.slice';
 type Props = {};
-
+function useOutside<T extends HTMLElement>(
+  ref: React.RefObject<T>,
+  setHidePicker: () => void
+) {
+  useEffect(() => {
+    function listener(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setHidePicker();
+      }
+    }
+    document.addEventListener('mousedown', listener);
+    return () => {
+      document.removeEventListener('mousedown', listener);
+    };
+  }, [ref]);
+}
 export default function InputBox({}: Props) {
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
-  const [message, setMessage] = useState('');
+  const [content, setContent] = useState('');
   const [isPickerShow, setIsPickerShow] = useState(false);
   const { colorMode } = useColorMode();
+  const dispatch = useAppDispatch();
+  const choosenConversationId = useAppSelector(
+    (state) => state.globalSlice.conversation.choosenConversationID
+  );
   const onPickerClick = (
     event: any,
     emoji: {
       emoji: string;
     }
   ) => {
-    setMessage(message + emoji.emoji);
+    setContent(content + emoji.emoji);
   };
+  const pickerRef = useRef<HTMLDivElement>(null);
+  useOutside(pickerRef, () => {
+    setIsPickerShow(false);
+  });
+  const socket = useAppSelector((state) => state.globalSlice.socket);
+  const sendMessage = async () => {
+    socket?.emit('createMessage', 'hi chin chao');
+    // const message = {
+    //   destination: choosenConversationId,
+    //   content: content,
+    //   attachment: [],
+    //   parentMessage: null,
+    // };
+    // try {
+    //   const response = await MessagesApi.sendMessage(message);
+    //   const data = response.data.data;
+    //   dispatch(
+    //     addMessage({ message: data, conversationId: choosenConversationId })
+    //   );
+    //   setContent('');
+    // } catch (error) {
+    //   console.log(error);
+    // }
+  };
+
   return (
     <Box
       marginTop="auto"
@@ -68,17 +114,19 @@ export default function InputBox({}: Props) {
             }
           />
           <IconButton
+            bg="none"
             aria-label="Photo"
             icon={<HiPhotograph fontSize={'24px'} />}
           />
           <IconButton
+            bg="none"
             aria-label="File"
             icon={<GrAttachment fontSize={'24px'} />}
           />
         </Flex>
       )}
-      <Flex gap="5px">
-        {!isLargerThanHD && (
+      <Flex gap="5px" paddingX={isLargerThanHD ? 0 : '1rem'}>
+        {/* {!isLargerThanHD && (
           <IconButton
             onClick={() => setIsPickerShow(!isPickerShow)}
             aria-label="Emoji"
@@ -90,19 +138,24 @@ export default function InputBox({}: Props) {
               />
             }
           />
-        )}
+        )} */}
         <Input
           variant="flushed"
-          value={message}
+          value={content}
           placeholder="Flushed"
           size="md"
           width="100%"
+          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === 'Enter') {
+              sendMessage();
+            }
+          }}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-            setMessage(event.target.value);
+            setContent(event.target.value);
           }}
         />
         {!isLargerThanHD ? (
-          message ? (
+          content ? (
             <IconButton
               aria-label="Photo"
               icon={<FaTelegramPlane fontSize={'24px'} />}
@@ -113,9 +166,10 @@ export default function InputBox({}: Props) {
               icon={<HiPhotograph fontSize={'24px'} />}
             />
           )
-        ) : message ? (
+        ) : content ? (
           <IconButton
-            aria-label="Photo"
+            onClick={sendMessage}
+            aria-label="send message"
             icon={<FaTelegramPlane fontSize={'24px'} />}
           />
         ) : (
@@ -123,15 +177,19 @@ export default function InputBox({}: Props) {
         )}
       </Flex>
       {isPickerShow && (
-        <Picker
-          onEmojiClick={onPickerClick}
-          pickerStyle={{
-            position: isLargerThanHD ? 'absolute' : 'relative',
-            top: '0',
-            transform: isLargerThanHD ? 'translate(0,-100%)' : 'translate(0,0)',
-            width: isLargerThanHD ? '258px' : '100%',
-          }}
-        />
+        <div ref={pickerRef}>
+          <Picker
+            onEmojiClick={onPickerClick}
+            pickerStyle={{
+              position: isLargerThanHD ? 'absolute' : 'relative',
+              top: '0',
+              transform: isLargerThanHD
+                ? 'translate(0,-100%)'
+                : 'translate(0,0)',
+              width: isLargerThanHD ? '258px' : '100%',
+            }}
+          />
+        </div>
       )}
     </Box>
   );

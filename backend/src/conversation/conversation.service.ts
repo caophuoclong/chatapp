@@ -68,6 +68,7 @@ export class ConversationService {
         conversation.participants = user;
         conversation.lastMessage = null;
         conversation.friendship = friendShip;
+        conversation.createdAt = new Date().getTime();
         const con = await this.conversation.save(conversation);
         return {
           statusCode: 200,
@@ -103,6 +104,8 @@ export class ConversationService {
       conversation.owner = owner;
       conversation.type = 'group';
       conversation.visible = createConversationDto.visible;
+      conversation.createdAt = new Date().getTime();
+
       const saved = await this.conversation.save(conversation);
       return {
         statusCode: 200,
@@ -407,7 +410,7 @@ export class ConversationService {
       };
     }
     conversation.isDeleted = true;
-    conversation.deletedAt = new Date();
+    conversation.deletedAt = new Date().getTime();
     await this.conversation.save(conversation);
     return {
       statusCode: 200,

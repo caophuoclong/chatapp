@@ -9,41 +9,43 @@ import { Conversation } from '../conversation/entities/conversation.entity';
 import { ConversationService } from '../conversation/conversation.service';
 import { UserService } from '~/user/user.service';
 
+
 @Injectable()
 export class MessageService {
   constructor(
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
+    @InjectRepository(Conversation)
+    private readonly conversationRepository: Repository<Conversation>,
     private readonly ConversationService: ConversationService,
     private readonly UserService: UserService,
-
   ) {}
   async create(senderId: string, createMessageDto: CreateMessageDto) {
     try {
       const message = this.messageRepository.create();
       message.sender = (await this.UserService.get(senderId)).data;
       message.content = createMessageDto.content;
+      message.createdAt = new Date().getTime();
       const conversation = await this.ConversationService.getConversationById(
-        createMessageDto.destination
-      )
-      if(conversation.data){
+        createMessageDto.destination,
+      );
+      if (conversation.data) {
         message.destination = conversation.data;
-      await this.messageRepository.save(message);
-      const messageConversation = await this.ConversationService.getParticipants(conversation.data._id)
-      return {
-        statusCode: 200,
-        message: 'Message created successfully',
-        data: messageConversation.data
-      }
-      }
-      else{
+        const data = await this.messageRepository.save(message);
+        delete data.destination;
+        return {
+          statusCode: 200,
+          message: 'Message created successfully',
+          data: data,
+        };
+      } else {
         return {
           statusCode: 404,
           message: 'Conversation not found',
-          data: null
-        }
+          data: null,
+        };
       }
-      
+
       return 'This action adds a new message';
     } catch (error) {
       return {
@@ -53,7 +55,57 @@ export class MessageService {
       };
     }
   }
-
+  async findByConversation(
+    conversationId: string,
+    userId: string,
+    skip: number,
+    limit: number,
+  ) {
+    try {
+      const user = await this.UserService.get(userId);
+      const conversation = await this.conversationRepository.findOne({
+        where: {
+          _id: conversationId,
+          participants: user.data,
+        },
+      });
+      if (!conversation) {
+        return {
+          statusCode: 404,
+          message: 'Conversation not found',
+          data: null,
+        };
+      } 
+      // console.log(conversation);
+      console.log(limit, skip);
+      const id = conversation._id
+      const messages = await this.messageRepository
+      .createQueryBuilder("message", )
+      .where("message.destination_id = :conversationId", { conversationId: id })
+      .innerJoinAndSelect("message.sender", "sender", "sender._id = message.sender_id")
+      .select(["message", "sender"])
+      .limit(20)
+      .orderBy("message.createdAt", "DESC")
+      .offset(skip)
+      .getManyAndCount()
+      ;
+        
+        // console.log(messages);
+      return {
+        statusCode: 200,
+        message: 'messages found',
+        count: messages[1],
+        data: messages[0],
+      };
+    } catch (error) {
+      console.log(error.message);
+      return {
+        statusCode: 500,
+        message: error.message,
+        data: null,
+      };
+    }
+  }
   findAll() {
     return `This action returns all message`;
   }

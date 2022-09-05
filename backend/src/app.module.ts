@@ -25,6 +25,7 @@ import { LocalStrategy } from '~/auth/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { Attachment } from './attachment/entities/attachment.entity';
+import { TestModule } from './test/test.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -54,9 +55,9 @@ import { Attachment } from './attachment/entities/attachment.entity';
         signOptions: { expiresIn: '1d' }
       }
     }
-  })],
+  }), TestModule],
   controllers: [AppController],
-  providers: [AppService, SocketGateway, AuthService, LocalStrategy, JwtStrategy],
+  providers: [AppService, AuthService, LocalStrategy, JwtStrategy],
 })
 export class AppModule{
   // configure(consumer: MiddlewareConsumer) {

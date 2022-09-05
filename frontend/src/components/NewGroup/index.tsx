@@ -23,9 +23,11 @@ import IConversation from '~/interfaces/IConversation';
 import IFriendShip from '../../interfaces/IFriendShip';
 import ConversationsApi from '~/services/apis/Conversations.api';
 
-type Props = {};
+type Props = {
+  height?: string;
+};
 
-export default function NewGroup({}: Props) {
+export default function NewGroup({ height }: Props) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [showCheck, setShowCheck] = useState(false);
@@ -35,6 +37,8 @@ export default function NewGroup({}: Props) {
   const friendShip = useAppSelector((state) => state.friendsSlice.friendShips);
   const [friendList, setFriendsList] = useState<IFriendShip[]>(friendShip);
   const toast = useToast();
+  const { value, getCheckboxProps, setValue } = useCheckboxGroup();
+
   useEffect(() => {
     if (input.length > 3) {
       setShowCheck(true);
@@ -42,7 +46,9 @@ export default function NewGroup({}: Props) {
       setShowCheck(false);
     }
   }, [input]);
-  const { value, getCheckboxProps, setValue } = useCheckboxGroup();
+  const handleRemove = (_id: string | number) => {
+    setValue(value.filter((id) => id !== _id));
+  };
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     console.log(value);
@@ -56,12 +62,7 @@ export default function NewGroup({}: Props) {
       setFriendsList([...friendList]);
     }
   };
-  const handleRemove = (_id: string | number) => {
-    setValue(value.filter((id) => id !== _id));
-  };
-  useEffect(() => {
-    console.log(value);
-  }, [value]);
+
   const handleCreateGroup = () => {
     const participants = [...value];
     participants.push(myId);
@@ -69,10 +70,11 @@ export default function NewGroup({}: Props) {
       .then((res) => {
         toast({
           title: t('Success'),
-          description: t('Create__Group__Sucess'),
+          description: t('Create__Group__Success'),
           status: 'success',
           duration: 3000,
           isClosable: true,
+          position: 'bottom',
         });
       })
       .catch((error) => {
@@ -82,11 +84,16 @@ export default function NewGroup({}: Props) {
           status: 'error',
           duration: 3000,
           isClosable: true,
+          position: 'bottom',
         });
       });
   };
   return (
-    <Flex direction="column" height="100vh" position="relative">
+    <Flex
+      direction="column"
+      height={height ? height : '100vh'}
+      position="relative"
+    >
       <Flex
         height="10%"
         width="100%"
@@ -105,7 +112,7 @@ export default function NewGroup({}: Props) {
             navigate(-1);
           }}
         />
-        <Text>{input.length === 0 ? t('New__Group') : input}</Text>
+        <Text>{input || t('New__Group')}</Text>
       </Flex>
       <Flex padding="1rem" gap="1rem" height="10%">
         <Avatar />
@@ -159,15 +166,21 @@ export default function NewGroup({}: Props) {
         overflow={'auto'}
       >
         <CheckboxGroup value={value}>
-          {friendList.map((fri) => (
-            <Flex>
-              <Contact avatarUrl={fri.user.avatarUrl} name={fri.user.name} />
-              <Checkbox
-                {...getCheckboxProps({ value: fri.user._id })}
-                marginLeft="auto"
-              ></Checkbox>
-            </Flex>
-          ))}
+          {friendList.map(
+            (fri) =>
+              fri.statusCode.code === 'a' && (
+                <Flex>
+                  <Contact
+                    avatarUrl={fri.user.avatarUrl}
+                    name={fri.user.name}
+                  />
+                  <Checkbox
+                    {...getCheckboxProps({ value: fri.user._id })}
+                    marginLeft="auto"
+                  ></Checkbox>
+                </Flex>
+              )
+          )}
         </CheckboxGroup>
       </Flex>
       {value.length > 0 && (
@@ -225,7 +238,7 @@ export default function NewGroup({}: Props) {
             ))}
           </Flex>
           <Button
-            disabled={input.length > 3 && value.length > 2 ? false : true}
+            disabled={input.length >= 2 && value.length >= 2 ? false : true}
             marginLeft={'auto'}
             rounded="full"
             padding="0"

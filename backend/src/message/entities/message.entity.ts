@@ -23,9 +23,9 @@ export class Message {
         default: false
     })
     isDeleted: boolean;
-    @CreateDateColumn({
-        type: "timestamp",
-        default: () => "CURRENT_TIMESTAMP(6)"
+    @Column({
+        type:"bigint",
+        default: new Date().getTime()
     })
-    createdAt: Date;
+    createdAt: number;
 }

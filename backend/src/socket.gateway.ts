@@ -11,7 +11,7 @@ export class SocketGateway {
     return 'Hello world!';
   }
   handleConnection(client: any) {
-    client.emit('message', 'Hello world!');
+    client.emit('connection', 'Hello world!');
     console.log('New client connected');
   }
 }

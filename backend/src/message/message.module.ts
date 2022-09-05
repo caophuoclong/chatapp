@@ -9,10 +9,11 @@ import { User } from '~/user/entities/user.entity';
 import { Conversation } from '~/conversation/entities/conversation.entity';
 import { Attachment } from '../attachment/entities/attachment.entity';
 import { UserModule } from '../user/user.module';
+import { MessageGateway } from './message.gateway';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Message, User, Conversation, Attachment]), ConversationModule, UserModule],
   controllers: [MessageController],
-  providers: [MessageService]
+  providers: [MessageService, MessageGateway]
 })
 export class MessageModule {}

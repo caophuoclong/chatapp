@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '@app/store'
+import { Socket } from 'socket.io-client'
 export enum ENUM_SCREEN {
   CONVERSATIONS,
   CONTACTS
@@ -16,6 +17,7 @@ interface GlobalState {
     isLargerThanHD: boolean,
     lan: "vn" | "en",
     showScreen: ENUM_SCREEN,
+    socket: Socket | null,
     
 }
 
@@ -27,7 +29,8 @@ const initialState: GlobalState = {
    },
    lan: "vn",
    isLargerThanHD: false,
-   showScreen: ENUM_SCREEN.CONVERSATIONS
+   showScreen: ENUM_SCREEN.CONVERSATIONS,
+   socket: null,
 }
 
 export const global = createSlice({
@@ -49,11 +52,17 @@ export const global = createSlice({
     },
     setChoosenConversationID: (state, action: PayloadAction<string>) => {
       state.conversation.choosenConversationID = action.payload
+    },
+    setSocket: (state, action: PayloadAction<Socket>) => {
+      return{
+        ...state,
+        socket: action.payload
+      }
     }
   },
 })
 
-export const { setShowInfoConversation, handleChangeLanguage, handleSetLargerThanHD, setShowScreen, setChoosenConversationID } = global.actions
+export const { setShowInfoConversation, handleChangeLanguage, handleSetLargerThanHD, setShowScreen, setChoosenConversationID, setSocket } = global.actions
 
 // Other code such as selectors can use the imported `RootState` type
 

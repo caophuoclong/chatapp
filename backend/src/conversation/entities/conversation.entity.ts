@@ -62,13 +62,16 @@ export class Conversation {
     default: false
   })
   isDeleted: boolean;
-  @DeleteDateColumn({
-    type: "timestamp",
-    nullable: true
-  })
-  deletedAt: Date;
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)" })
-  createdAt: Date;
+  @Column({
+    type:"bigint",
+    default: new Date().getTime()
+})
+  deletedAt: number;
+  @Column({
+    type:"bigint",
+    default: new Date().getTime()
+})
+createdAt: number;
   @OneToOne(type => Message, m => m._id)
   @JoinColumn({
     name: "lastmessage"

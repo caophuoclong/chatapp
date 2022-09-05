@@ -49,26 +49,7 @@ export const userSlice = createSlice({
       state.info = action.payload.data;
       state.info.avatarUrl = action.payload.data.avatarUrl || "https://picsum.photos/200";
       const birthday = action.payload.data.birthday;
-      // if(birthday.includes("-")){
-      //   state.info.birthday = {
-      //     day: +birthday.split("-")[0],
-      //     month: +birthday.split("-")[1],
-      //     year: +birthday.split("-")[2],
-      //   }
-      // }else if (birthday.includes("/")){
-      //   state.info.birthday = {
-      //     day: +birthday.split("/")[0],
-      //     month: +birthday.split("/")[1],
-      //     year: +birthday.split("/")[2],
-      //   }
-      // }
-      // else if (birthday.includes(".")){
-      //   state.info.birthday = {
-      //     day: +birthday.split(".")[0],
-      //     month: +birthday.split(".")[1],
-      //     year: +birthday.split(".")[2],
-      //   }
-      // }
+      
       
       state.isLoading = false;
     })
