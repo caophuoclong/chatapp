@@ -19,7 +19,9 @@ export default function MyMessage({ message, time }: Props) {
       width="fit-content"
     >
       <Box>
-        <Text fontSize={'16px'}>{message}</Text>
+        <Text fontSize={'16px'} wordBreak="break-word">
+          {message}
+        </Text>
         <Text
           fontSize={'13px'}
           color={colorMode === 'light' ? '#4F5359' : 'gray'}

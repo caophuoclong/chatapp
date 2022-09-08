@@ -1,19 +1,21 @@
 import {
   Avatar,
   Box,
+  Flex,
   Stack,
   Text,
   useBreakpoint,
   useColorMode,
   useMediaQuery,
 } from '@chakra-ui/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import IConversation from '@interfaces/IConversation';
 import moment from 'moment';
 import { Link, useParams } from 'react-router-dom';
 import { setChoosenConversationID } from '~/app/slices/global.slice';
 import { IUser } from '../../../interfaces/IUser';
+import { useRef } from 'react';
 
 const renderDirectConversation = (participants: IUser[], myId: string) => {
   return {
@@ -40,6 +42,15 @@ export default function Conversation({
   const choosenConversationID = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
+  console.log(lastMessage.createdAt);
+  const contentRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    const p = contentRef.current;
+    console.log(p);
+    if (p) {
+      console.log(p.clientWidth);
+    }
+  }, [contentRef]);
   return (
     <Stack
       onClick={() => {
@@ -80,7 +91,7 @@ export default function Conversation({
             : renderDirectConversation(participants, user._id).avatarUrl
         }
       />
-      <Box>
+      <Box width="80%">
         <Text
           fontSize="md"
           noOfLines={1}
@@ -94,10 +105,14 @@ export default function Conversation({
             : renderDirectConversation(participants, user._id).name}
         </Text>
         {lastMessage ? (
-          <Text fontSize="sm" noOfLines={1} color="gray.500">
-            {lastMessage.content} ·{' '}
-            {moment(lastMessage.createdAt).fromNow(true)}
-          </Text>
+          <Flex>
+            <Text fontSize="sm" noOfLines={1} color="gray.500" width={'80%'}>
+              {lastMessage.content} ·{' '}
+            </Text>
+            <Text fontSize="sm" noOfLines={1} color="gray.500">
+              {moment(new Date(+lastMessage.createdAt)).format('HH:mm')}
+            </Text>
+          </Flex>
         ) : (
           <Text fontSize="sm" noOfLines={1} color="gray.500">
             You are not have a message in this conversation

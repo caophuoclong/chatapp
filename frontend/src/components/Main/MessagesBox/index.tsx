@@ -32,8 +32,6 @@ export default function MessagesBox({}: Props) {
   useEffect(() => {
     if (shouldScroll) divRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages[choosenConversation]]);
-  const socket = useAppSelector((state) => state.globalSlice.socket);
-  console.log(socket);
   const handleOnScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const element = flexRef.current;
     const scrollTop = element?.scrollTop || 0;
@@ -76,7 +74,7 @@ export default function MessagesBox({}: Props) {
       height={{
         lg: '90%',
       }}
-      paddingY="1rem"
+      // paddingY="1rem"
       paddingX=".7rem"
       overflow={'auto'}
       gap=".5rem"

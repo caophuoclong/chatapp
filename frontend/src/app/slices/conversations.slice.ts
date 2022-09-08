@@ -3,6 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '@app/store'
 import IConversation from '../../interfaces/IConversation';
 import ConversationsApi from '~/services/apis/Conversations.api';
+import { IMessage } from '~/interfaces/IMessage';
 
 // Define a type for the slice state
 export const getMyConversations = createAsyncThunk("Get my conversations",()=>{
@@ -34,6 +35,18 @@ export const conversationsSlice = createSlice({
             return;
         }
         state.conversations.push(action.payload);
+    },
+    updateLastestMessage: (state: Conversations, action:PayloadAction<{
+      message: IMessage,
+      conversationId: string,
+    }>)=>{
+        const conversation = state.conversations.find(conversation=>{
+            return conversation._id === action.payload.conversationId;
+        })
+        if(conversation){
+            conversation.lastMessage = action.payload.message;
+        }
+
     }
     
   },
@@ -48,7 +61,7 @@ export const conversationsSlice = createSlice({
   },
 })
 
-export const { addConversation } = conversationsSlice.actions
+export const { addConversation, updateLastestMessage } = conversationsSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 

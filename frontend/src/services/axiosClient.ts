@@ -12,8 +12,10 @@ const axiosClient = axios.create({
 });
 axiosClient.interceptors.request.use(config =>{
     if(config){
-        if(config.headers)
+        if(config.headers){
             config.headers.Authorization = "Bearer " + localStorage.getItem("access_token");
+            config.headers.AcceptAllowOrigin = "*";
+        }
     }
     return config;
 })

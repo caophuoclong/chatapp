@@ -7,10 +7,13 @@ import Desktop from './Desktop';
 import Mobile from './Mobile';
 import { getFriendsList } from '~/app/slices/friends.slice';
 import { getMyConversations } from '~/app/slices/conversations.slice';
+import { connectSocket } from '../../providers/SocketProvider';
+import { setSocket } from '~/app/slices/global.slice';
 
 type Props = {};
 
 export default function Home({}: Props) {
+  const socket = useAppSelector((state) => state.globalSlice.socket);
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
@@ -27,6 +30,9 @@ export default function Home({}: Props) {
       dispatch(getMe());
       dispatch(getFriendsList());
       dispatch(getMyConversations());
+      if (!socket?.id) {
+        dispatch(setSocket(connectSocket()));
+      }
     }
   }, []);
 

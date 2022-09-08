@@ -19,7 +19,9 @@ export default function OtherMessage({ message, time }: Props) {
       boxShadow="rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px"
     >
       <Box>
-        <Text fontSize={'16px'}>{message}</Text>
+        <Text fontSize={'16px'} wordBreak="break-word">
+          {message}
+        </Text>
         <Text
           fontSize={'13px'}
           color={colorMode === 'light' ? '#4F5359' : 'gray'}

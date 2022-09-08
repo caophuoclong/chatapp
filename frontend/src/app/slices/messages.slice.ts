@@ -26,7 +26,6 @@ export const getMessages = createAsyncThunk(
   }) => {
     const response = await MessagesApi.getMessages(conversationId, skip);
     response.data.conversationId = conversationId;
-    console.log(response.data);
     return response;
   }
 );

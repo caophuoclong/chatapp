@@ -33,6 +33,7 @@ import { getMe } from './app/slices/user.slice';
 import { getFriendsList } from './app/slices/friends.slice';
 import NewGroup from './components/NewGroup';
 import moment from 'moment-timezone';
+import SocketProvider from './providers/SocketProvider';
 function App() {
   const { toggleColorMode, colorMode } = useColorMode();
   const dispatch = useAppDispatch();
@@ -66,6 +67,8 @@ function App() {
     const access_token = localStorage.getItem('access_token');
     if (!access_token) {
       navigate('/login');
+    } else {
+      navigate('/');
     }
   }, []);
 

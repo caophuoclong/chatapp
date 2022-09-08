@@ -57,23 +57,24 @@ export default function InputBox({}: Props) {
   });
   const socket = useAppSelector((state) => state.globalSlice.socket);
   const sendMessage = async () => {
-    socket?.emit('createMessage', 'hi chin chao');
-    // const message = {
-    //   destination: choosenConversationId,
-    //   content: content,
-    //   attachment: [],
-    //   parentMessage: null,
-    // };
-    // try {
-    //   const response = await MessagesApi.sendMessage(message);
-    //   const data = response.data.data;
-    //   dispatch(
-    //     addMessage({ message: data, conversationId: choosenConversationId })
-    //   );
-    //   setContent('');
-    // } catch (error) {
-    //   console.log(error);
-    // }
+    const message = {
+      destination: choosenConversationId,
+      content: content,
+      attachment: [],
+      parentMessage: null,
+    };
+    try {
+      // const response = await MessagesApi.sendMessage(message);
+      // const data = response.data.data;
+      socket?.emit('createMessage', message);
+
+      // dispatch(
+      //   addMessage({ message: data, conversationId: choosenConversationId })
+      // );
+      setContent('');
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -98,7 +99,7 @@ export default function InputBox({}: Props) {
           ? '1px solid rgba(255, 255, 255,0.3)'
           : '1px solid  rgba(0, 0, 0, 0.08)'
       }
-      paddingY="0.3rem"
+      // paddingY="0.3rem"
     >
       {isLargerThanHD && (
         <Flex>
@@ -140,7 +141,7 @@ export default function InputBox({}: Props) {
           />
         )} */}
         <Input
-          variant="flushed"
+          variant={!isLargerThanHD ? 'unstyled' : 'flushed'}
           value={content}
           placeholder="Flushed"
           size="md"
