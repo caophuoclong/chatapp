@@ -61,7 +61,6 @@ export class MessageController {
   ) {
     const { _id } = req.user._id;
     const { skip, limit } = paginateQuery;
-    console.log(skip, limit);
     return this.messageService.findByConversation(conversationId, _id, skip || 0  , limit || 20);
   }
 

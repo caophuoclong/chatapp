@@ -1,17 +1,80 @@
-import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-
-@WebSocketGateway(3001, {
-  cors: {
-    origin: "*"
+import { CACHE_MANAGER, Inject, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ConnectedSocket, SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
+import { Cache } from 'cache-manager';
+import { Socket } from 'socket.io';
+import { Repository } from 'typeorm';
+import { AuthService } from './auth/auth.service';
+import { JWTAuthGuard } from './auth/jwt-auth.guard';
+import WsGuards from './auth/ws-auth.guard';
+import CustomSocket from './interfaces/CustomInterface';
+import { User } from './user/entities/user.entity';
+import { UserService } from './user/user.service';
+@WebSocketGateway(3001,{
+  cors:{
+    origin: "*",
   }
 })
 export class SocketGateway {
-  @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): string {
-    return 'Hello world!';
+  constructor(
+
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache
+  ){}
+  async handleConnection(@ConnectedSocket() client: Socket) {
+    const token = client.handshake.headers.authorization.split(" ")[1];
+    try{
+      const {_id} = this.authService.verifyJWT(token);
+      
+      // join room as conversation
+      // get conversations select only id
+      const user =( await this.userService.get(_id)).data;
+      if(!user){
+        this.disconect(client);
+      }else{
+        const onlineUser = await this.cacheManager.get<Array<String>>("online_user") || [];
+      const set = new Set(onlineUser);
+      set.add(_id);
+      const newOnlineUser = Array.from(set);
+      await this.cacheManager.set("online_user", newOnlineUser);
+      const rooms = user.conversations;
+      rooms.forEach(room => {
+        this.crateRoom(client, room._id);
+      })
+        client.emit("connectSuccessFull", {
+          message: "Hello"
+        })
+      }
+    }catch(error){
+      this.disconect(client);
+    }
   }
-  handleConnection(client: any) {
-    client.emit('connection', 'Hello world!');
-    console.log('New client connected');
+  @UseGuards(WsGuards)
+  async handleDisconnect(client: CustomSocket) {
+    if(client.user){
+      const {_id} = client.user;
+      const onlineUser = await this.cacheManager.get<Array<String>>("online_user") || [];
+      const set = new Set(onlineUser);
+      set.delete(_id);
+      const newOnlineUser = Array.from(set);
+      await this.cacheManager.set("online_user", newOnlineUser);
+      // leave on room which joined 
+      const rooms = Object.keys(client.rooms);
+      rooms.forEach(room => {
+        this.leaveRoom(client, room);
+      })
+    }
+      }
+  private disconect(socket: Socket){
+    socket.emit("Error", new UnauthorizedException());
+    socket.disconnect();
+  }
+  private crateRoom(socket: Socket, roomId: string){
+    socket.join(roomId);
+  }
+  private leaveRoom(socket: Socket, roomId: string){
+    socket.leave(roomId);
   }
 }

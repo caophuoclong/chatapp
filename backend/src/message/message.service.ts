@@ -26,12 +26,16 @@ export class MessageService {
       message.sender = (await this.UserService.get(senderId)).data;
       message.content = createMessageDto.content;
       message.createdAt = new Date().getTime();
-      const conversation = await this.ConversationService.getConversationById(
-        createMessageDto.destination,
-      );
-      if (conversation.data) {
-        message.destination = conversation.data;
+      const conversation = await this.conversationRepository.findOne({
+        where:{
+          _id: createMessageDto.destination
+        }
+      });
+      if (conversation) {
+        message.destination = conversation;
+        conversation.lastMessage = message;
         const data = await this.messageRepository.save(message);
+        await this.conversationRepository.save(conversation);
         delete data.destination;
         return {
           statusCode: 200,
@@ -46,7 +50,6 @@ export class MessageService {
         };
       }
 
-      return 'This action adds a new message';
     } catch (error) {
       return {
         statusCode: 500,
@@ -77,7 +80,6 @@ export class MessageService {
         };
       } 
       // console.log(conversation);
-      console.log(limit, skip);
       const id = conversation._id
       const messages = await this.messageRepository
       .createQueryBuilder("message", )

@@ -14,3 +14,11 @@ services:
       MYSQL_DATABASE: chatapp
       MYSQL_USER: user
       MYSQL_PASSWORD: 516489
+  redis:
+    image: redis:latest
+    restart: always
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis:/data

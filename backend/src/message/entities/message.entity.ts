@@ -17,7 +17,9 @@ export class Message {
     attachments: Attachment[];
     @OneToOne(type => Message, mes => mes._id)
     parentMessage: Message;
-    @Column()
+    @Column({
+        type: "longtext"
+    })
     content: string;
     @Column({
         default: false

@@ -133,13 +133,18 @@ export class UserService {
         where: {
           _id: _id,
         },
+        relations:["conversations"],
+        select:{
+          _id: true,
+          conversations: {
+            _id: true,
+          }
+        }
 
       });
       if (!user) {
         throw new HttpException('User not found', 400);
       }
-      delete user.salt;
-      delete user.password;
       return {
         statusCode: 200,
         message: 'User found',

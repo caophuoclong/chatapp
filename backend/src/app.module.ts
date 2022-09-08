@@ -1,5 +1,5 @@
 import { PassportModule } from '@nestjs/passport';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { CacheModule, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -26,11 +26,20 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { Attachment } from './attachment/entities/attachment.entity';
 import { TestModule } from './test/test.module';
+import { MessageGateway } from './message.gateway';
+import * as redisStore from 'cache-manager-redis-store';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig, config]
+    }),
+    CacheModule.register({
+      store: redisStore,
+      host: "redis-17679.c258.us-east-1-4.ec2.cloud.redislabs.com",
+      port: 17679,
+      password: "516489",
     }),
     TypeOrmModule.forRootAsync({
     useFactory: () => {
@@ -55,9 +64,9 @@ import { TestModule } from './test/test.module';
         signOptions: { expiresIn: '1d' }
       }
     }
-  }), TestModule],
+  }), MessageModule],
   controllers: [AppController],
-  providers: [AppService, AuthService, LocalStrategy, JwtStrategy],
+  providers: [AppService, AuthService, LocalStrategy, JwtStrategy, SocketGateway, MessageGateway],
 })
 export class AppModule{
   // configure(consumer: MiddlewareConsumer) {

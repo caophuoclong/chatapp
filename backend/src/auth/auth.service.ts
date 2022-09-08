@@ -32,4 +32,12 @@ export class AuthService {
       })
     };
   }
+  verifyJWT(bearerToken: string){
+    const response = this.jwtService.verify(bearerToken);
+    return response as {
+      _id: string,
+      username: string;
+    };
+
+  }
 }
