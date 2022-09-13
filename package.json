@@ -6,6 +6,6 @@
   "author": "caophuoclong <caophuoclong1@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "yarn --cwd ./backend start:prod"
+    "start": "npm --cwd backend start:prod"
   }
 }
