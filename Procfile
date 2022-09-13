@@ -1,1 +1,1 @@
-web: yarn --cwd ./backend start:prod
+web: yarn start
