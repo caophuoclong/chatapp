@@ -25,20 +25,26 @@ export class SocketGateway {
   ){}
   async handleConnection(@ConnectedSocket() client: Socket) {
     const token = client.handshake.headers.authorization.split(" ")[1];
+    if(token === "null"){
+      this.disconect(client);
+    }else{
     try{
       const {_id} = this.authService.verifyJWT(token);
-      
-      // join room as conversation
-      // get conversations select only id
       const user =( await this.userService.get(_id)).data;
       if(!user){
         this.disconect(client);
       }else{
-        const onlineUser = await this.cacheManager.get<Array<String>>("online_user") || [];
+        
+      // let onlineUser = [];
+      const onlineUser = await this.cacheManager.get<Array<String>>("online_user");
       const set = new Set(onlineUser);
       set.add(_id);
       const newOnlineUser = Array.from(set);
-      await this.cacheManager.set("online_user", newOnlineUser);
+      const x = await this.cacheManager.set("online_user", newOnlineUser);
+      console.log(x)
+      this.cacheManager.get<Array<String>>("online_user").then(res => {
+        console.log("🚀 ~ file: socket.gateway.ts ~ line 38 ~ SocketGateway ~ handleConnection ~ res", res)
+      })
       const rooms = user.conversations;
       rooms.forEach(room => {
         this.crateRoom(client, room._id);
@@ -48,13 +54,18 @@ export class SocketGateway {
         })
       }
     }catch(error){
+      console.log(error);
       this.disconect(client);
     }
   }
+}
+
   @UseGuards(WsGuards)
+  @SubscribeMessage("disconnect")
   async handleDisconnect(client: CustomSocket) {
-    if(client.user){
-      const {_id} = client.user;
+    const user = this.authService.verifyJWT(client.handshake.headers.authorization.split(" ")[1]);
+    if(user){
+      const {_id} = user;
       const onlineUser = await this.cacheManager.get<Array<String>>("online_user") || [];
       const set = new Set(onlineUser);
       set.delete(_id);

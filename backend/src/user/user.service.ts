@@ -1,4 +1,4 @@
-import { forwardRef, HttpException, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, Inject, Injectable, CACHE_MANAGER } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, JoinTable, In } from 'typeorm';
 import { IUtils } from '~/interfaces/IUtils';
@@ -10,6 +10,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { FriendshipService } from '~/friendship/friendship.service';
 import { ConversationService } from '../conversation/conversation.service';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class UserService {
@@ -20,7 +21,9 @@ export class UserService {
     private readonly utils: IUtils,
     private readonly friendShipService: FriendshipService,
     @Inject(forwardRef(()=> ConversationService))
-    private readonly conversationService: ConversationService
+    private readonly conversationService: ConversationService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache
   ) {}
   async register(createUserDto: CreateUserDto) {
     try {
@@ -197,49 +200,62 @@ export class UserService {
       if (!user) {
         throw new HttpException('User not found', 400);
       }
-
-      const friends = 
-        (() => {
-          const friends = user.friendRequest.filter(
-            (friend) => {
-              delete friend.userAddress.salt;
-              delete friend.userAddress.password;
-              return friend.statusCode
-            },
-          );
-          const friends1 = user.friendAddress.filter(
-            (friend) => {
-              delete friend.userRequest.salt;
-              delete friend.userRequest.password;
-              return friend.statusCode},
-          );
-          const mergeFriend = [];
-          friends.forEach((friend) => {
-            mergeFriend.push({
-              _id: friend._id,
-              statusCode: friend.statusCode,
-              user: friend.userAddress,
-              flag: 'sender',
-            })
-          })
-          friends1.forEach((friend) => {
-            mergeFriend.push({
-              _id: friend._id,
-              statusCode: friend.statusCode,
-              user: friend.userRequest,
-              flag: 'target',
-            })
+      const friends = user.friendRequest.filter(
+        (friend) => {
+          delete friend.userAddress.salt;
+          delete friend.userAddress.password;
+          return friend.statusCode
+        },
+      );
+      const friends1 = user.friendAddress.filter(
+        (friend) => {
+          delete friend.userRequest.salt;
+          delete friend.userRequest.password;
+          return friend.statusCode},
+      );
+      const mergeFriend = [];
+      friends.forEach((friend) => {
+        mergeFriend.push({
+          _id: friend._id,
+          statusCode: friend.statusCode,
+          user: friend.userAddress,
+          flag: 'sender',
+        })
+      })
+      friends1.forEach((friend) => {
+        mergeFriend.push({
+          _id: friend._id,
+          statusCode: friend.statusCode,
+          user: friend.userRequest,
+          flag: 'target',
+        })
+      }
+      );
+      return new Promise<Array<any>>(async (resolve, reject) => {
+        const x = []
+          for(let i = 0; i < mergeFriend.length; i++){
+          const isExist = async (_id: string)=>{
+            const onlineUser = await this.cacheManager.get("online_user") as Array<string>;
+            console.log("🚀 ~ file: user.service.ts ~ line 239 ~ UserService ~ isExist ~ onlineUser", onlineUser)
+              return onlineUser.indexOf(user._id) === -1 ? false : true;
           }
-          )
-          return mergeFriend;
-        })()
+          mergeFriend[i].user.isOnline = await isExist(mergeFriend[i].user._id);
+          x.push(mergeFriend[i])
+      }
+      resolve(x)
+      }).then(res => {
+        return {
+          statusCode: 200,
+          message: 'User found',
+          data: [
+            ...res
+          ],
+        };
+      })
+
       
 
-      return {
-        statusCode: 200,
-        message: 'User found',
-        data: friends,
-      };
+      
     } catch (error) {
       throw new HttpException(error.message, 400);
     }
@@ -424,4 +440,5 @@ export class UserService {
       .then((response) => response)
       .catch((error) => new HttpException(error, 400));
   }
+
 }

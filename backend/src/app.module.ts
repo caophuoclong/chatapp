@@ -1,5 +1,10 @@
 import { PassportModule } from '@nestjs/passport';
-import { CacheModule, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  CacheModule,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -28,47 +33,79 @@ import { Attachment } from './attachment/entities/attachment.entity';
 import { TestModule } from './test/test.module';
 import { MessageGateway } from './message.gateway';
 import * as redisStore from 'cache-manager-redis-store';
+import { redisConfig } from './configs/index';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, config]
+      load: [databaseConfig, config, redisConfig],
     }),
-    CacheModule.register({
-      store: redisStore,
-      host: "redis-17679.c258.us-east-1-4.ec2.cloud.redislabs.com",
-      port: 17679,
-      password: "516489",
+    CacheModule.registerAsync({
+      useFactory: () => {
+        const config = redisConfig();
+        const x = {
+          store: redisStore,
+          host: config.host,
+          port: config.port,
+          password: config.password,
+        }
+        if(config.password.length === 0)
+          delete x.password;
+        return x;
+      },
+      isGlobal: true
     }),
     TypeOrmModule.forRootAsync({
-    useFactory: () => {
-      const config = databaseConfig();
-      return {
-        type: 'mysql',
-        host: config.host,
-        port: +config.port,
-        username: config.user,
-        password: config.password,
-        database: config.database,
-        entities: [User, Status, FriendShip, Conversation, Message, UnRead, Attachment],
-        autoLoadEntities: true,
-        synchronize: true
-
-      }
-    },
-  }),UserModule, MessageModule, ConversationModule, AttachmentModule,PassportModule, JwtModule.registerAsync({
-    useFactory: ()=>{
-      return {
-        secret: config().jwtSecret,
-        signOptions: { expiresIn: '1d' }
-      }
-    }
-  }), MessageModule],
+      useFactory: () => {
+        const config = databaseConfig();
+        return {
+          type: 'mysql',
+          host: config.host,
+          port: +config.port,
+          username: config.user,
+          password: config.password,
+          database: config.database,
+          entities: [
+            User,
+            Status,
+            FriendShip,
+            Conversation,
+            Message,
+            UnRead,
+            Attachment,
+          ],
+          autoLoadEntities: true,
+          synchronize: true,
+        };
+      },
+    }),
+    UserModule,
+    MessageModule,
+    ConversationModule,
+    AttachmentModule,
+    PassportModule,
+    JwtModule.registerAsync({
+      useFactory: () => {
+        return {
+          secret: config().jwtSecret,
+          signOptions: { expiresIn: '1d' },
+        };
+      },
+    }),
+    MessageModule,
+  ],
   controllers: [AppController],
-  providers: [AppService, AuthService, LocalStrategy, JwtStrategy, SocketGateway, MessageGateway],
+  providers: [
+    AppService,
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    SocketGateway,
+    MessageGateway,
+  ],
 })
-export class AppModule{
+export class AppModule {
   // configure(consumer: MiddlewareConsumer) {
   //   consumer
   //   .apply(AuthvalidationMiddleware)

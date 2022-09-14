@@ -57,7 +57,6 @@ export class ConversationService {
           },
         });
         if (existConversation) {
-          console.log(existConversation._id);
           return {
             statusCode: 200,
             message: 'success',
