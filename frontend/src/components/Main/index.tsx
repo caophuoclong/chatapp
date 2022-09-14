@@ -24,11 +24,11 @@ export default function Main({}: Props) {
   );
   if (conversation && conversation.type === 'direct') {
     const x = conversation.participants.filter((item) => item._id !== myId)[0];
-    const name = (conversation = {
+    conversation = {
       ...conversation,
       name: x.name,
       avatarUrl: x.avatarUrl,
-    });
+    };
   }
   const dispatch = useAppDispatch();
   useEffect(() => {

@@ -46,10 +46,6 @@ function App() {
     '2xl': '1536px',
   };
   const theme = extendTheme({ breakpoints: brakePoints });
-  const socket = useContext(SocketContext);
-  socket.on('message', (message) => {
-    console.log(message);
-  });
   useEffect(() => {
     const lan = (window.localStorage.getItem('lan') || 'vn') as 'en' | 'vn';
     dispatch(handleChangeLanguage(lan));

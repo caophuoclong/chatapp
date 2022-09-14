@@ -8,75 +8,17 @@ import { BsKey } from 'react-icons/bs';
 import { Link, useNavigate } from 'react-router-dom';
 import background from '~/assets/images/bg_login.png';
 import ChangeLanguage from '../../components/Settings/ChangeLanguage';
-import { EmailIcon } from '@chakra-ui/icons';
 import { MdEmail } from 'react-icons/md';
-import Auth from '~/services/apis/Auth.api';
 import { IRegisterRequest } from '~/interfaces/IRegister';
-import getKeyByValue from '~/utils/getKeyByValue';
 
-type Props = {};
+type Props = {
+  onSubmit: (data: IRegisterRequest) => void;
+};
 
-export default function Mobile({}: Props) {
+export default function Mobile({ onSubmit }: Props) {
   const { t } = useTranslation();
-  const toast = useToast();
   const methods = useForm<IRegisterRequest>({});
-  const navigate = useNavigate();
-  const onSubmit = async (data: IRegisterRequest) => {
-    try {
-      const response = await Auth.register({
-        email: data.email,
-        password: data.password,
-        name: data.name,
-        username: data.username,
-      });
-      toast({
-        title: t('Success'),
-        description: t('Success__Register'),
-        status: 'success',
-        position: 'top-right',
-        duration: 1000,
-        onCloseComplete: () => {
-          navigate('/login');
-        },
-      });
-    } catch (error: any) {
-      const data1 = error.response.data;
-      console.log(error);
-      if (data1) {
-        if (data1.message.includes('Duplicate')) {
-          const value = data1.message.split(' ')[2];
-          toast({
-            title: t('Error'),
-            description: (t('IsExist') as (x: string) => string)(
-              getKeyByValue(data, (value as string).replaceAll("'", '')) || ''
-            ),
-            position: 'top-right',
-            status: 'error',
-            duration: 3000,
-            isClosable: true,
-          });
-        } else {
-          toast({
-            title: t('Error'),
-            description: t('Error__Register'),
-            position: 'top-right',
-            status: 'error',
-            duration: 3000,
-            isClosable: true,
-          });
-        }
-      } else {
-        toast({
-          title: t('Error'),
-          description: t('Error__Register'),
-          position: 'top-right',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    }
-  };
+
   return (
     <FormProvider {...methods}>
       <Box
@@ -124,6 +66,11 @@ export default function Mobile({}: Props) {
           </Box>
           <form onSubmit={methods.handleSubmit(onSubmit)}>
             <Flex direction={'column'} gap="20px" color="white">
+              <MyInput
+                icon={<FaUser size="34px" />}
+                name="name"
+                placeholder={t('Name')}
+              />
               <MyInput
                 icon={<FaUser size="34px" />}
                 name="username"

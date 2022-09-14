@@ -7,4 +7,5 @@ export interface IUser {
     phone: string,
     birthday: string,
     gender: boolean | null
+    isOnline: boolean,
 }

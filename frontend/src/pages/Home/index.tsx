@@ -9,11 +9,12 @@ import { getFriendsList } from '~/app/slices/friends.slice';
 import { getMyConversations } from '~/app/slices/conversations.slice';
 import { connectSocket } from '../../providers/SocketProvider';
 import { setSocket } from '~/app/slices/global.slice';
+import Auth from '~/services/apis/Auth.api';
+import { Button } from '@chakra-ui/react';
 
 type Props = {};
 
 export default function Home({}: Props) {
-  const socket = useAppSelector((state) => state.globalSlice.socket);
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
@@ -30,11 +31,17 @@ export default function Home({}: Props) {
       dispatch(getMe());
       dispatch(getFriendsList());
       dispatch(getMyConversations());
-      if (!socket?.id) {
-        dispatch(setSocket(connectSocket()));
-      }
+      const s = connectSocket();
+      dispatch(setSocket(s));
+      s.on('connectSuccessFull', (data) => {
+        console.log(data);
+      });
     }
   }, []);
-
+  const handle = async () => {
+    const response = await Auth.refreshToken();
+    console.log(response);
+  };
+  // return <Button onClick={handle}>hhihihi</Button>;
   return <>{isLargerThanHD ? <Desktop /> : <Mobile />}</>;
 }

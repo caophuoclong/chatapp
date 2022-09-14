@@ -51,6 +51,10 @@ export default function Header({ name, avatarUrl, friendShip, type }: Props) {
     (state) => state.globalSlice.conversation.showInfoConversation
   );
   const friendShips = useAppSelector((state) => state.friendsSlice.friendShips);
+  console.log(
+    '🚀 ~ file: index.tsx ~ line 54 ~ Header ~ friendShips',
+    friendShips
+  );
 
   const dispatch = useAppDispatch();
   const { colorMode } = useColorMode();

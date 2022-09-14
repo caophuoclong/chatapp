@@ -26,7 +26,9 @@ export default function Logout({}: Props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const handleLogout = () => {
-    window.localStorage.removeItem('access-token');
+    window.localStorage.removeItem('access_token');
+    window.localStorage.removeItem('expiredTime');
+
     navigate('/login');
   };
   return (

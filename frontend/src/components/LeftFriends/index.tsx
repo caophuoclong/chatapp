@@ -14,6 +14,10 @@ export default function LeftFriends({}: Props) {
   const [show, setShow] = useState<'addfriend' | 'creategroup' | ''>('');
   // console.log());
   const friendShips = useAppSelector((state) => state.friendsSlice.friendShips);
+  console.log(
+    '🚀 ~ file: index.tsx ~ line 17 ~ LeftFriends ~ friendShips',
+    friendShips
+  );
   const { t } = useTranslation();
   return (
     <Flex direction={'column'}>
@@ -57,6 +61,7 @@ export default function LeftFriends({}: Props) {
                   friendId={friendShip.user._id}
                   avatarUrl={friendShip.user.avatarUrl}
                   isPending={true}
+                  isOnline={friendShip.user.isOnline}
                 />
               )
           )}
@@ -80,6 +85,7 @@ export default function LeftFriends({}: Props) {
               friendShipId={friendShip._id}
               friendId={friendShip.user._id}
               avatarUrl={friendShip.user.avatarUrl}
+              isOnline={friendShip.user.isOnline}
             />
           ))}
       </Box>

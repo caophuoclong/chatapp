@@ -29,7 +29,8 @@ const initialState: UserState = {
     email: "",
     phone: "",
     birthday: "",
-    gender: null
+    gender: null,
+    isOnline: false,
   },
   isLoading: false,
 }

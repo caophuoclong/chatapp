@@ -73,7 +73,7 @@ export default function Friend({ user, isOnline, friendShipId }: Props) {
     >
       <Avatar src={user.avatarUrl}>
         <AvatarBadge
-          borderColor={isOnline ? '' : 'papayawhip'}
+          borderColor={isOnline ? 'white' : 'papayawhip'}
           bg={isOnline ? 'green.500' : 'tomato'}
           boxSize="1em"
         />{' '}

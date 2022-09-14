@@ -24,4 +24,7 @@ export default class Auth{
             name,
         })
     }
+    static async refreshToken(){
+        return await axiosClient.get("/auth/refresh-token");
+    }
 }

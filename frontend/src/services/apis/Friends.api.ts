@@ -38,4 +38,9 @@ export default class FriendsApi{
         })
 
     }
+    static async checkOnline(listId: Array<string>){
+        return axiosClient.post("/user/friends/checkOnline",
+            
+        listId)
+    }
 }

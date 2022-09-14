@@ -3,26 +3,74 @@ import queryString from "query-string";
 const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 const axiosClient = axios.create({
     baseURL: SERVER_URL,
+    withCredentials: true,
     headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "Access-Control-Allow-Origin": "*",
     },
     paramsSerializer: (params) => queryString.stringify(params),
 });
+const getLocalToken: ()=> {
+    accessToken: string | undefined,
+    expiredTokenTime: number | undefined
+} = ()=>{
+    const accessToken = window.localStorage.getItem("access_token");
+    let expiredTokenTime = window.localStorage.getItem("expiredTime");
+    if(!accessToken || !expiredTokenTime){
+        return {
+            accessToken: undefined,
+            expiredTokenTime: undefined
+        }
+    }else{
+    const expiredTokenTime1 = +expiredTokenTime;
+    return {
+        accessToken,
+        expiredTokenTime: expiredTokenTime1
+    }
+    }
+}
+
+
+const setLocalToken = (accessToken: string, expiredTime: string)=>{
+    window.localStorage.setItem("access_token", accessToken)
+    window.localStorage.setItem("expiredTime", expiredTime);
+}
+const getRefreshToken = ()=>{}
 axiosClient.interceptors.request.use(config =>{
+
     if(config){
         if(config.headers){
             config.headers.Authorization = "Bearer " + localStorage.getItem("access_token");
             config.headers.AcceptAllowOrigin = "*";
         }
+        if(config.url){
+            if(config.url?.indexOf("/login") >= 0 || config.url?.indexOf("/register") >= 0){
+                return config;
+            }
+        }
+        const {accessToken, expiredTokenTime} = getLocalToken();
+        if(!accessToken || !expiredTokenTime){
+            throw new Error;
+        }
+        const now = Date.now()
+        if(expiredTokenTime > now){
+            try{
+
+                
+            }catch(error){
+                throw error;
+            }
+        }
+
+
     }
     return config;
 })
 axiosClient.interceptors.response.use(response =>response, error=>{
     console.log(error);
-    if(error.response.status === 401 && error.response.data.message === "Unauthorized"){
+    if(error.response.status === 400 && error.response.data.message === "User not found"){
         localStorage.removeItem("access_token");
+        localStorage.removeItem("expiredTime");
         window.location.href = "/login";
     }else{
         throw error;

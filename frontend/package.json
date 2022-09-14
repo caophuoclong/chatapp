@@ -53,8 +53,8 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
+    "start": "cat ./dev.env > .env && react-app-rewired start",
+    "build": "cat ./prod.env > .env && react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject"
   },

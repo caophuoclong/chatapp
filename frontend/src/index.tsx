@@ -15,7 +15,6 @@ import './i18n';
 import { Provider } from 'react-redux';
 import { store } from './app/store';
 import 'react-datepicker/dist/react-datepicker.css';
-import LocalDatabaseProvider from './providers/LocalDatabaseProvider';
 import SocketProvider from './providers/SocketProvider';
 
 const root = ReactDOM.createRoot(
@@ -24,14 +23,12 @@ const root = ReactDOM.createRoot(
 root.render(
   <Router>
     <Provider store={store}>
-      <SocketProvider>
-        <ChakraProvider theme={theme}>
-          <ColorModeProvider>
-            <CSSReset />
-            <App />
-          </ColorModeProvider>
-        </ChakraProvider>
-      </SocketProvider>
+      <ChakraProvider theme={theme}>
+        <ColorModeProvider>
+          <CSSReset />
+          <App />
+        </ColorModeProvider>
+      </ChakraProvider>
     </Provider>
   </Router>
 );

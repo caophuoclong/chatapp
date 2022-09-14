@@ -14,69 +14,13 @@ import Auth from '~/services/apis/Auth.api';
 import getKeyByValue from '../../utils/getKeyByValue';
 import { IRegisterRequest } from '~/interfaces/IRegister';
 
-type Props = {};
+type Props = {
+  onSubmit: (data: IRegisterRequest) => void;
+};
 
-export default function Desktop({}: Props) {
+export default function Desktop({ onSubmit }: Props) {
   const { t } = useTranslation();
-  const toast = useToast();
   const methods = useForm<IRegisterRequest>({});
-  const navigate = useNavigate();
-  const onSubmit = async (data: IRegisterRequest) => {
-    try {
-      const response = await Auth.register({
-        email: data.email,
-        password: data.password,
-        name: data.name,
-        username: data.username,
-      });
-      toast({
-        title: t('Success'),
-        description: t('Success__Register'),
-        status: 'success',
-        position: 'top-right',
-        duration: 1000,
-        onCloseComplete: () => {
-          navigate('/login');
-        },
-      });
-    } catch (error: any) {
-      const data1 = error.response.data;
-      console.log(error);
-      if (data1) {
-        if (data1.message.includes('Duplicate')) {
-          const value = data1.message.split(' ')[2];
-          toast({
-            title: t('Error'),
-            description: (t('IsExist') as (x: string) => string)(
-              getKeyByValue(data, (value as string).replaceAll("'", '')) || ''
-            ),
-            position: 'top-right',
-            status: 'error',
-            duration: 3000,
-            isClosable: true,
-          });
-        } else {
-          toast({
-            title: t('Error'),
-            description: t('Error__Register'),
-            position: 'top-right',
-            status: 'error',
-            duration: 3000,
-            isClosable: true,
-          });
-        }
-      } else {
-        toast({
-          title: t('Error'),
-          description: t('Error__Register'),
-          position: 'top-right',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    }
-  };
   return (
     <FormProvider {...methods}>
       <Box
