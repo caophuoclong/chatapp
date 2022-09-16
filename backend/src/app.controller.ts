@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Inject, Post, Req, Res, Response, UseGuards, CACHE_MANAGER, Request, Query } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Req, Res, Response, UseGuards, CACHE_MANAGER, Request, Query, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 import { AuthService } from './auth/auth.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { LoginUserDto } from './user/dto/login-user.dto';
-import { ApiBody, ApiProperty, ApiPropertyOptional, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiProperty, ApiPropertyOptional, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './user/dto/create-user.dto';
 import { Cache } from 'cache-manager';
 import { UserService } from './user/user.service';
@@ -53,16 +53,14 @@ export class AppController {
     }
   }
   @Post("/auth/create_forgot_token")
-  
   createForgotToken(@Body() createForgotToken: CreateForgotToken){
-    console.log(createForgotToken.email);
     return this.userService.createForgotToken(createForgotToken.email);
   }
-  @Post("/auth/createNewPassword")
-  @ApiQuery({
+  @Post("/auth/createNewPassword/:token")
+  @ApiParam({
     name: "token",
   })
-  createNewPassword(@Query("token") token: string, @Body() resetPassword: ResetPassword){
+  createNewPassword(@Param("token") token: string, @Body() resetPassword: ResetPassword){
     return this.userService.resetPassword(token, resetPassword.newPassword);
   }
 }

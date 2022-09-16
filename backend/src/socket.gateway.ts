@@ -35,14 +35,15 @@ export class SocketGateway {
       }else{
       // let onlineUser = [];
       const onlineUser = await this.cacheManager.get<Array<String>>("online_user");
+      console.log("🚀 ~ file: socket.gateway.ts ~ line 38 ~ SocketGateway ~ handleConnection ~ onlineUser", onlineUser)
       const set = new Set(onlineUser);
       set.add(_id);
       const newOnlineUser = Array.from(set);
       const x = await this.cacheManager.set("online_user", newOnlineUser);
-      console.log(x)
-      this.cacheManager.get<Array<String>>("online_user").then(res => {
-        console.log("🚀 ~ file: socket.gateway.ts ~ line 38 ~ SocketGateway ~ handleConnection ~ res", res)
-      })
+      // console.log(x)
+      // this.cacheManager.get<Array<String>>("online_user").then(res => {
+      //   console.log("🚀 ~ file: socket.gateway.ts ~ line 38 ~ SocketGateway ~ handleConnection ~ res", res)
+      // })
       const rooms = user.conversations;
       rooms.forEach(room => {
         this.crateRoom(client, room._id);

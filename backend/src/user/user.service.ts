@@ -450,9 +450,7 @@ export class UserService {
       email: email
     })
     if(!user){
-      return {
-        message: "fail"
-      }
+      throw new HttpException("User not found", 404);
     }
     const token = this.utils.hashToken();
     const PasswordForgotToken = this.passFogotToken.create({
@@ -461,7 +459,8 @@ export class UserService {
     })
     await this.passFogotToken.save(PasswordForgotToken);
     return {
-      token: token
+      token: token,
+      url: "http://localhost:3000/set-password?token=" + token
     }
   }
   async resetPassword(token: string, newPassword: string){
@@ -487,7 +486,12 @@ export class UserService {
     user.password = hashedPassowrd;
     user.salt = salt;
     await this.userRepository.save(user);
-    await this.passFogotToken.remove(tokenResult)
+    const listToken = await this.passFogotToken.find({
+      where:{
+        user: userId
+      }
+    })
+    await this.passFogotToken.remove(listToken)
     return {
       statusCode: 200,
       message: "Reset password successfull"
