@@ -74,8 +74,25 @@ const resources = {
       "Fail": "Fail",
       "Create__Group__Fail": "Create group fail",
       "Create__Group__Success": "Create group success",
+      "Find__Your__Account":"Find your account",
+      "Find__Your__Account__Detail":"Please enter your email to find your account",
+      "Send": "Send",
+      "Invalid__Email": "Invalid Email",
+      "Detail__Recover__Email": "An recover email was sent to you!",
+      "Reset__Password": "Reset Password",
+      "New__Password": "New Password",
+      "Reset": "Reset",
+      "At__Least__8": "At least 8 characters",
+      "At__Least__Upper": "Include at least one uppercase letter",
+      "At__Least__Num": "Include at least one number",
+      "At__Least__Special": "Include at least one special charater (!@#$%&*)",
+      "Password__Doesnot__Match": "Confirm password does not match",
+      "Password__Matched": "Confirm password matched",
+      "Email__Not__Exist": "Email does not exist",
 
 
+
+    
     }
   },
   vn: {
@@ -147,6 +164,21 @@ const resources = {
       "Fail": "Thất bại",
       "Create__Group__Fail": "Tạo nhóm thất bại",
       "Create__Group__Success": "Tạo nhóm thành công",
+      "Find__Your__Account":"Tìm tài khoản của bạn",
+      "Find__Your__Account__Detail":"Vui lòng nhập email của bạn để tìm kiếm tài khoản",
+      "Send": "Gửi",
+      "Invalid__Email": "Email chưa hợp lệ",
+      "Detail__Recover__Email": "Email khôi phục mật khẩu đã được gửi đến email của bạn!",
+      "Reset__Password": "Khôi phục mật khẩu",
+      "New__Password": "Mật khẩu mới",
+      "Reset": "Đặt lại",
+      "At__Least__8": "Tối thiểu 8 ký tự",
+      "At__Least__Upper": "Bao gồm ít nhất 1 ký tự hoa",
+      "At__Least__Num": "Bao gồm ít nhất 1 số",
+      "At__Least__Special": "Bao gồm ít nhất 1 ký tự đặc biệt (!@#$%&*)",
+      "Password__Doesnot__Match": "Mật khẩu chưa trùng khớp",
+      "Password__Matched": "Mật khẩu trùng khớp",
+      "Email__Not__Exist": "Email không tồn tại",
 
     }
   }

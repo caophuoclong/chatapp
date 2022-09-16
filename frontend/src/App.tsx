@@ -25,6 +25,7 @@ import es from 'date-fns/locale/es';
 import {
   handleChangeLanguage,
   handleSetLargerThanHD,
+  setAutoChangeColorMode,
 } from './app/slices/global.slice';
 import AddFriend from './components/Contacts/Mobile/AddFriend';
 import FoundUser from './components/Contacts/Mobile/AddFriend/FoundUser';
@@ -34,8 +35,10 @@ import { getFriendsList } from './app/slices/friends.slice';
 import NewGroup from './components/NewGroup';
 import moment from 'moment-timezone';
 import SocketProvider from './providers/SocketProvider';
+import ForgetPassword from './pages/ForgetPassword';
+import SetPassword from './pages/SetPassword/index';
 function App() {
-  const { toggleColorMode, colorMode } = useColorMode();
+  const { setColorMode } = useColorMode();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const brakePoints = {
@@ -45,6 +48,7 @@ function App() {
     xl: '1200px',
     '2xl': '1536px',
   };
+
   const theme = extendTheme({ breakpoints: brakePoints });
   useEffect(() => {
     const lan = (window.localStorage.getItem('lan') || 'vn') as 'en' | 'vn';
@@ -60,14 +64,29 @@ function App() {
     dispatch(handleSetLargerThanHD(isLargerThanHD));
   }, [isLargerThanHD]);
   useEffect(() => {
-    const access_token = localStorage.getItem('access_token');
-    if (!access_token) {
-      navigate('/login');
-    } else {
-      navigate('/');
+    const darkThemeMq = window.matchMedia('(prefers-color-scheme: dark)');
+    console.log(darkThemeMq);
+    if (darkThemeMq.matches) {
+      setColorMode('dark');
     }
+    darkThemeMq.onchange = (event) => {
+      if (event.matches) {
+        setColorMode('dark');
+      } else {
+        setColorMode('light');
+      }
+    };
+    const isAutoChangeColorMode = () => {
+      const x = window.localStorage.getItem('isAutoChangeColorMode');
+      if (!x) {
+        window.localStorage.setItem('isAutoChangeColorMode', 'false');
+        dispatch(setAutoChangeColorMode(false));
+      } else {
+        dispatch(setAutoChangeColorMode(x === 'true'));
+      }
+    };
+    isAutoChangeColorMode();
   }, []);
-
   return (
     <Routes>
       <Route path={'/'} element={<Home />} />
@@ -79,6 +98,8 @@ function App() {
       <Route path="/newgroup" element={<NewGroup />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgetPassword />} />
+      <Route path="/set-password" element={<SetPassword />} />
     </Routes>
   );
 }

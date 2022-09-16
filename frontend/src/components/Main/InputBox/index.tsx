@@ -82,10 +82,6 @@ export default function InputBox({}: Props) {
       marginTop="auto"
       boxSizing="border-box"
       position="relative"
-      minHeight={{
-        base: '6%',
-        lg: '5%',
-      }}
       _dark={{
         bg: 'gray.800',
       }}

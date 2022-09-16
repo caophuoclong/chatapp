@@ -29,7 +29,7 @@ interface GlobalState {
     loading: {
       login: boolean
     }
-    
+    autoChangeColorMode: boolean,
 }
 
 // Define the initial state using that type
@@ -44,7 +44,8 @@ const initialState: GlobalState = {
    socket: null,
    loading:{
     login: false,
-   }
+   },
+   autoChangeColorMode: false,
 }
 
 export const global = createSlice({
@@ -71,6 +72,12 @@ export const global = createSlice({
       return{
         ...state,
         socket: action.payload
+      }
+    },
+    setAutoChangeColorMode: (state, action: PayloadAction<boolean>) => {
+      return{
+        ...state,
+        autoChangeColorMode: action.payload
       }
     }
   },
@@ -100,7 +107,7 @@ export const global = createSlice({
   }
 })
 
-export const { setShowInfoConversation, handleChangeLanguage, handleSetLargerThanHD, setShowScreen, setChoosenConversationID, setSocket } = global.actions
+export const { setShowInfoConversation, handleChangeLanguage, handleSetLargerThanHD, setShowScreen, setChoosenConversationID, setSocket, setAutoChangeColorMode } = global.actions
 
 // Other code such as selectors can use the imported `RootState` type
 

@@ -6,11 +6,15 @@ import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import Desktop from './Desktop';
 import Mobile from './Mobile';
 import { getFriendsList } from '~/app/slices/friends.slice';
-import { getMyConversations } from '~/app/slices/conversations.slice';
+import {
+  getMyConversations,
+  updateLastestMessage,
+} from '~/app/slices/conversations.slice';
 import { connectSocket } from '../../providers/SocketProvider';
 import { setSocket } from '~/app/slices/global.slice';
 import Auth from '~/services/apis/Auth.api';
 import { Button } from '@chakra-ui/react';
+import { addMessage } from '~/app/slices/messages.slice';
 
 type Props = {};
 
@@ -35,6 +39,22 @@ export default function Home({}: Props) {
       dispatch(setSocket(s));
       s.on('connectSuccessFull', (data) => {
         console.log(data);
+      });
+      s.on('newMessage', (data) => {
+        console.log(data);
+        const { destination, ...message } = data;
+        dispatch(
+          addMessage({
+            message: message,
+            conversationId: destination,
+          })
+        );
+        dispatch(
+          updateLastestMessage({
+            message: message,
+            conversationId: destination,
+          })
+        );
       });
     }
   }, []);
