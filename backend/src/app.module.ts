@@ -1,6 +1,5 @@
 import { PassportModule } from '@nestjs/passport';
 import {
-  CacheModule,
   MiddlewareConsumer,
   Module,
   NestModule,
@@ -35,38 +34,25 @@ import { MessageGateway } from './message.gateway';
 import * as redisStore from 'cache-manager-redis-store';
 import { redisConfig } from './configs/index';
 import { PasswordResetToken } from './entities/passResetToken.entity';
+import { RedisModule } from './redis.module';
 
 @Module({
   imports: [
+    RedisModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig, config, redisConfig],
-    }),
-    CacheModule.registerAsync({
-      useFactory: () => {
-        const config = redisConfig();
-        const x = {
-          store: redisStore,
-          host: config.host,
-          port: config.port,
-          password: config.password,
-        }
-        if(config.password.length === 0)
-          delete x.password;
-        return x;
-      },
-      isGlobal: true
     }),
     TypeOrmModule.forRootAsync({
       useFactory: () => {
         const config = databaseConfig();
         return {
           type: 'mysql',
-          host: config.host,
-          port: +config.port,
-          username: config.user,
-          password: config.password,
-          database: config.database,
+          host: config.database_host,
+          port: +config.database_port,
+          username: config.database_user,
+          password: config.database_password,
+          database: config.database_database,
           entities: [
             User,
             Status,

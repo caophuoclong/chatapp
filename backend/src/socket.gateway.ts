@@ -1,14 +1,10 @@
 import { CACHE_MANAGER, Inject, UnauthorizedException, UseGuards } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { ConnectedSocket, SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
-import { Cache } from 'cache-manager';
+import { RedisClientType } from '@redis/client';
 import { Socket } from 'socket.io';
-import { Repository } from 'typeorm';
 import { AuthService } from './auth/auth.service';
-import { JWTAuthGuard } from './auth/jwt-auth.guard';
 import WsGuards from './auth/ws-auth.guard';
 import CustomSocket from './interfaces/CustomInterface';
-import { User } from './user/entities/user.entity';
 import { UserService } from './user/user.service';
 @WebSocketGateway(3001,{
   cors:{
@@ -19,8 +15,8 @@ export class SocketGateway {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
-    @Inject(CACHE_MANAGER)
-    private readonly cacheManager: Cache
+    @Inject("REDIS_CLIENT")
+    private readonly redisClient: RedisClientType
   ){}
   async handleConnection(@ConnectedSocket() client: Socket) {
     const token = client.handshake.headers.authorization.split(" ")[1];
@@ -33,17 +29,15 @@ export class SocketGateway {
       if(!user){
         this.disconect(client);
       }else{
-      // let onlineUser = [];
-      const onlineUser = await this.cacheManager.get<Array<String>>("online_user");
-      console.log("🚀 ~ file: socket.gateway.ts ~ line 38 ~ SocketGateway ~ handleConnection ~ onlineUser", onlineUser)
-      const set = new Set(onlineUser);
-      set.add(_id);
-      const newOnlineUser = Array.from(set);
-      const x = await this.cacheManager.set("online_user", newOnlineUser);
-      // console.log(x)
-      // this.cacheManager.get<Array<String>>("online_user").then(res => {
-      //   console.log("🚀 ~ file: socket.gateway.ts ~ line 38 ~ SocketGateway ~ handleConnection ~ res", res)
-      // })
+        const onlineUser = (await this.redisClient.get("online_user")) as string;
+        let x = [];
+        if(onlineUser){
+          x = onlineUser.split(",");
+        }
+        const set = new Set(x);
+        set.add(_id);
+        const newOnlineUser = Array.from(set);
+        await this.redisClient.set("online_user", newOnlineUser.toString());
       const rooms = user.conversations;
       rooms.forEach(room => {
         this.crateRoom(client, room._id);
@@ -65,11 +59,11 @@ export class SocketGateway {
     const user = this.authService.verifyJWT(client.handshake.headers.authorization.split(" ")[1]);
     if(user){
       const {_id} = user;
-      const onlineUser = await this.cacheManager.get<Array<String>>("online_user") || [];
-      const set = new Set(onlineUser);
-      set.delete(_id);
-      const newOnlineUser = Array.from(set);
-      await this.cacheManager.set("online_user", newOnlineUser);
+      // const onlineUser = await this.cacheManager.get<Array<String>>("online_user") || [];
+      // const set = new Set(onlineUser);
+      // set.delete(_id);
+      // const newOnlineUser = Array.from(set);
+      // await this.cacheManager.set("online_user", newOnlineUser);
       // leave on room which joined 
       const rooms = Object.keys(client.rooms);
       rooms.forEach(room => {

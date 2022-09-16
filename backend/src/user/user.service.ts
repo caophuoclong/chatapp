@@ -25,8 +25,6 @@ export class UserService {
     private readonly friendShipService: FriendshipService,
     @Inject(forwardRef(()=> ConversationService))
     private readonly conversationService: ConversationService,
-    @Inject(CACHE_MANAGER)
-    private readonly cacheManager: Cache
   ) {}
   async register(createUserDto: CreateUserDto) {
     try {
@@ -238,14 +236,14 @@ export class UserService {
         const x = []
           for(let i = 0; i < mergeFriend.length; i++){
           const isExist = async (_id: string)=>{
-            const onlineUser = await this.cacheManager.get("online_user") as Array<string> | "null";
-            console.log("🚀 ~ file: user.service.ts ~ line 239 ~ UserService ~ isExist ~ onlineUser", onlineUser)
-            if(onlineUser === "null")
-              return false;
-            else if (!onlineUser)
-              return false;
-            else
-              return onlineUser.indexOf(user._id) === -1 ? false : true;
+            // const onlineUser = await this.cacheManager.get("online_user") as Array<string> | "null";
+            // console.log("🚀 ~ file: user.service.ts ~ line 239 ~ UserService ~ isExist ~ onlineUser", onlineUser)
+            // if(onlineUser === "null")
+            //   return false;
+            // else if (!onlineUser)
+            //   return false;
+            // else
+            //   return onlineUser.indexOf(user._id) === -1 ? false : true;
           }
           mergeFriend[i].user.isOnline = await isExist(mergeFriend[i].user._id);
           x.push(mergeFriend[i])

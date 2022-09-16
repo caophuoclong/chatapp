@@ -16,25 +16,24 @@ export class AppController {
     private readonly appService: AppService,
     private readonly userService: UserService,
     private authService: AuthService,
-    @Inject(CACHE_MANAGER)
-    private readonly cache: Cache
+
   ) {}
   @Post('/auth/login')
   @UseGuards(LocalAuthGuard)
   async login(@Body() loginUserDto: LoginUserDto, @Res({passthrough: true }) res) {
     const {refreshToken, ...data} = await this.authService.login(loginUserDto);
     res.cookie('refreshToken', refreshToken, {httpOnly: true});
-    const refreshTokenList = await this.cache.get("refreshToken") as Array<string> || [];
-    console.log("🚀 ~ file: app.controller.ts ~ line 25 ~ AppController ~ login ~ refreshTokenList", refreshTokenList)
-    if(refreshTokenList.length === 0) {
-      const x = [refreshToken];
-      await this.cache.set("refreshToken", x);
-    }else{
-      const x1 = new Set(refreshTokenList);
-      x1.add(refreshToken);
-      const x123 = await this.cache.set("refreshToken", Array.from(x1));
-      console.log(x123);
-    }
+    // const refreshTokenList = await this.cache.get("refreshToken") as Array<string> || [];
+    // console.log("🚀 ~ file: app.controller.ts ~ line 25 ~ AppController ~ login ~ refreshTokenList", refreshTokenList)
+    // if(refreshTokenList.length === 0) {
+    //   const x = [refreshToken];
+    //   await this.cache.set("refreshToken", x);
+    // }else{
+    //   const x1 = new Set(refreshTokenList);
+    //   x1.add(refreshToken);
+    //   const x123 = await this.cache.set("refreshToken", Array.from(x1));
+    //   console.log(x123);
+    // }
     res.json({...data});
   }
   @Post('/auth/register')
@@ -45,8 +44,8 @@ export class AppController {
   }
   @Get("/auth/refresh-token")
   async refreshToken(@Req() req) {
-    const refreshTokenList = await this.cache.get("online_user") ;
-    console.log(refreshTokenList);
+    // const refreshTokenList = await this.cache.get("online_user") ;
+    // console.log(refreshTokenList);
     // console.log(req.cookies);
     return {
       a: "123123"
