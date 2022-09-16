@@ -23,7 +23,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { JWTAuthGuard } from '../auth/jwt-auth.guard';
 import { AuthService } from '~/auth/auth.service';
 import Utils from '~/utils';
-import { ApiTags, ApiHeader, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiHeader, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery, ApiBody, ApiProperty } from '@nestjs/swagger';
 @ApiTags('User')
 @ApiBearerAuth()
 @UseGuards(JWTAuthGuard)
@@ -101,5 +101,6 @@ export class UserController {
   getFriendShip(@Request() req, @Query("userId") userId){
     return this.userService.getFriendShip(req.user._id, userId)
   }
+
  
 }

@@ -17,7 +17,6 @@ import { UserService } from './user/user.service';
 })
 export class SocketGateway {
   constructor(
-
     private readonly authService: AuthService,
     private readonly userService: UserService,
     @Inject(CACHE_MANAGER)
@@ -34,7 +33,6 @@ export class SocketGateway {
       if(!user){
         this.disconect(client);
       }else{
-        
       // let onlineUser = [];
       const onlineUser = await this.cacheManager.get<Array<String>>("online_user");
       const set = new Set(onlineUser);

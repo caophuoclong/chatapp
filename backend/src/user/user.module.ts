@@ -12,8 +12,9 @@ import { LocalStrategy } from '~/auth/local.strategy';
 import { AuthService } from '~/auth/auth.service';
 import { AuthModule } from '~/auth/auth.module';
 import { ConversationModule } from '../conversation/conversation.module';
+import { PasswordResetToken } from '../entities/passResetToken.entity';
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), FriendshipModule, forwardRef(()=> ConversationModule)],
+  imports: [TypeOrmModule.forFeature([User, PasswordResetToken]), FriendshipModule, forwardRef(()=> ConversationModule)],
   controllers: [UserController],
   providers: [UserService, {
     provide: "IUtils",

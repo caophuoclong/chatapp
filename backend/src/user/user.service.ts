@@ -11,12 +11,15 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { FriendshipService } from '~/friendship/friendship.service';
 import { ConversationService } from '../conversation/conversation.service';
 import { Cache } from 'cache-manager';
+import { PasswordResetToken } from '~/entities/passResetToken.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(PasswordResetToken)
+    private readonly passFogotToken: Repository<PasswordResetToken>,
     @Inject('IUtils')
     private readonly utils: IUtils,
     private readonly friendShipService: FriendshipService,
@@ -235,8 +238,13 @@ export class UserService {
         const x = []
           for(let i = 0; i < mergeFriend.length; i++){
           const isExist = async (_id: string)=>{
-            const onlineUser = await this.cacheManager.get("online_user") as Array<string>;
+            const onlineUser = await this.cacheManager.get("online_user") as Array<string> | "null";
             console.log("🚀 ~ file: user.service.ts ~ line 239 ~ UserService ~ isExist ~ onlineUser", onlineUser)
+            if(onlineUser === "null")
+              return false;
+            else if (!onlineUser)
+              return false;
+            else
               return onlineUser.indexOf(user._id) === -1 ? false : true;
           }
           mergeFriend[i].user.isOnline = await isExist(mergeFriend[i].user._id);
@@ -252,10 +260,7 @@ export class UserService {
           ],
         };
       })
-
-      
-
-      
+     
     } catch (error) {
       throw new HttpException(error.message, 400);
     }
@@ -439,6 +444,54 @@ export class UserService {
       .blockFriend(_id, friendShipId)
       .then((response) => response)
       .catch((error) => new HttpException(error, 400));
+  }
+  async createForgotToken(email: string){
+    const user = await this.userRepository.findOneBy({
+      email: email
+    })
+    if(!user){
+      return {
+        message: "fail"
+      }
+    }
+    const token = this.utils.hashToken();
+    const PasswordForgotToken = this.passFogotToken.create({
+      token: token,
+      user: user._id
+    })
+    await this.passFogotToken.save(PasswordForgotToken);
+    return {
+      token: token
+    }
+  }
+  async resetPassword(token: string, newPassword: string){
+    const tokenResult = await this.passFogotToken.findOneBy({
+      token: token
+    })
+    if(!tokenResult) return {
+      statusCode: 400,
+      message: "Could not reset password. Because token is invalid"
+    }
+    if(tokenResult.token_expire < Date.now()){
+    await this.passFogotToken.remove(tokenResult)
+      return{
+        statusCode: 400,
+        message: "Could not reset password. Because token was expired"
+      }
+    }
+    const userId = tokenResult.user;
+    const {salt, hashedPassowrd} = await this.utils.hashPassword(newPassword)
+    const user = await this.userRepository.findOneBy({
+      _id: userId,
+    })
+    user.password = hashedPassowrd;
+    user.salt = salt;
+    await this.userRepository.save(user);
+    await this.passFogotToken.remove(tokenResult)
+    return {
+      statusCode: 200,
+      message: "Reset password successfull"
+    };
   }
 
 }

@@ -34,6 +34,7 @@ import { TestModule } from './test/test.module';
 import { MessageGateway } from './message.gateway';
 import * as redisStore from 'cache-manager-redis-store';
 import { redisConfig } from './configs/index';
+import { PasswordResetToken } from './entities/passResetToken.entity';
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { redisConfig } from './configs/index';
             Message,
             UnRead,
             Attachment,
+            PasswordResetToken,
           ],
           autoLoadEntities: true,
           synchronize: true,
