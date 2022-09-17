@@ -10,8 +10,8 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { FriendshipService } from '~/friendship/friendship.service';
 import { ConversationService } from '../conversation/conversation.service';
-import { Cache } from 'cache-manager';
 import { PasswordResetToken } from '~/entities/passResetToken.entity';
+import { RedisClientType } from 'redis';
 
 @Injectable()
 export class UserService {
@@ -25,6 +25,8 @@ export class UserService {
     private readonly friendShipService: FriendshipService,
     @Inject(forwardRef(()=> ConversationService))
     private readonly conversationService: ConversationService,
+    @Inject("REDIS_CLIENT")
+    private readonly redisClient: RedisClientType
   ) {}
   async register(createUserDto: CreateUserDto) {
     try {
@@ -137,7 +139,7 @@ export class UserService {
         where: {
           _id: _id,
         },
-        relations:["conversations"],
+        relations:["conversations","friendRequest"],
         select:{
           _id: true,
           conversations: {
@@ -236,14 +238,11 @@ export class UserService {
         const x = []
           for(let i = 0; i < mergeFriend.length; i++){
           const isExist = async (_id: string)=>{
-            // const onlineUser = await this.cacheManager.get("online_user") as Array<string> | "null";
-            // console.log("🚀 ~ file: user.service.ts ~ line 239 ~ UserService ~ isExist ~ onlineUser", onlineUser)
-            // if(onlineUser === "null")
-            //   return false;
-            // else if (!onlineUser)
-            //   return false;
-            // else
-            //   return onlineUser.indexOf(user._id) === -1 ? false : true;
+            const hihi = await this.redisClient.get(_id);
+            if(hihi){
+              return true;
+            }else
+            return false
           }
           mergeFriend[i].user.isOnline = await isExist(mergeFriend[i].user._id);
           x.push(mergeFriend[i])
@@ -494,6 +493,24 @@ export class UserService {
       statusCode: 200,
       message: "Reset password successfull"
     };
+  }
+  async updateLastOnline(_id: string, status: "ONLINE" | "OFFLINE"){
+    const user = await this.userRepository.findOneBy({
+      _id: _id
+    })
+    if(!user) return {
+      statusCode: 404,
+      message: "User not found"
+    }
+    if(status === "ONLINE")
+      user.lastOnline = 0;
+    else
+      user.lastOnline = Date.now();
+    await this.userRepository.save(user);
+    return {
+      statusCode: 200,
+      message: "Update last online successfull"
+    }
   }
 
 }

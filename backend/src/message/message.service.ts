@@ -100,7 +100,6 @@ export class MessageService {
         data: messages[0],
       };
     } catch (error) {
-      console.log(error.message);
       return {
         statusCode: 500,
         message: error.message,
