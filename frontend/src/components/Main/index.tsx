@@ -1,6 +1,8 @@
 import { unwrapResult } from '@reduxjs/toolkit';
 import React, { useEffect } from 'react';
+import { getFriendsList } from '~/app/slices/friends.slice';
 import { getMessages } from '~/app/slices/messages.slice';
+import { getMe } from '~/app/slices/user.slice';
 import { useAppSelector, useAppDispatch } from '../../app/hooks';
 import Desktop from './Desktop';
 import Mobile from './Mobile';
@@ -41,11 +43,16 @@ export default function Main({}: Props) {
               skip: 0,
             })
           );
-          const result = unwrapResult(unwrap);
+
+          unwrapResult(unwrap);
         } catch (error) {
           console.log(error);
         }
       }
+      // if (choosenConversation) {
+      //   const x = await dispatch(getFriendsList());
+      //   console.log(unwrapResult(x));
+      // }
     })();
   }, [choosenConversation]);
   return conversation ? (

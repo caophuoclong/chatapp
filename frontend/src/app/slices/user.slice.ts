@@ -31,6 +31,7 @@ const initialState: UserState = {
     birthday: "",
     gender: null,
     isOnline: false,
+    lastOnline: 0
   },
   isLoading: false,
 }

@@ -53,7 +53,8 @@ export default function Conversation({
   return (
     <Stack
       onClick={() => {
-        dispatch(setChoosenConversationID(_id));
+        if (choosenConversationID) dispatch(setChoosenConversationID(''));
+        else dispatch(setChoosenConversationID(_id));
       }}
       padding={'5px'}
       rounded="lg"

@@ -9,7 +9,7 @@ import {
   useColorMode,
   Tag,
 } from '@chakra-ui/react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BsCameraVideoFill } from 'react-icons/bs';
@@ -22,13 +22,22 @@ import {
   setChoosenConversationID,
 } from '~/app/slices/global.slice';
 import ModalShowInfo from '~/components/ModalShowInfo';
+import moment from 'moment';
+import { IUser } from '../../../interfaces/IUser';
+import { setInterval } from 'timers/promises';
 type Props = {
   name: string;
   avatarUrl: string;
   friendShip: IFriendShip;
   type: 'group' | 'direct';
 };
-const AvatarMemo = React.memo(function AvatarMemo({ src }: { src: string }) {
+const AvatarMemo = React.memo(function AvatarMemo({
+  src,
+  isOnline,
+}: {
+  src: string;
+  isOnline?: boolean;
+}) {
   return (
     <Avatar
       width="40px"
@@ -39,23 +48,30 @@ const AvatarMemo = React.memo(function AvatarMemo({ src }: { src: string }) {
       }}
       src={src}
     >
-      <AvatarBadge borderColor="papayawhip" bg="tomato" boxSize="1em" />
+      <AvatarBadge
+        borderColor={isOnline ? 'white' : 'papayawhip'}
+        bg={isOnline ? 'green.500' : 'tomato'}
+        boxSize="1em"
+      />
     </Avatar>
   );
 });
 export default function Header({ name, avatarUrl, friendShip, type }: Props) {
   const { t } = useTranslation();
   const [showFriendInfo, setShowFriendInfo] = useState(false);
-  const navigate = useNavigate();
   const showInfo = useAppSelector(
     (state) => state.globalSlice.conversation.showInfoConversation
   );
   const friendShips = useAppSelector((state) => state.friendsSlice.friendShips);
-  console.log(
-    '🚀 ~ file: index.tsx ~ line 54 ~ Header ~ friendShips',
-    friendShips
-  );
-
+  const [myFriend, setMyFriend] = useState<IUser | null>(null);
+  useEffect(() => {
+    if (type === 'direct') {
+      setMyFriend(
+        friendShips.find((friendShip1) => friendShip1._id === friendShip._id)!
+          .user
+      );
+    }
+  }, [friendShips]);
   const dispatch = useAppDispatch();
   const { colorMode } = useColorMode();
   return (
@@ -91,25 +107,21 @@ export default function Header({ name, avatarUrl, friendShip, type }: Props) {
             setShowFriendInfo(true);
           }}
         >
-          <AvatarMemo src={avatarUrl} />
+          <AvatarMemo src={avatarUrl} isOnline={myFriend?.isOnline} />
         </button>
       ) : (
         <>
-          <AvatarMemo src={avatarUrl} />
+          <AvatarMemo src={avatarUrl} isOnline={myFriend?.isOnline} />
         </>
       )}
       {}
-      {type === 'direct' && (
+      {myFriend && (
         <ModalShowInfo
           showInfo={showFriendInfo}
           setShowInfo={(e: boolean) => {
             setShowFriendInfo(e);
           }}
-          user={
-            friendShips.find(
-              (friendShip1) => friendShip1._id === friendShip._id
-            )!.user
-          }
+          user={myFriend}
         />
       )}
       <Box marginX="1rem">
@@ -118,11 +130,17 @@ export default function Header({ name, avatarUrl, friendShip, type }: Props) {
         </Text>
         {friendShip ? (
           <>
-            {friendShip.statusCode.code === 'a' && (
-              <Text fontSize={'12px'}>
-                {(t('LastActive') as (time: string | number) => String)(5)}
-              </Text>
-            )}
+            {friendShip.statusCode.code === 'a' &&
+              myFriend &&
+              (myFriend.isOnline ? (
+                <Text fontSize={'12px'}>{t('ActiveNow')}</Text>
+              ) : (
+                <Text fontSize={'12px'}>
+                  {(t('LastActive') as (time: string | number) => String)(
+                    moment(new Date(+myFriend.lastOnline)).fromNow()
+                  )}
+                </Text>
+              ))}
             {friendShip.statusCode.code === 'p' && (
               <Tag size="sm" colorScheme={'yellow'}>
                 {t('Pending')}

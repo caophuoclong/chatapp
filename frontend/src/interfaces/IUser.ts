@@ -8,4 +8,5 @@ export interface IUser {
     birthday: string,
     gender: boolean | null
     isOnline: boolean,
+    lastOnline: number
 }

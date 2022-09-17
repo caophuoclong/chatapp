@@ -5,7 +5,7 @@ import DatabaseContenxt from '~/context/DatabaseContext';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import Desktop from './Desktop';
 import Mobile from './Mobile';
-import { getFriendsList } from '~/app/slices/friends.slice';
+import { changeOnlineStatus, getFriendsList } from '~/app/slices/friends.slice';
 import {
   getMyConversations,
   updateLastestMessage,
@@ -53,6 +53,19 @@ export default function Home({}: Props) {
           updateLastestMessage({
             message: message,
             conversationId: destination,
+          })
+        );
+      });
+      s.on('MY_FRIEND_ONLINE', (_id: string) => {
+        dispatch(changeOnlineStatus({ _id, isOnline: true }));
+      });
+      s.on('MY_FRIEND_OFFLINE', (data: { _id: string; lastOnline: number }) => {
+        console.log(data);
+        dispatch(
+          changeOnlineStatus({
+            _id: data._id,
+            isOnline: false,
+            lastOnline: data.lastOnline,
           })
         );
       });
