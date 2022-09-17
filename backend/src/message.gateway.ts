@@ -11,7 +11,7 @@ import { Message } from './message/entities/message.entity';
 import  {Cache}  from 'cache-manager';
 import { RedisClientType } from 'redis';
 
-@WebSocketGateway(3001,{
+@WebSocketGateway({
   cors:{
     origin: "*",
   }

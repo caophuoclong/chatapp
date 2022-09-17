@@ -18,7 +18,7 @@ import WsGuards from './auth/ws-auth.guard';
 import CustomSocket from './interfaces/CustomInterface';
 import { MessageService } from './message/message.service';
 import { UserService } from './user/user.service';
-@WebSocketGateway(3001, {
+@WebSocketGateway({
   cors: {
     origin: '*',
   },
