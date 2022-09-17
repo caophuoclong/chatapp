@@ -42,7 +42,6 @@ export default function Conversation({
   const choosenConversationID = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
-  console.log(lastMessage.createdAt);
   const contentRef = useRef<HTMLParagraphElement>(null);
   useEffect(() => {
     const p = contentRef.current;
@@ -54,7 +53,8 @@ export default function Conversation({
   return (
     <Stack
       onClick={() => {
-        dispatch(setChoosenConversationID(_id));
+        if (choosenConversationID) dispatch(setChoosenConversationID(''));
+        else dispatch(setChoosenConversationID(_id));
       }}
       padding={'5px'}
       rounded="lg"
@@ -110,7 +110,7 @@ export default function Conversation({
               {lastMessage.content} ·{' '}
             </Text>
             <Text fontSize="sm" noOfLines={1} color="gray.500">
-              {moment(new Date(+lastMessage.createdAt)).format('HH:mm')}
+              {moment(new Date(+lastMessage.createdAt || 0)).format('HH:mm')}
             </Text>
           </Flex>
         ) : (

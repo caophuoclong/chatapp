@@ -18,15 +18,21 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '~/app/hooks';
 
 type Props = {};
 
 export default function Logout({}: Props) {
   const { t } = useTranslation();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const socket = useAppSelector((state) => state.globalSlice.socket);
   const navigate = useNavigate();
   const handleLogout = () => {
-    window.localStorage.removeItem('access-token');
+    window.localStorage.removeItem('access_token');
+    window.localStorage.removeItem('expiredTime');
+    if (socket) {
+      socket.disconnect();
+    }
     navigate('/login');
   };
   return (

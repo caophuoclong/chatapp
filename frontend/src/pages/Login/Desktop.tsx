@@ -1,49 +1,22 @@
-import { Box, Button, Flex, Text, useToast } from '@chakra-ui/react';
-import React, { useContext, useEffect } from 'react';
+import { Box, Button, Flex, Text } from '@chakra-ui/react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import MyInput from '~/components/MyInput';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FaUser } from 'react-icons/fa';
 import { BsKey } from 'react-icons/bs';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import background from '~/assets/images/bg_login.png';
 import ChangeLanguage from '../../components/Settings/ChangeLanguage';
 import { ILoginRequest } from '~/interfaces/ILogin';
-import Auth from '~/services/apis/Auth.api';
 
-type Props = {};
+type Props = {
+  onSubmit: (data: ILoginRequest) => void;
+};
 
-export default function Desktop({}: Props) {
+export default function Desktop({ onSubmit }: Props) {
   const { t } = useTranslation();
-  const toast = useToast();
-  const navigate = useNavigate();
   const methods = useForm<ILoginRequest>({});
-  const onSubmit = async (data: ILoginRequest) => {
-    try {
-      const response = await Auth.login(data);
-      window.localStorage.setItem('access_token', response.data.access_token);
-      toast({
-        title: t('Success'),
-        description: t('Success__Login'),
-        status: 'success',
-        position: 'top-right',
-        duration: 1000,
-        onCloseComplete: () => {
-          navigate('/');
-        },
-      });
-    } catch (error: any) {
-      toast({
-        title: t('Error'),
-        description: t('Password__NotMatch'),
-        status: 'error',
-        position: 'top-right',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-    console.log(data);
-  };
   return (
     <FormProvider {...methods}>
       <Box

@@ -28,6 +28,7 @@ export default function TabContacts({}: Props) {
               user={friendShip.user}
               friendId={friendShip.user._id}
               avatarUrl={friendShip.user.avatarUrl}
+              isOnline={friendShip.user.isOnline}
             />
           ))}
         </TabPanel>

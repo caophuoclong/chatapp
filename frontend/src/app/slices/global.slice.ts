@@ -1,13 +1,21 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '@app/store'
 import { Socket } from 'socket.io-client'
+import Auth from '~/services/apis/Auth.api'
+import { ILoginRequest } from '~/interfaces/ILogin';
+import { IRegisterRequest } from '~/interfaces/IRegister';
 export enum ENUM_SCREEN {
   CONVERSATIONS,
   CONTACTS
 }
 
-
+export const login =  createAsyncThunk("login", async (data: ILoginRequest)=>{
+  return await Auth.login(data);
+})
+export const register = createAsyncThunk("register", async (data: IRegisterRequest)=>{
+  return await Auth.register(data);
+})
 // Define a type for the slice state
 interface GlobalState {
     conversation:{
@@ -18,7 +26,10 @@ interface GlobalState {
     lan: "vn" | "en",
     showScreen: ENUM_SCREEN,
     socket: Socket | null,
-    
+    loading: {
+      login: boolean
+    }
+    autoChangeColorMode: boolean,
 }
 
 // Define the initial state using that type
@@ -31,6 +42,10 @@ const initialState: GlobalState = {
    isLargerThanHD: false,
    showScreen: ENUM_SCREEN.CONVERSATIONS,
    socket: null,
+   loading:{
+    login: false,
+   },
+   autoChangeColorMode: false,
 }
 
 export const global = createSlice({
@@ -58,11 +73,41 @@ export const global = createSlice({
         ...state,
         socket: action.payload
       }
+    },
+    setAutoChangeColorMode: (state, action: PayloadAction<boolean>) => {
+      return{
+        ...state,
+        autoChangeColorMode: action.payload
+      }
     }
   },
+  extraReducers:builder => {
+    builder.addCase(login.pending, (state, action) => {
+      state.loading.login = true
+    })
+    builder.addCase(login.fulfilled, (state, action) => {
+      state.loading.login = false
+    })
+    builder.addCase(login.rejected, (state, action) => {
+      state.loading.login = false
+    })
+    builder.addCase(register.pending, (state, action) => {
+      state.loading.login = true
+    }
+    )
+    builder.addCase(register.fulfilled, (state, action) => {
+      state.loading.login = false
+    }
+    )
+    builder.addCase(register.rejected, (state, action) => {
+      state.loading.login = false
+    }
+    )
+
+  }
 })
 
-export const { setShowInfoConversation, handleChangeLanguage, handleSetLargerThanHD, setShowScreen, setChoosenConversationID, setSocket } = global.actions
+export const { setShowInfoConversation, handleChangeLanguage, handleSetLargerThanHD, setShowScreen, setChoosenConversationID, setSocket, setAutoChangeColorMode } = global.actions
 
 // Other code such as selectors can use the imported `RootState` type
 

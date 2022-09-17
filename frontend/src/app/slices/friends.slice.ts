@@ -54,6 +54,20 @@ export const friendsSlice = createSlice({
       console.log(action.payload);
       const xxx = state.friendShips.filter((friendShip)=> friendShip._id !== action.payload);
       state.friendShips = xxx;
+    },
+    changeOnlineStatus: (state: Friends, action: PayloadAction<{
+      _id: string,
+      isOnline: boolean,
+      lastOnline?: number
+    }>)=>{
+      state.friendShips.forEach((friendShip)=>{
+        if(friendShip.user._id === action.payload._id){
+          friendShip.user.isOnline = action.payload.isOnline;
+          if(action.payload.lastOnline){
+            friendShip.user.lastOnline = action.payload.lastOnline;
+          }
+        }
+      })
     }
   },
   extraReducers(builder) {
@@ -90,7 +104,7 @@ export const friendsSlice = createSlice({
   },
 });
 
-export const {changeStatusCode, rejectFriendShip} = friendsSlice.actions;
+export const {changeStatusCode, rejectFriendShip, changeOnlineStatus} = friendsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 

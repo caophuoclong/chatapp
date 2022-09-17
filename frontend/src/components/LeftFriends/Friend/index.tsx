@@ -34,7 +34,7 @@ import {
 type Props = {
   user: IUser;
   avatarUrl: string;
-  isOnline?: boolean;
+  isOnline: boolean;
   friendShipId: string;
   friendId: string;
   isPending?: boolean;
@@ -138,7 +138,7 @@ export default function Friend({
       <Avatar src={user.avatarUrl}>
         {!isPending && (
           <AvatarBadge
-            borderColor={isOnline ? '' : 'papayawhip'}
+            borderColor={isOnline ? 'white' : 'papayawhip'}
             bg={isOnline ? 'green.500' : 'tomato'}
             boxSize="1em"
           />
