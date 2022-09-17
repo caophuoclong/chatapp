@@ -12,7 +12,7 @@ import { FriendshipService } from '~/friendship/friendship.service';
 import { ConversationService } from '../conversation/conversation.service';
 import { PasswordResetToken } from '~/entities/passResetToken.entity';
 import { RedisClientType } from 'redis';
-
+import { IListFriend } from '~/interfaces/IListFriend';
 @Injectable()
 export class UserService {
   constructor(
@@ -139,7 +139,7 @@ export class UserService {
         where: {
           _id: _id,
         },
-        relations:["conversations","friendRequest"],
+        relations:["conversations",],
         select:{
           _id: true,
           conversations: {
@@ -234,7 +234,8 @@ export class UserService {
         })
       }
       );
-      return new Promise<Array<any>>(async (resolve, reject) => {
+      
+      return new Promise<Array<IListFriend>>(async (resolve, reject) => {
         const x = []
           for(let i = 0; i < mergeFriend.length; i++){
           const isExist = async (_id: string)=>{
