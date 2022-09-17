@@ -87,6 +87,7 @@ export default function MessagesBox({}: Props) {
               <MyMessage
                 key={message._id}
                 message={message.content}
+                _id={message._id}
                 time={moment(new Date(+message.createdAt)).format('HH:mm')}
               />
             ) : (

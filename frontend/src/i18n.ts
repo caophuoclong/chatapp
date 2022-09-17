@@ -89,6 +89,10 @@ const resources = {
       "Password__Doesnot__Match": "Confirm password does not match",
       "Password__Matched": "Confirm password matched",
       "Email__Not__Exist": "Email does not exist",
+      "Sent": "Sent",
+      "Received": "Received",
+      "Sending": "Sending",
+      "Seen": "Seen",
 
 
 
@@ -179,7 +183,10 @@ const resources = {
       "Password__Doesnot__Match": "Mật khẩu chưa trùng khớp",
       "Password__Matched": "Mật khẩu trùng khớp",
       "Email__Not__Exist": "Email không tồn tại",
-
+      "Sent": "Đã gửi",
+      "Received": "Đã nhận",
+      "Sending": "Đang gửi",
+      "Seen": "Đã xem",
     }
   }
 };

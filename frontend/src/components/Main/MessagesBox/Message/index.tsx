@@ -7,7 +7,7 @@ type Props = {};
 export default function Message({}: Props) {
   return (
     <div>
-      <MyMessage message="hio" time="123" />
+      {/* <MyMessage message="hio" time="123" /> */}
       <OtherMessage message="23" time="123" />
     </div>
   );

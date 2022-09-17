@@ -47,7 +47,8 @@ export const conversationsSlice = createSlice({
             conversation.lastMessage = action.payload.message;
         }
 
-    }
+    },
+    
     
   },
   extraReducers(builder) {
