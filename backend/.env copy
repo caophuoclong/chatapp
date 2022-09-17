@@ -1,7 +1,0 @@
-DB_HOST=sql.freedb.tech
-DB_USER=freedb_phuoclong
-DB_PASSWORD=K$%FuQA!!UJg*Z8
-DB_NAME=freedb_123chatapp
-DB_PORT=3306
-JWT_SECRET=caophuoclong123123123
-PEPPER=caophuoclong26032001

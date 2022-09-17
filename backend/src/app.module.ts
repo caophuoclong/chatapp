@@ -1,5 +1,9 @@
 import { PassportModule } from '@nestjs/passport';
-import { CacheModule, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -28,47 +32,68 @@ import { Attachment } from './attachment/entities/attachment.entity';
 import { TestModule } from './test/test.module';
 import { MessageGateway } from './message.gateway';
 import * as redisStore from 'cache-manager-redis-store';
+import { redisConfig } from './configs/index';
+import { PasswordResetToken } from './entities/passResetToken.entity';
+import { RedisModule } from './redis.module';
 
 @Module({
   imports: [
+    RedisModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, config]
-    }),
-    CacheModule.register({
-      store: redisStore,
-      host: "redis-17679.c258.us-east-1-4.ec2.cloud.redislabs.com",
-      port: 17679,
-      password: "516489",
+      load: [databaseConfig, config, redisConfig],
     }),
     TypeOrmModule.forRootAsync({
-    useFactory: () => {
-      const config = databaseConfig();
-      return {
-        type: 'mysql',
-        host: config.host,
-        port: +config.port,
-        username: config.user,
-        password: config.password,
-        database: config.database,
-        entities: [User, Status, FriendShip, Conversation, Message, UnRead, Attachment],
-        autoLoadEntities: true,
-        synchronize: true
-
-      }
-    },
-  }),UserModule, MessageModule, ConversationModule, AttachmentModule,PassportModule, JwtModule.registerAsync({
-    useFactory: ()=>{
-      return {
-        secret: config().jwtSecret,
-        signOptions: { expiresIn: '1d' }
-      }
-    }
-  }), MessageModule],
+      useFactory: () => {
+        const config = databaseConfig();
+        return {
+          type: 'mysql',
+          host: config.database_host,
+          port: +config.database_port,
+          username: config.database_user,
+          password: config.database_password,
+          database: config.database_database,
+          entities: [
+            User,
+            Status,
+            FriendShip,
+            Conversation,
+            Message,
+            UnRead,
+            Attachment,
+            PasswordResetToken,
+          ],
+          autoLoadEntities: true,
+          synchronize: true,
+        };
+      },
+    }),
+    UserModule,
+    MessageModule,
+    ConversationModule,
+    AttachmentModule,
+    PassportModule,
+    JwtModule.registerAsync({
+      useFactory: () => {
+        return {
+          secret: config().jwtSecret,
+          signOptions: { expiresIn: '1d' },
+        };
+      },
+    }),
+    MessageModule,
+  ],
   controllers: [AppController],
-  providers: [AppService, AuthService, LocalStrategy, JwtStrategy, SocketGateway, MessageGateway],
+  providers: [
+    AppService,
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    SocketGateway,
+    MessageGateway,
+  ],
 })
-export class AppModule{
+export class AppModule {
   // configure(consumer: MiddlewareConsumer) {
   //   consumer
   //   .apply(AuthvalidationMiddleware)

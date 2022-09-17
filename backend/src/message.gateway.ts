@@ -20,8 +20,6 @@ export class MessageGateway {
     private readonly userService: UserService,
     private readonly messageService: MessageService,
     private readonly conversationService: ConversationService,
-    @Inject(CACHE_MANAGER)
-    private readonly cacheManager: Cache
   ){}
   @UseGuards(WsGuards)
   @SubscribeMessage('createMessage')

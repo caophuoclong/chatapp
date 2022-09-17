@@ -35,7 +35,6 @@ export class ConversationService {
     createFromFriendShipDto: CreateConversationDtoFromFriendshipDto,
   ) {
     const { friendShipId } = createFromFriendShipDto;
-    console.log(friendShipId);
     try {
       const friendShip = await this.friendshipService.getOne(friendShipId);
       if (friendShip) {
@@ -57,7 +56,6 @@ export class ConversationService {
           },
         });
         if (existConversation) {
-          console.log(existConversation._id);
           return {
             statusCode: 200,
             message: 'success',

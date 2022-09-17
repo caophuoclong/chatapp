@@ -2,9 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '~/user/dto/create-user.dto';
+import ms from "ms";
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly configService: ConfigService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
   ) {}
@@ -26,7 +29,14 @@ export class AuthService {
   async login(user: any){
     // const payload = { username: user.username, sub: user._id};
     const x = await this.validateUser(user.username, user.password);
+    const time = ms(this.configService.get<string>("expireTokenTime"))
+    const refreshToken = this.jwtService.sign(x, {
+      expiresIn: "365d"
+    })
+    
     return {
+      refreshToken,
+      expiredTime:Date.now() + time,
       access_token: this.jwtService.sign({
         ...x
       })

@@ -11,6 +11,7 @@ import {
   Inject,
   Query,
   ParseUUIDPipe,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,7 +23,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { JWTAuthGuard } from '../auth/jwt-auth.guard';
 import { AuthService } from '~/auth/auth.service';
 import Utils from '~/utils';
-import { ApiTags, ApiHeader, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiHeader, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery, ApiBody, ApiProperty } from '@nestjs/swagger';
 @ApiTags('User')
 @ApiBearerAuth()
 @UseGuards(JWTAuthGuard)
@@ -35,7 +36,8 @@ export class UserController {
   ) {}
   @ApiResponse({ status: 201, description: 'Create user successfully'})
   @Get()
-  getMe(@Request() req) {
+  getMe(@Req() req) {
+
     const _id = req.user._id;
     return this.userService.getMe(_id);
   }
@@ -99,7 +101,6 @@ export class UserController {
   getFriendShip(@Request() req, @Query("userId") userId){
     return this.userService.getFriendShip(req.user._id, userId)
   }
-  
 
-  
+ 
 }

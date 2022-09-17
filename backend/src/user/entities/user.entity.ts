@@ -43,7 +43,14 @@ export class User {
     @Column({
         select: false
     })
+    
     salt: string;
+    @Column(
+        "bigint"
+    ,{
+        nullable: true
+    })
+    lastOnline: number;
     @OneToMany(type => FriendShip, fri => fri.userRequest)
     friendRequest: FriendShip[];
     @OneToMany(type => FriendShip, fri => fri.userAddress)

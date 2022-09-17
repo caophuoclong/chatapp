@@ -1,4 +1,4 @@
-import { forwardRef, HttpException, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, Inject, Injectable, CACHE_MANAGER } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, JoinTable, In } from 'typeorm';
 import { IUtils } from '~/interfaces/IUtils';
@@ -10,17 +10,23 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { FriendshipService } from '~/friendship/friendship.service';
 import { ConversationService } from '../conversation/conversation.service';
+import { PasswordResetToken } from '~/entities/passResetToken.entity';
+import { RedisClientType } from 'redis';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(PasswordResetToken)
+    private readonly passFogotToken: Repository<PasswordResetToken>,
     @Inject('IUtils')
     private readonly utils: IUtils,
     private readonly friendShipService: FriendshipService,
     @Inject(forwardRef(()=> ConversationService))
-    private readonly conversationService: ConversationService
+    private readonly conversationService: ConversationService,
+    @Inject("REDIS_CLIENT")
+    private readonly redisClient: RedisClientType
   ) {}
   async register(createUserDto: CreateUserDto) {
     try {
@@ -133,7 +139,7 @@ export class UserService {
         where: {
           _id: _id,
         },
-        relations:["conversations"],
+        relations:["conversations","friendRequest"],
         select:{
           _id: true,
           conversations: {
@@ -197,49 +203,61 @@ export class UserService {
       if (!user) {
         throw new HttpException('User not found', 400);
       }
-
-      const friends = 
-        (() => {
-          const friends = user.friendRequest.filter(
-            (friend) => {
-              delete friend.userAddress.salt;
-              delete friend.userAddress.password;
-              return friend.statusCode
-            },
-          );
-          const friends1 = user.friendAddress.filter(
-            (friend) => {
-              delete friend.userRequest.salt;
-              delete friend.userRequest.password;
-              return friend.statusCode},
-          );
-          const mergeFriend = [];
-          friends.forEach((friend) => {
-            mergeFriend.push({
-              _id: friend._id,
-              statusCode: friend.statusCode,
-              user: friend.userAddress,
-              flag: 'sender',
-            })
-          })
-          friends1.forEach((friend) => {
-            mergeFriend.push({
-              _id: friend._id,
-              statusCode: friend.statusCode,
-              user: friend.userRequest,
-              flag: 'target',
-            })
+      const friends = user.friendRequest.filter(
+        (friend) => {
+          delete friend.userAddress.salt;
+          delete friend.userAddress.password;
+          return friend.statusCode
+        },
+      );
+      const friends1 = user.friendAddress.filter(
+        (friend) => {
+          delete friend.userRequest.salt;
+          delete friend.userRequest.password;
+          return friend.statusCode},
+      );
+      const mergeFriend = [];
+      friends.forEach((friend) => {
+        mergeFriend.push({
+          _id: friend._id,
+          statusCode: friend.statusCode,
+          user: friend.userAddress,
+          flag: 'sender',
+        })
+      })
+      friends1.forEach((friend) => {
+        mergeFriend.push({
+          _id: friend._id,
+          statusCode: friend.statusCode,
+          user: friend.userRequest,
+          flag: 'target',
+        })
+      }
+      );
+      return new Promise<Array<any>>(async (resolve, reject) => {
+        const x = []
+          for(let i = 0; i < mergeFriend.length; i++){
+          const isExist = async (_id: string)=>{
+            const hihi = await this.redisClient.get(_id);
+            if(hihi){
+              return true;
+            }else
+            return false
           }
-          )
-          return mergeFriend;
-        })()
-      
-
-      return {
-        statusCode: 200,
-        message: 'User found',
-        data: friends,
-      };
+          mergeFriend[i].user.isOnline = await isExist(mergeFriend[i].user._id);
+          x.push(mergeFriend[i])
+      }
+      resolve(x)
+      }).then(res => {
+        return {
+          statusCode: 200,
+          message: 'User found',
+          data: [
+            ...res
+          ],
+        };
+      })
+     
     } catch (error) {
       throw new HttpException(error.message, 400);
     }
@@ -424,4 +442,75 @@ export class UserService {
       .then((response) => response)
       .catch((error) => new HttpException(error, 400));
   }
+  async createForgotToken(email: string){
+    const user = await this.userRepository.findOneBy({
+      email: email
+    })
+    if(!user){
+      throw new HttpException("User not found", 404);
+    }
+    const token = this.utils.hashToken();
+    const PasswordForgotToken = this.passFogotToken.create({
+      token: token,
+      user: user._id
+    })
+    await this.passFogotToken.save(PasswordForgotToken);
+    return {
+      token: token,
+      url: "http://localhost:3000/set-password?token=" + token
+    }
+  }
+  async resetPassword(token: string, newPassword: string){
+    const tokenResult = await this.passFogotToken.findOneBy({
+      token: token
+    })
+    if(!tokenResult) return {
+      statusCode: 400,
+      message: "Could not reset password. Because token is invalid"
+    }
+    if(tokenResult.token_expire < Date.now()){
+    await this.passFogotToken.remove(tokenResult)
+      return{
+        statusCode: 400,
+        message: "Could not reset password. Because token was expired"
+      }
+    }
+    const userId = tokenResult.user;
+    const {salt, hashedPassowrd} = await this.utils.hashPassword(newPassword)
+    const user = await this.userRepository.findOneBy({
+      _id: userId,
+    })
+    user.password = hashedPassowrd;
+    user.salt = salt;
+    await this.userRepository.save(user);
+    const listToken = await this.passFogotToken.find({
+      where:{
+        user: userId
+      }
+    })
+    await this.passFogotToken.remove(listToken)
+    return {
+      statusCode: 200,
+      message: "Reset password successfull"
+    };
+  }
+  async updateLastOnline(_id: string, status: "ONLINE" | "OFFLINE"){
+    const user = await this.userRepository.findOneBy({
+      _id: _id
+    })
+    if(!user) return {
+      statusCode: 404,
+      message: "User not found"
+    }
+    if(status === "ONLINE")
+      user.lastOnline = 0;
+    else
+      user.lastOnline = Date.now();
+    await this.userRepository.save(user);
+    return {
+      statusCode: 200,
+      message: "Update last online successfull"
+    }
+  }
+
 }
