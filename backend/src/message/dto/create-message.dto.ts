@@ -4,6 +4,10 @@ import { IsNotEmpty, IsUUID } from "class-validator";
 
 export class CreateMessageDto {
     @ApiProperty({
+        description: "Temp _id"
+    })
+    _id: string;
+    @ApiProperty({
         description: "Where message is sent"
     })
     @IsUUID()

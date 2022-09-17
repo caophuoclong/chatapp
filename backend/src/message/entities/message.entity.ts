@@ -2,7 +2,11 @@ import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, OneToOne, Prima
 import { Attachment } from "~/attachment/entities/attachment.entity";
 import { Conversation } from "~/conversation/entities/conversation.entity";
 import { User } from "~/user/entities/user.entity";
-
+export enum MessageStatusType{
+    SENT = "SENT",
+    RECEIVED = "RECEIVED",
+    SEEN = "SEEN"
+}
 @Entity()
 export class Message {
     @PrimaryGeneratedColumn("uuid")
@@ -30,4 +34,11 @@ export class Message {
         default: new Date().getTime()
     })
     createdAt: number;
+    @Column({
+        type: "enum",
+        enum: MessageStatusType,
+        default: MessageStatusType.SENT
+    },
+    )
+    status: MessageStatusType;
 }
