@@ -149,7 +149,7 @@ export default function Home({}: Props) {
     const response = await Auth.refreshToken();
     console.log(response);
   };
-  return <Button onClick={handle}>hihi</Button>;
+  // return <Button onClick={handle}>hihi</Button>;
   // return (
   //   <Box width="100vw" position="absolute">
   //     <Popover>
