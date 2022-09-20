@@ -93,7 +93,10 @@ const resources = {
       "Received": "Received",
       "Sending": "Sending",
       "Seen": "Seen",
-
+      "Invalid__Password": "Invalid password",
+      "Username__Required": "Username is required",
+      "Password__Required": "Password is required",
+      "Email__Required": "Email is required",
 
 
     
@@ -187,6 +190,9 @@ const resources = {
       "Received": "Đã nhận",
       "Sending": "Đang gửi",
       "Seen": "Đã xem",
+      "Username__Required": "Tên đăng nhập không được để trống",
+      "Password__Required": "Mật khẩu không được để trống",
+      "Email__Required": "Email không được để trống",
     }
   }
 };

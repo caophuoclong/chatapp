@@ -23,20 +23,21 @@ import * as yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { CheckCircleIcon } from '@chakra-ui/icons';
+import ShowErrorPerChar from '~/components/ErrorShow/ShowErrorPerChar';
 import Auth from '~/services/apis/Auth.api';
 type Props = {};
+export const regAtLeastUpper = new RegExp(/^(?=.*?[A-Z]).{1,}$/);
+export const regAtLeastNum = new RegExp(/^(?=.*?[0-9]).{1,}$/);
+export const regAtLeastSpecial = new RegExp(/^(?=.*?[#?!@$%^&*-]).{1,}$/);
+export const regPassword = new RegExp(
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z0-9_@.#&^+-]{8,}$/
+);
 const schema = yup.object().shape({
-  newPassword: yup
-    .string()
-    .required()
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z0-9_@.#&^+-]{8,}$/),
+  newPassword: yup.string().required().matches(regPassword),
   confirmPassword: yup
     .string()
     .oneOf([yup.ref('newPassword')], "Password doesn't match"),
 });
-const regAtLeastUpper = new RegExp(/^(?=.*?[A-Z]).{1,}$/);
-const regAtLeastNum = new RegExp(/^(?=.*?[0-9]).{1,}$/);
-const regAtLeastSpecial = new RegExp(/^(?=.*?[#?!@$%^&*-]).{1,}$/);
 
 export default function SetPassword({}: Props) {
   const isLargerThanHD = useAppSelector(
@@ -62,6 +63,7 @@ export default function SetPassword({}: Props) {
   const navigate = useNavigate();
   const { search } = useLocation();
   const token = queryString.parse(search).token as string;
+  console.log(token);
   const onSubmit = handleSubmit(async (data) => {
     try {
       const { newPassword, confirmPassword } = data;
@@ -155,39 +157,13 @@ export default function SetPassword({}: Props) {
               })}
             />
           </FormControl>
+          <ShowErrorPerChar
+            atLeast={atLeast}
+            atLeastNum={atLeastNum}
+            atLeastSpecial={atLeastSpecial}
+            atLeastUpper={atLeastUpper}
+          />
           <Box width="100%">
-            <Flex
-              color={atLeast ? 'green.300' : 'gray.300'}
-              gap=".2rem"
-              alignItems={'center'}
-            >
-              <CheckCircleIcon />
-              <Text>{t('At__Least__8')}</Text>
-            </Flex>
-            <Flex
-              color={atLeastUpper ? 'green.300' : 'gray.300'}
-              gap=".2rem"
-              alignItems={'center'}
-            >
-              <CheckCircleIcon />
-              <Text>{t('At__Least__Upper')}</Text>
-            </Flex>
-            <Flex
-              color={atLeastNum ? 'green.300' : 'gray.300'}
-              gap=".2rem"
-              alignItems={'center'}
-            >
-              <CheckCircleIcon />
-              <Text>{t('At__Least__Num')}</Text>
-            </Flex>
-            <Flex
-              color={atLeastSpecial ? 'green.300' : 'gray.300'}
-              gap=".2rem"
-              alignItems={'center'}
-            >
-              <CheckCircleIcon />
-              <Text>{t('At__Least__Special')}</Text>
-            </Flex>
             <Flex
               color={isMatched ? 'green.300' : 'gray.300'}
               gap=".2rem"

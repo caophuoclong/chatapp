@@ -42,52 +42,52 @@ export default function LeftFriends({}: Props) {
       <Box paddingX="1rem">
         <Text fontWeight={600}>
           {t('Friends__Request')} (
-          {
+          {friendShips &&
             friendShips
               .filter((friendship) => friendship.statusCode.code === 'p')
-              .filter((f) => f.flag === 'target').length
-          }
+              .filter((f) => f.flag === 'target').length}
           )
         </Text>
-        {friendShips
-          .filter((friendship) => friendship.statusCode.code === 'p')
-          .map(
-            (friendShip, index) =>
-              friendShip.flag === 'target' && (
-                <Friend
-                  key={index}
-                  user={friendShip.user}
-                  friendShipId={friendShip._id}
-                  friendId={friendShip.user._id}
-                  avatarUrl={friendShip.user.avatarUrl}
-                  isPending={true}
-                  isOnline={friendShip.user.isOnline}
-                />
-              )
-          )}
+        {friendShips &&
+          friendShips
+            .filter((friendship) => friendship.statusCode.code === 'p')
+            .map(
+              (friendShip, index) =>
+                friendShip.flag === 'target' && (
+                  <Friend
+                    key={index}
+                    user={friendShip.user}
+                    friendShipId={friendShip._id}
+                    friendId={friendShip.user._id}
+                    avatarUrl={friendShip.user.avatarUrl}
+                    isPending={true}
+                    isOnline={friendShip.user.isOnline}
+                  />
+                )
+            )}
       </Box>
       <Box paddingX="1rem">
         <Text fontWeight={600}>
           {t('Friends')} (
-          {
+          {friendShips &&
             friendShips.filter(
               (friendship) => friendship.statusCode.code === 'a'
-            ).length
-          }
+            ).length}
           )
         </Text>
-        {friendShips
-          .filter((friendship) => friendship.statusCode.code === 'a')
-          .map((friendShip, index) => (
-            <Friend
-              key={index}
-              user={friendShip.user}
-              friendShipId={friendShip._id}
-              friendId={friendShip.user._id}
-              avatarUrl={friendShip.user.avatarUrl}
-              isOnline={friendShip.user.isOnline}
-            />
-          ))}
+        {friendShips &&
+          friendShips
+            .filter((friendship) => friendship.statusCode.code === 'a')
+            .map((friendShip, index) => (
+              <Friend
+                key={index}
+                user={friendShip.user}
+                friendShipId={friendShip._id}
+                friendId={friendShip.user._id}
+                avatarUrl={friendShip.user.avatarUrl}
+                isOnline={friendShip.user.isOnline}
+              />
+            ))}
       </Box>
       {show === 'addfriend' && <AddFriendsModal setShow={() => setShow('')} />}
       {show === 'creategroup' && (

@@ -13,7 +13,18 @@ import {
 import { connectSocket } from '../../providers/SocketProvider';
 import { setSocket } from '~/app/slices/global.slice';
 import Auth from '~/services/apis/Auth.api';
-import { Button } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
+  useToast,
+} from '@chakra-ui/react';
 import {
   addMessage,
   updateReceivedMessage,
@@ -21,6 +32,8 @@ import {
 } from '~/app/slices/messages.slice';
 import { string } from 'yup/lib/locale';
 import { IMessage, MessageStatusType } from '~/interfaces/IMessage';
+import { handleLogout } from '~/components/Settings/Logout';
+import { useTranslation } from 'react-i18next';
 
 type Props = {};
 
@@ -34,6 +47,8 @@ export default function Home({}: Props) {
   }, [isLargerThanHD]);
   const dispatch = useAppDispatch();
   const messages = useAppSelector((state) => state.messageSlice.messages);
+  const toast = useToast();
+  const { t } = useTranslation();
   useEffect(() => {
     const access_token = localStorage.getItem('access_token');
     if (!access_token) {
@@ -117,12 +132,40 @@ export default function Home({}: Props) {
           );
         }
       );
+      s.on('ErrorConnection', (data: Error) => {
+        toast({
+          title: t('Error'),
+          description: t('Token__Expired'),
+          status: 'error',
+          position: isLargerThanHD ? 'top-right' : 'bottom',
+          duration: 3000,
+          isClosable: true,
+        });
+        handleLogout(null, navigate);
+      });
     }
   }, []);
   const handle = async () => {
     const response = await Auth.refreshToken();
     console.log(response);
   };
-  // return <Button onClick={handle}>hhihihi</Button>;
+  return <Button onClick={handle}>hihi</Button>;
+  // return (
+  //   <Box width="100vw" position="absolute">
+  //     <Popover>
+  //       <PopoverTrigger>
+  //         <Button>Trigger</Button>
+  //       </PopoverTrigger>
+  //       <PopoverContent>
+  //         <PopoverArrow />
+  //         <PopoverCloseButton />
+  //         <PopoverHeader>Confirmation!</PopoverHeader>
+  //         <PopoverBody>
+  //           Are you sure you want to have that milkshake?
+  //         </PopoverBody>
+  //       </PopoverContent>
+  //     </Popover>
+  //   </Box>
+  // );
   return <>{isLargerThanHD ? <Desktop /> : <Mobile />}</>;
 }

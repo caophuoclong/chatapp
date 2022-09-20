@@ -1,5 +1,6 @@
 import axios from 'axios';
 import queryString from 'query-string';
+import Auth from './apis/Auth.api';
 const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 const axiosClient = axios.create({
   baseURL: SERVER_URL,
@@ -42,9 +43,7 @@ axiosClient.interceptors.request.use((config) => {
     '/auth/create_forgot_token',
     '/auth/createNewPassword',
   ];
-  console.log(config.url);
   const isUnSecureUrl = unSecureUrl.some((url) => config.url?.includes(url));
-  console.log(isUnSecureUrl);
   if (isUnSecureUrl) return config;
   else {
     const { accessToken, expiredTokenTime } = getLocalToken();
@@ -60,7 +59,16 @@ axiosClient.interceptors.request.use((config) => {
       }
       return config;
     } else {
-      // getRefreshToken();
+      const response = Auth.refreshToken();
+      response.then((res) => {
+        const { access_token, expired_time } = res.data;
+        setLocalToken(access_token, expired_time);
+        if(config.headers){
+          config.headers.Authorization = 'Bearer ' + access_token;
+          config.headers.AcceptAllowOrigin = '*';
+        }
+        return config;
+      })
     }
   }
 });
