@@ -8,6 +8,7 @@ import { CreateUserDto } from './user/dto/create-user.dto';
 import { Cache } from 'cache-manager';
 import { UserService } from './user/user.service';
 import { ResetPassword, CreateForgotToken } from './dto/createToken.dto';
+import { RedisClientType } from '@redis/client';
 
 @ApiTags('Auth')
 @Controller()
@@ -16,24 +17,16 @@ export class AppController {
     private readonly appService: AppService,
     private readonly userService: UserService,
     private authService: AuthService,
+    @Inject("REDIS_CLIENT")
+    private readonly redisClient: RedisClientType
 
   ) {}
   @Post('/auth/login')
   @UseGuards(LocalAuthGuard)
   async login(@Body() loginUserDto: LoginUserDto, @Res({passthrough: true }) res) {
     const {refreshToken, ...data} = await this.authService.login(loginUserDto);
+    this.redisClient.set(refreshToken, "A");
     res.cookie('refreshToken', refreshToken, {httpOnly: true});
-    // const refreshTokenList = await this.cache.get("refreshToken") as Array<string> || [];
-    // console.log("🚀 ~ file: app.controller.ts ~ line 25 ~ AppController ~ login ~ refreshTokenList", refreshTokenList)
-    // if(refreshTokenList.length === 0) {
-    //   const x = [refreshToken];
-    //   await this.cache.set("refreshToken", x);
-    // }else{
-    //   const x1 = new Set(refreshTokenList);
-    //   x1.add(refreshToken);
-    //   const x123 = await this.cache.set("refreshToken", Array.from(x1));
-    //   console.log(x123);
-    // }
     res.json({...data});
   }
   @Post('/auth/register')
@@ -44,11 +37,26 @@ export class AppController {
   }
   @Get("/auth/refresh-token")
   async refreshToken(@Req() req) {
-    // const refreshTokenList = await this.cache.get("online_user") ;
-    // console.log(refreshTokenList);
-    // console.log(req.cookies);
-    return {
-      a: "123123"
+    const refreshToken = req.cookies.refreshToken;
+    if(!refreshToken) return {
+      statusCode: 401,
+      message: "No refresh token"
+    };
+    const refrshTokenInDatabase = await this.redisClient.get(refreshToken);
+    if(refrshTokenInDatabase === null){
+      return {
+        statusCode: 404,
+        message: "Token not found"
+      }
+    }
+    if(refrshTokenInDatabase === "A"){
+      const response = await this.authService.generateToken(this.authService.verifyJWT(refreshToken));
+      return response;
+
+    }
+    return{
+      statusCode: 401,
+      message: "User has blocked"
     }
   }
   @Post("/auth/create_forgot_token")

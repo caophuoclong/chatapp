@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Inject, Injectable } from "@nestjs/common";
+import { CanActivate, ExecutionContext, Inject, Injectable, HttpException } from '@nestjs/common';
 import { AuthService } from "./auth.service";
 @Injectable()
 export default class WsGuards implements CanActivate{
@@ -10,11 +10,12 @@ export default class WsGuards implements CanActivate{
         const token = client.handshake.headers.authorization;
         if(token){
             try{
+                console.log(998877)
                 const {_id, username} = this.authService.verifyJWT(token.split(" ")[1]);
                 context.switchToWs().getClient().user = {_id, username};
-                return true
+                return true;
             }catch(error){
-                return false;
+                throw new HttpException("Invalid token", 401);
             }
             
         }

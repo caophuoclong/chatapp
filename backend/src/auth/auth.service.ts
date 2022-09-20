@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '~/user/dto/create-user.dto';
@@ -10,6 +10,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+
   ) {}
   async validateUser(username: string, pass: string){
     const user = await this.userService.login({username, password: pass});
@@ -33,7 +34,6 @@ export class AuthService {
     const refreshToken = this.jwtService.sign(x, {
       expiresIn: "365d"
     })
-    
     return {
       refreshToken,
       expiredTime:Date.now() + time,
@@ -42,12 +42,29 @@ export class AuthService {
       })
     };
   }
+  async generateToken({_id, username}: {
+    _id: string,
+    username: string
+  }){
+    const expiredTime = Date.now() + ms(this.configService.get<string>("expireTokenTime"));
+    const accessToken = this.jwtService.sign({
+      _id,
+      username
+    })
+    return {
+      access_token: accessToken,
+      expired_time: expiredTime
+    }
+  }
   verifyJWT(bearerToken: string){
-    const response = this.jwtService.verify(bearerToken);
+    try{
+      const response = this.jwtService.verify(bearerToken);
     return response as {
       _id: string,
       username: string;
     };
-
+    }catch(error){
+      throw new HttpException("Invalid token", 401);
+    }
   }
 }

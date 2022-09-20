@@ -12,6 +12,7 @@ import {
   WsResponse,
 } from '@nestjs/websockets';
 import { RedisClientType } from '@redis/client';
+import { Observable } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
 import WsGuards from './auth/ws-auth.guard';
@@ -72,7 +73,7 @@ export class SocketGateway {
           }
         }
       } catch (error) {
-        console.log(error);
+        client.emit("ErrorConnection", error);
         this.disconect(client);
       }
     }
