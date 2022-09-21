@@ -48,9 +48,13 @@ export const messageSlice = createSlice({
       const { message, conversationId } = action.payload;
       if(!state.messages[conversationId]){
         state.messages[conversationId].data = [];
+      }else{
+        const set = new Set(state.messages[conversationId].data);
+        set.add(message);
+        state.messages[conversationId].data = Array.from(set);
+        // state.messages[conversationId].data.push(message);
+        state.messages[conversationId].count++;
       }
-      state.messages[conversationId].data.push(message);
-      state.messages[conversationId].count++;
     },
     updateSentMessage: (state: MessageState, action: PayloadAction<{
       conversationId: string,
@@ -60,6 +64,7 @@ export const messageSlice = createSlice({
       const { conversationId, value, tempId } = action.payload;
       console.log(conversationId);
       const index = state.messages[conversationId].data.findIndex((message)=>message._id === tempId);
+      console.log(index);
       state.messages[conversationId].data[index] = {
         ...state.messages[conversationId].data[index],
         ...value
@@ -67,11 +72,14 @@ export const messageSlice = createSlice({
     },
     updateReceivedMessage: (state: MessageState, action: PayloadAction<{conversationId: string, messageId: string}>)=>{
       const {conversationId, messageId} = action.payload;
-      const index = state.messages[conversationId].data.findIndex((message)=>message._id === messageId);
+      if(state.messages[conversationId]){
+        const index = state.messages[conversationId].data.findIndex((message)=>message._id === messageId);
       state.messages[conversationId].data[index] = {
         ...state.messages[conversationId].data[index],
         status: MessageStatusType.RECEIVED
       }
+      }
+      
     }
 
   },

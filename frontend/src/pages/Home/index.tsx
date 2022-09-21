@@ -100,7 +100,6 @@ export default function Home({}: Props) {
           message: IMessage;
         }) => {
           const { conversationId, tempId, message } = data;
-
           dispatch(
             updateLastestMessage({
               message: message,

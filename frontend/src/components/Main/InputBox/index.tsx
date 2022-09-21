@@ -17,6 +17,7 @@ import MessagesApi from '../../../services/apis/Messages.api';
 import { addMessage } from '~/app/slices/messages.slice';
 import { IMessage, MessageStatusType } from '~/interfaces/IMessage';
 import randomInt from '~/utils/randomInt';
+import { updateLastestMessage } from '~/app/slices/conversations.slice';
 type Props = {};
 function useOutside<T extends HTMLElement>(
   ref: React.RefObject<T>,
@@ -73,6 +74,12 @@ export default function InputBox({}: Props) {
     try {
       dispatch(
         addMessage({ message: message, conversationId: choosenConversationId })
+      );
+      dispatch(
+        updateLastestMessage({
+          message: message,
+          conversationId: choosenConversationId,
+        })
       );
       // const response = await MessagesApi.sendMessage(message);
       // const data = response.data.data;
