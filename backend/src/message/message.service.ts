@@ -111,7 +111,7 @@ export class MessageService {
     }
   }
   async receiveMessage(messageId: string) {
-    console.log(messageId);
+    // console.log(messageId);
     try {
       const message = await this.messageRepository.findOne({
         where: {
@@ -178,6 +178,7 @@ export class MessageService {
         })
         for(let j = 0; j < messages.length; j++){
           const message = messages[j];
+          if(message.sender._id !== userId)
           message.status = MessageStatusType.RECEIVED;
           await this.messageRepository.save(message);
           x.push({
