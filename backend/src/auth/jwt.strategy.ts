@@ -19,7 +19,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       return { _id: payload._id, username: payload.username };
       
     }catch(error){
-
       console.log(1231231)
     }
     
