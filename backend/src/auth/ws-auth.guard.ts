@@ -10,7 +10,6 @@ export default class WsGuards implements CanActivate{
         const token = client.handshake.headers.authorization;
         if(token){
             try{
-                console.log(998877)
                 const {_id, username} = this.authService.verifyJWT(token.split(" ")[1]);
                 context.switchToWs().getClient().user = {_id, username};
                 return true;

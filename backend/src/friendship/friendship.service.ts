@@ -58,6 +58,7 @@ export class FriendshipService {
           return {
             statusCode: 200,
             message: 'Friendship created successfully',
+            friendShip: friendship,
           };
         }
       }

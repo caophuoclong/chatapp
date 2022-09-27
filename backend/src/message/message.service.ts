@@ -67,15 +67,16 @@ export class MessageService {
     skip: number,
     limit: number,
   ) {
+    console.log("🚀 ~ file: message.service.ts ~ line 70 ~ MessageService ~ conversationId", conversationId)
     try {
-      const user = await this.UserService.get(userId);
+      // const user = await this.UserService.get(userId);
       const conversation = await this.conversationRepository.findOne({
         where: {
           _id: conversationId,
-          participants: user.data,
         },
+        relations: ["participants"],
       });
-      if (!conversation) {
+      if (!conversation && !conversation.participants.find((user) => user._id === userId)) {
         return {
           statusCode: 404,
           message: 'Conversation not found',

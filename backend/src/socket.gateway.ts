@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   ConnectedSocket,
+  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -74,7 +75,7 @@ export class SocketGateway {
         }
       } catch (error) {
         client.emit("ErrorConnection", error);
-        this.disconect(client);
+        // this.disconect(client);
       }
     }
   }
@@ -134,5 +135,9 @@ export class SocketGateway {
         lastOnline: Date.now(),
       });
     }
+  }
+  @SubscribeMessage("joinRoom")
+  handleJoinRoom(@ConnectedSocket()client: CustomSocket,@MessageBody() roomId){
+    client.join(roomId);
   }
 }

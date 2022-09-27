@@ -52,7 +52,6 @@ export class AppController {
     if(refrshTokenInDatabase === "A"){
       const response = await this.authService.generateToken(this.authService.verifyJWT(refreshToken));
       return response;
-
     }
     return{
       statusCode: 401,

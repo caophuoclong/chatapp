@@ -35,6 +35,7 @@ import * as redisStore from 'cache-manager-redis-store';
 import { redisConfig } from './configs/index';
 import { PasswordResetToken } from './entities/passResetToken.entity';
 import { RedisModule } from './redis.module';
+import { ConversationGateway } from './conversation.gateway';
 
 @Module({
   imports: [
@@ -91,6 +92,7 @@ import { RedisModule } from './redis.module';
     JwtStrategy,
     SocketGateway,
     MessageGateway,
+    ConversationGateway
   ],
 })
 export class AppModule {

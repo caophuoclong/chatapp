@@ -119,6 +119,7 @@ export class ConversationService {
     }
   }
   async getMessagesConversation(conversationId: string) {
+    console.log("🚀 ~ file: conversation.service.ts ~ line 122 ~ ConversationService ~ getMessagesConversation ~ conversationId", conversationId)
     try {
       const conversation = await this.conversation.findOne({
         where: {
