@@ -51,6 +51,7 @@ export default function Friend({
   const [showInfo, setShowInfo] = useState(false);
   const toast = useToast();
   const dispatch = useAppDispatch();
+  const socket = useAppSelector((state) => state.globalSlice.socket);
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
@@ -61,6 +62,7 @@ export default function Friend({
   const createConversation = (e: React.MouseEvent<HTMLDivElement>) => {
     let isExist = false;
     let tempConId = '';
+
     conversations.forEach((conversation) => {
       if (conversation.type === 'direct') {
         if (
@@ -73,16 +75,19 @@ export default function Friend({
       }
     });
     if (!isExist) {
-      ConversationsApi.createConversationByFriendShip(friendShipId).then(
-        (response) => {
-          if (response) {
-            const data = response.data.data as IConversation;
-            dispatch(addConversation(data));
-            dispatch(setChoosenConversationID(data._id));
-            dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
-          }
-        }
-      );
+      if (socket) {
+        socket.emit('createConversationFromFriendShip', friendShipId);
+      }
+      // ConversationsApi.createConversationByFriendShip(friendShipId).then(
+      //   (response) => {
+      //     if (response) {
+      //       const data = response.data.data as IConversation;
+      //       dispatch(addConversation(data));
+      // dispatch(setChoosenConversationID(data._id));
+      // dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
+      //     }
+      //   }
+      // );
     } else {
       dispatch(setChoosenConversationID(tempConId));
       dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));

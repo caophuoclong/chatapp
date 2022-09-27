@@ -16,15 +16,15 @@ export default function AddFriend({}: Props) {
   return (
     <Flex direction={'column'} height="100vh">
       <Flex
+        height="5%"
         gap="1rem"
         alignItems={'center'}
         paddingY=".5rem"
-        bg="blue.500"
-        color="white"
+        boxShadow="rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px"
       >
         <IconButton
           aria-label="Back to contacts"
-          bg="none"
+          variant={'unstyled'}
           fontSize={'24px'}
           icon={<ArrowBackIcon />}
           onClick={() => navigate(-1)}
@@ -40,11 +40,14 @@ export default function AddFriend({}: Props) {
           borderColor: 'blue.500',
         }}
       >
-        <Text size="sm">{t('Username')}</Text>
-        <Flex>
+        <Text size="sm" fontWeight={'bold'} fontStyle="italic">
+          {t('Username')}
+        </Text>
+        <Flex justifyContent={'center'} alignItems={'center'}>
           <Input
             variant={'unstyled'}
-            paddingX=".5rem"
+            fontSize={'1.2rem'}
+            padding=".5rem"
             value={serachUser}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setSearchUser(e.target.value)
@@ -59,9 +62,9 @@ export default function AddFriend({}: Props) {
             _active={{
               bg: 'blue.700',
             }}
-            fontSize={'12px'}
-            padding="0"
-            height="20px"
+            // fontSize={'12px'}
+            // padding="0"
+            height="40px"
             color="white"
             onClick={handleSubmitSearch}
           >

@@ -54,12 +54,13 @@ export default function MessagesBox({}: Props) {
         messages[choosenConversation].count
     ) {
       setShouldScroll(false);
-      dispatch(
-        getMessages({
-          conversationId: choosenConversation,
-          skip: messages[choosenConversation].data.length,
-        })
-      );
+      if (messages[choosenConversation])
+        dispatch(
+          getMessages({
+            conversationId: choosenConversation,
+            skip: messages[choosenConversation].data.length,
+          })
+        );
     }
   };
   return (
@@ -80,6 +81,7 @@ export default function MessagesBox({}: Props) {
       gap=".5rem"
     >
       {messages[choosenConversation] &&
+        messages[choosenConversation].data &&
         [...messages[choosenConversation].data]
           .sort((a, b) => a.createdAt - b.createdAt)
           .map((message) =>

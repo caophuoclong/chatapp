@@ -93,7 +93,7 @@ function App() {
       <Route path="/user/:id" element={<User />} />
       <Route path="/contacts" element={<Contacts />} />
       <Route path="/contacts/add" element={<AddFriend />} />
-      <Route path="/contacts/add/:id" element={<FoundUser />} />
+      <Route path="/contacts/add/:username" element={<FoundUser />} />
       <Route path="/newgroup" element={<NewGroup />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />

@@ -38,7 +38,6 @@ export default function Logout({}: Props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const socket = useAppSelector((state) => state.globalSlice.socket);
   const navigate = useNavigate();
-  handleLogout(socket, navigate);
   return (
     <>
       <Button onClick={onOpen} marginY="1rem">

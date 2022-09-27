@@ -29,7 +29,6 @@ function DetectShow(show: 'info' | 'settings', id?: string) {
       }
     });
   }
-  console.log(user);
   switch (show) {
     case 'info':
       return <Info user={user} id={id} />;
@@ -72,7 +71,6 @@ export default function User({}: Props) {
   const { colorMode } = useColorMode();
   const [show, setShow] = useState<'info' | 'settings'>('info');
   const { id } = useParams();
-  console.log(id);
   const [showMoreAction, setShowMoreAction] = useState(false);
   return (
     <Flex direction={'column'} height="100vh" boxSizing="border-box">
@@ -86,17 +84,15 @@ export default function User({}: Props) {
         >
           <IconButton
             aria-label="Back to contacts"
-            bg="none"
+            variant={'unstyled'}
             fontSize={'24px'}
-            color="white"
             icon={<ArrowBackIcon />}
             onClick={() => navigate(-1)}
           />
           <IconButton
             aria-label="more action"
-            bg="none"
+            variant={'unstyled'}
             fontSize={'24px'}
-            color="white"
             marginLeft="auto"
             onClick={() => setShowMoreAction(true)}
             icon={<FiMoreHorizontal />}

@@ -40,6 +40,9 @@ export const friendsSlice = createSlice({
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
+    addNewFriend: (state: Friends, action: PayloadAction<IFriendShip>)=>{
+      state.friendShips.push(action.payload);
+    },
     changeStatusCode: (state: Friends, action: PayloadAction<{
       friendShipId: string,
       statusCode: StatusCode 
@@ -104,7 +107,7 @@ export const friendsSlice = createSlice({
   },
 });
 
-export const {changeStatusCode, rejectFriendShip, changeOnlineStatus} = friendsSlice.actions;
+export const {changeStatusCode, rejectFriendShip, changeOnlineStatus, addNewFriend} = friendsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 

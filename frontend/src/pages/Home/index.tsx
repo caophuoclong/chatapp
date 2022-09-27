@@ -7,6 +7,7 @@ import Desktop from './Desktop';
 import Mobile from './Mobile';
 import { changeOnlineStatus, getFriendsList } from '~/app/slices/friends.slice';
 import {
+  addConversation,
   getMyConversations,
   updateLastestMessage,
 } from '~/app/slices/conversations.slice';
@@ -27,6 +28,7 @@ import {
 } from '@chakra-ui/react';
 import {
   addMessage,
+  initMessage,
   updateReceivedMessage,
   updateSentMessage,
 } from '~/app/slices/messages.slice';
@@ -34,6 +36,7 @@ import { string } from 'yup/lib/locale';
 import { IMessage, MessageStatusType } from '~/interfaces/IMessage';
 import { handleLogout } from '~/components/Settings/Logout';
 import { useTranslation } from 'react-i18next';
+import IConversation from '~/interfaces/IConversation';
 
 type Props = {};
 
@@ -64,7 +67,6 @@ export default function Home({}: Props) {
       });
       s.on('newMessage', (data) => {
         const { destination, ...message } = data;
-        console.log(data);
         dispatch(
           addMessage({
             message: message,
@@ -122,7 +124,6 @@ export default function Home({}: Props) {
         'receivedMessage',
         (data: { conversationId: string; messageId: string }) => {
           const { conversationId, messageId } = data;
-          console.log(data);
           dispatch(
             updateReceivedMessage({
               conversationId,
@@ -131,6 +132,11 @@ export default function Home({}: Props) {
           );
         }
       );
+      s.on('createConversationSuccess', (data: IConversation) => {
+        s.emit('joinRoom', data._id);
+        dispatch(addConversation(data));
+        dispatch(initMessage(data._id));
+      });
       s.on('ErrorConnection', (data: Error) => {
         toast({
           title: t('Error'),

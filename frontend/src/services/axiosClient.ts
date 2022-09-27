@@ -35,57 +35,56 @@ const setLocalToken = (accessToken: string, expiredTime: string) => {
   window.localStorage.setItem('access_token', accessToken);
   window.localStorage.setItem('expiredTime', expiredTime);
 };
-const getRefreshToken = () => {};
-axiosClient.interceptors.request.use((config) => {
-  const unSecureUrl = [
-    '/login',
-    '/register',
-    '/auth/create_forgot_token',
-    '/auth/createNewPassword',
-  ];
-  const isUnSecureUrl = unSecureUrl.some((url) => config.url?.includes(url));
-  if (isUnSecureUrl) return config;
-  else {
+axiosClient.interceptors.request.use(
+  async (config) => {
+    const unSecureUrl = [
+      '/login',
+      '/register',
+      '/auth/create_forgot_token',
+      '/auth/createNewPassword',
+      '/auth/refresh-token',
+    ];
+    const isUnSecureUrl = unSecureUrl.some((url) => config.url?.includes(url));
+    if (isUnSecureUrl) return config;
     const { accessToken, expiredTokenTime } = getLocalToken();
     if (!accessToken || !expiredTokenTime) {
       throw new Error();
     }
     const now = Date.now();
-    if (expiredTokenTime > now) {
+    if (expiredTokenTime < now) {
+      try{
+        const response = await Auth.refreshToken();
+        const {access_token, expired_time} = response.data;
+        setLocalToken(access_token, expired_time);
+        if(config.headers)
+          config.headers.Authorization = `Bearer ${access_token}`;
+        return config;
+      }catch(error){
+        return Promise.reject(error);
+      }
+    } else {
       if (config.headers) {
-        config.headers.Authorization =
-          'Bearer ' + localStorage.getItem('access_token');
-        config.headers.AcceptAllowOrigin = '*';
+        config.headers.Authorization = `Bearer ${accessToken}`;
       }
       return config;
-    } else {
-      const response = Auth.refreshToken();
-      response.then((res) => {
-        const { access_token, expired_time } = res.data;
-        setLocalToken(access_token, expired_time);
-        if(config.headers){
-          config.headers.Authorization = 'Bearer ' + access_token;
-          config.headers.AcceptAllowOrigin = '*';
-        }
-        return config;
-      })
     }
-  }
-});
+  },
+  (err) => Promise.reject(err)
+);
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
     console.log(error);
-    if (
-      error.response.status === 400 &&
-      error.response.data.message === 'User not found'
-    ) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('expiredTime');
-      window.location.href = '/login';
-    } else {
-      throw error;
-    }
+    // if (
+    //   error.response.status === 400 &&
+    //   error.response.data.message === 'User not found'
+    // ) {
+    //   localStorage.removeItem('access_token');
+    //   localStorage.removeItem('expiredTime');
+    //   window.location.href = '/login';
+    // } else {
+    //   throw error;
+    // }
   }
 );
 export default axiosClient;

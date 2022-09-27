@@ -22,7 +22,11 @@ import FriendsApi from '~/services/apis/Friends.api';
 import { StatusCode } from '../../../interfaces/IFriendShip';
 import { useToast } from '@chakra-ui/react';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
-import { changeStatusCode, rejectFriendShip } from '~/app/slices/friends.slice';
+import {
+  addNewFriend,
+  changeStatusCode,
+  rejectFriendShip,
+} from '~/app/slices/friends.slice';
 import ConversationsApi from '~/services/apis/Conversations.api';
 import IConversation from '~/interfaces/IConversation';
 import {
@@ -31,13 +35,16 @@ import {
   setShowScreen,
 } from '~/app/slices/global.slice';
 import { addConversation } from '~/app/slices/conversations.slice';
+import { IoMdArrowRoundBack } from 'react-icons/io';
+import { useNavigate } from 'react-router-dom';
+import { ArrowBackIcon } from '@chakra-ui/icons';
 
 type Props = {
   user: IUser;
   friendShipStatusCode: StatusCode | null;
-  setFrienShipStatus: (status: StatusCode | null) => void;
+  // setFrienShipStatus: (status: StatusCode) => void;
   flag?: 'sender' | 'target' | '';
-  friendShipId: string;
+  friendShipId: string | '';
 };
 const ShowButton = (
   statusCode: StatusCode | null,
@@ -58,15 +65,15 @@ const ShowButton = (
         isClosable: true,
         position: 'top-right',
       });
-      dispatch(
-        changeStatusCode({
-          friendShipId: friendShipId,
-          statusCode: {
-            code: 'a',
-            name: 'Accept',
-          },
-        })
-      );
+      // dispatch(
+      //   changeStatusCode({
+      //     friendShipId: friendShipId,
+      //     statusCode: {
+      //       code: 'a',
+      //       name: 'Accept',
+      //     },
+      //   })
+      // );
     } catch (error) {
       toast({
         title: t('Error'),
@@ -194,17 +201,32 @@ const ShowButton = (
 export default function FoundUser({
   user,
   friendShipStatusCode,
-  setFrienShipStatus,
   flag = '',
   friendShipId,
 }: Props) {
+  const isLargerThanHD = useAppSelector(
+    (state) => state.globalSlice.isLargerThanHD
+  );
   const { t } = useTranslation();
   const toast = useToast();
+  const navigate = useNavigate();
   const myId = useAppSelector((state) => state.userSlice.info._id);
+  console.log(useAppSelector((state) => state.userSlice.info));
   const handleAddFriend = async () => {
     try {
       const response = await FriendsApi.addFriend(user._id);
-      console.log(response);
+      const { _id } = response.data.friendShip;
+      dispatch(
+        addNewFriend({
+          _id: _id,
+          user: user,
+          statusCode: {
+            code: 'p',
+            name: 'Pending',
+          },
+          flag: 'sender',
+        })
+      );
       toast({
         title: t('Success'),
         description: t('Send__Request__Success'),
@@ -212,10 +234,10 @@ export default function FoundUser({
         duration: 3000,
         position: 'top-right',
       });
-      setFrienShipStatus({
-        code: 'p',
-        name: 'Pending',
-      });
+      // setFrienShipStatus({
+      //   code: 'p',
+      //   name: 'Pending',
+      // });
     } catch (error) {
       console.log(error);
       toast({
@@ -241,10 +263,25 @@ export default function FoundUser({
       }
     );
   };
+  console.log(myId);
+  console.log(user._id);
   return (
-    <Box boxSizing="border-box" maxHeight={'600px'}>
+    <Box boxSizing="border-box" maxHeight={'600px'} position="relative">
+      {!isLargerThanHD && (
+        <Box position="absolute" bg="blackAlpha.300" width="100%">
+          <IconButton
+            aria-label="back to search"
+            variant={'unstyled'}
+            fontSize={'24px'}
+            icon={<ArrowBackIcon />}
+            onClick={() => {
+              navigate(-1);
+            }}
+          />
+        </Box>
+      )}
       {/* Profile photo  */}
-      <Box height="200px" marginX=".5rem">
+      <Box height="200px" marginX={isLargerThanHD ? '.5rem' : '0'}>
         {/* Cover */}
         <Box width="full" height="130px">
           <Image
@@ -252,6 +289,7 @@ export default function FoundUser({
             alt=""
             width="100%"
             height="130px"
+            objectFit="cover"
           />
         </Box>
         {/* Name and avatar */}

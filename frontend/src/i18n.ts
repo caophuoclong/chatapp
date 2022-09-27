@@ -97,6 +97,8 @@ const resources = {
       "Username__Required": "Username is required",
       "Password__Required": "Password is required",
       "Email__Required": "Email is required",
+      "Request": "Request",
+
 
 
     
@@ -193,6 +195,7 @@ const resources = {
       "Username__Required": "Tên đăng nhập không được để trống",
       "Password__Required": "Mật khẩu không được để trống",
       "Email__Required": "Email không được để trống",
+      "Request": "Lời mời",
     }
   }
 };

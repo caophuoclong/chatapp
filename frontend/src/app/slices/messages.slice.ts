@@ -3,6 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '@app/store';
 import { IMessage, MessageStatusType } from '../../interfaces/IMessage';
 import MessagesApi from '../../services/apis/Messages.api';
+import Message from '../../components/Main/MessagesBox/Message/index';
 
 // Define a type for the slice state
 interface MessageState {
@@ -26,6 +27,7 @@ export const getMessages = createAsyncThunk(
   }) => {
     const response = await MessagesApi.getMessages(conversationId, skip);
     response.data.conversationId = conversationId;
+    console.log(response);
     return response;
   }
 );
@@ -41,6 +43,17 @@ export const messageSlice = createSlice({
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
+    initMessage: (state: MessageState, action: PayloadAction<string>)=>{
+      return {
+        ...state,
+        messages: {
+          [action.payload] : {
+            count: 0,
+            data: []
+          }
+        }
+      }
+    },
     addMessage:(state: MessageState, action: PayloadAction<{
       message: IMessage,
       conversationId: string,
@@ -109,7 +122,7 @@ export const messageSlice = createSlice({
   },
 });
 
-export const {addMessage, updateSentMessage, updateReceivedMessage} = messageSlice.actions;
+export const {addMessage, updateSentMessage, updateReceivedMessage, initMessage} = messageSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 

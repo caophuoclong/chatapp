@@ -53,15 +53,15 @@ export default function Groups({}: Props) {
       ></Box>
       <Flex direction="column" paddingY=".5rem" gap=".5rem">
         <Text paddingX="1rem" fontWeight={600}>
-          {t('Group__Joined')} (4)
+          {t('Group__Joined')} (0)
         </Text>
+        {/* <Group />
         <Group />
         <Group />
         <Group />
         <Group />
         <Group />
-        <Group />
-        <Group />
+        <Group /> */}
       </Flex>
     </Flex>
   );

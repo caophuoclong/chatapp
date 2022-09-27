@@ -30,7 +30,6 @@ type Props = {
 
 export default function Main({ choosenConversation }: Props) {
   let location = useLocation();
-  console.log(choosenConversation);
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
@@ -49,7 +48,7 @@ export default function Main({ choosenConversation }: Props) {
     <Flex
       width={{
         base: '100%',
-        lg: '80%',
+        lg: '75%',
       }}
       boxSizing="border-box"
       direction={'column'}
