@@ -75,7 +75,8 @@ export class SocketGateway {
         }
       } catch (error) {
         client.emit("ErrorConnection", error);
-        // this.disconect(client);
+        
+
       }
     }
   }
