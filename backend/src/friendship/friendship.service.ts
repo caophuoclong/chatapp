@@ -10,6 +10,8 @@ export class FriendshipService {
   constructor(
     @InjectRepository(FriendShip)
     private readonly friendShip: Repository<FriendShip>,
+    @InjectRepository(User)
+    private readonly user: Repository<User>
   ) {}
   async addFreiend(requestId: string, addressId: string) {
     try {
@@ -20,7 +22,7 @@ export class FriendshipService {
           userRequest: requestId,
           userAddress: addressId,
         })
-        .getOne();
+        .getOne()
       if (isFriendShip) {
         return {
           statusCode: 200,
@@ -42,15 +44,24 @@ export class FriendshipService {
             _id: isFriendShip._id,
           };
         } else {
-          const friendship = {
-            userRequest: {
+          const user1 = this.user.findOne({
+            where: {
               _id: requestId,
-            },
-            userAddress: {
+            }
+          })
+          const user2 = this.user.findOne({
+            where: {
               _id: addressId,
-            },
+            }
+          })
+          
+          const [userRequest, userAddress] = await Promise.all([user1, user2]);
+          const friendship = {
+            userRequest,
+            userAddress,
             statusCode: {
               code: 'p',
+              name: 'Pending',
             },
           };
           this.friendShip.create(friendship);

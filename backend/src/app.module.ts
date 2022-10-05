@@ -36,6 +36,7 @@ import { redisConfig } from './configs/index';
 import { PasswordResetToken } from './entities/passResetToken.entity';
 import { RedisModule } from './redis.module';
 import { ConversationGateway } from './conversation.gateway';
+import { FriendShipGateway } from './friendship.gateway';
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { ConversationGateway } from './conversation.gateway';
     ConversationModule,
     AttachmentModule,
     PassportModule,
+    FriendshipModule,
     JwtModule.registerAsync({
       useFactory: () => {
         return {
@@ -92,7 +94,9 @@ import { ConversationGateway } from './conversation.gateway';
     JwtStrategy,
     SocketGateway,
     MessageGateway,
-    ConversationGateway
+    ConversationGateway,
+    FriendShipGateway
+
   ],
 })
 export class AppModule {

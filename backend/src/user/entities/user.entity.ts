@@ -3,7 +3,11 @@ import { Conversation } from "~/conversation/entities/conversation.entity";
 import { FriendShip } from "~/friendship/entities/friendship.entity";
 import { Message } from "~/message/entities/message.entity";
 import { UnRead } from '../../unread/entities/unread.entity';
-
+export enum Gender{
+    MALE= "male",
+    FEMALE="female",
+    OTHER="other"
+}
 @Entity({
     name: "user"
 })
@@ -72,7 +76,9 @@ export class User {
     @OneToMany(type => Conversation, c => c._id)
     conversationBlocked: Conversation[];
     @Column({
-        default: null
+        type: "enum",
+        enum: Gender,
+        default: Gender.OTHER
     })
-    gender: boolean
+    gender: Gender
 }

@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '~/user/dto/create-user.dto';
 import ms from "ms";
 import { ConfigService } from '@nestjs/config';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -58,7 +59,7 @@ export class AuthService {
   }
   verifyJWT(bearerToken: string){
     try{
-      const response = this.jwtService.verify(bearerToken);
+    const response = this.jwtService.verify(bearerToken);
     return response as {
       _id: string,
       username: string;
