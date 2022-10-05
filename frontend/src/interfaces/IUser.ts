@@ -1,3 +1,8 @@
+export enum Gender{
+    MALE="male",
+    FEMALE="female",
+    OTHER="other"
+}
 export interface IUser {
     _id: string;
     name: string,
@@ -6,7 +11,7 @@ export interface IUser {
     email: string,
     phone: string,
     birthday: string,
-    gender: boolean | null
+    gender: Gender,
     isOnline: boolean,
     lastOnline: number
 }

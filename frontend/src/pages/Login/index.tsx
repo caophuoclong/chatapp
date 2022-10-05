@@ -33,7 +33,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import ErrorShow from '~/components/ErrorShow';
 type Props = {};
 const loginSchema = yup.object().shape({
-  username: yup.string().required('Username__Required'),
+  username: yup.string().required('Username__Required').trim().lowercase(),
   password: yup.string().required('Password__Required'),
 });
 export default function Login({}: Props) {

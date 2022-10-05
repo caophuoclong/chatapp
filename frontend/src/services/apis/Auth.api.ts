@@ -8,7 +8,7 @@ export default class Auth{
             username,
             password
         })
-        
+        console.log(response);
         return response;
     }
     static async register({
