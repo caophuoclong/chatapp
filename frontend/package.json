@@ -57,7 +57,7 @@
   },
   "scripts": {
     "start": "cat ./dev.env > .env && react-app-rewired start",
-    "build": "cat ./prod.env > .env && react-app-rewired build",
+    "build": "cat ./prod1.env > .env && react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject"
   },

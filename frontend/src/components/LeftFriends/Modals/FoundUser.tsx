@@ -212,21 +212,23 @@ export default function FoundUser({
   const navigate = useNavigate();
   const myId = useAppSelector((state) => state.userSlice.info._id);
   console.log(useAppSelector((state) => state.userSlice.info));
+  const socket = useAppSelector((state) => state.globalSlice.socket);
   const handleAddFriend = async () => {
     try {
-      const response = await FriendsApi.addFriend(user._id);
-      const { _id } = response.data.friendShip;
-      dispatch(
-        addNewFriend({
-          _id: _id,
-          user: user,
-          statusCode: {
-            code: 'p',
-            name: 'Pending',
-          },
-          flag: 'sender',
-        })
-      );
+      socket?.emit('createFriendShip', user._id);
+      // const response = await FriendsApi.addFriend(user._id);
+      // const { _id } = response.data.friendShip;
+      // dispatch(
+      //   addNewFriend({
+      //     _id: _id,
+      //     user: user,
+      //     statusCode: {
+      //       code: 'p',
+      //       name: 'Pending',
+      //     },
+      //     flag: 'sender',
+      //   })
+      // );
       toast({
         title: t('Success'),
         description: t('Send__Request__Success'),
@@ -234,10 +236,6 @@ export default function FoundUser({
         duration: 3000,
         position: 'top-right',
       });
-      // setFrienShipStatus({
-      //   code: 'p',
-      //   name: 'Pending',
-      // });
     } catch (error) {
       console.log(error);
       toast({

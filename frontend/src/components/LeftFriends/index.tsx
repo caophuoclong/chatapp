@@ -14,10 +14,6 @@ export default function LeftFriends({}: Props) {
   const [show, setShow] = useState<'addfriend' | 'creategroup' | ''>('');
   // console.log());
   const friendShips = useAppSelector((state) => state.friendsSlice.friendShips);
-  console.log(
-    '🚀 ~ file: index.tsx ~ line 17 ~ LeftFriends ~ friendShips',
-    friendShips
-  );
   const { t } = useTranslation();
   return (
     <Flex direction={'column'}>

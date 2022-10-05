@@ -22,7 +22,7 @@ export default function LeftBar({}: Props) {
     <Flex
       width={{
         base: '100%',
-        lg: '20%',
+        lg: '21%',
       }}
       borderRight={
         colorMode === 'dark'
