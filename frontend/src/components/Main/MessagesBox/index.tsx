@@ -75,7 +75,7 @@ export default function MessagesBox({}: Props) {
       height={{
         lg: '90%',
       }}
-      // paddingY="1rem"
+      paddingY="1rem"
       paddingX=".7rem"
       overflow={'auto'}
       gap=".5rem"

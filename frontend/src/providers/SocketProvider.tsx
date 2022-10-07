@@ -8,7 +8,7 @@ import * as io from 'socket.io-client';
 
 // type Props = { children: React.ReactNode };
 export const connectSocket = () => {
-  const WS_URL = process.env.REACT_APP_WS_URL || 'http://localhost:3004';
+  const WS_URL = process.env.REACT_APP_WS_URL || 'http://localhost:3003';
   const access_token = localStorage.getItem('access_token');
   const s = io.connect(WS_URL, {
     extraHeaders: {

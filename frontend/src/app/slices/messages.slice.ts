@@ -62,11 +62,12 @@ export const messageSlice = createSlice({
       if(!state.messages[conversationId]){
         state.messages[conversationId].data = [];
       }else{
-        const set = new Set(state.messages[conversationId].data);
-        set.add(message);
-        state.messages[conversationId].data = Array.from(set);
-        // state.messages[conversationId].data.push(message);
-        state.messages[conversationId].count++;
+        const {_id} = message;
+        const index = state.messages[conversationId].data.findIndex((item: IMessage) => item._id === _id);
+        if(index === -1){
+          state.messages[conversationId].data.push(message);
+          state.messages[conversationId].count += 1;
+        }
       }
     },
     updateSentMessage: (state: MessageState, action: PayloadAction<{

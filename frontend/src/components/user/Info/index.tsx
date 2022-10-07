@@ -4,6 +4,7 @@ import {
   AvatarGroup,
   Box,
   Button,
+  CircularProgress,
   HStack,
   IconButton,
   Radio,
@@ -27,7 +28,7 @@ import DatePicker from 'react-datepicker';
 import vi from 'date-fns/locale/vi';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import { BsCheckLg } from 'react-icons/bs';
-import { FaTimes } from 'react-icons/fa';
+import { FaCheck, FaTimes } from 'react-icons/fa';
 import { useColorMode } from '@chakra-ui/react';
 import { IUser } from '../../../interfaces/IUser';
 import { useForm, Controller } from 'react-hook-form';
@@ -36,6 +37,9 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import moment from 'moment';
 import UserApi from '~/services/apis/User.api';
 import { updateInformation } from '~/app/slices/user.slice';
+import readFile from '~/utils/readFile';
+import { Blob } from 'buffer';
+import { SERVER_URL } from '~/configs';
 type Props = {
   user: IUser;
   id?: string;
@@ -184,6 +188,37 @@ export default function Info({ user, id }: Props) {
   const [isEnalbeInput, setIsEnabledInput] = useState(false);
   const lan = useAppSelector((state) => state.globalSlice.lan);
   const myId = useAppSelector((state) => state.userSlice.info._id);
+  const [fileAvatar, setFileAvatar] = useState<{
+    file: File;
+    name: string;
+  }>();
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [isChangeAvatar, setIsChangeAvatar] = useState(false);
+  const [cover, setCover] = useState<string | null>(null);
+  const [isChangeCover, setIsChangeCover] = useState(false);
+  const [uploadAvatarProgress, setUploadAvatarProgress] = useState(0);
+  const handleOnInputAvatarChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.files) {
+      const file1 = e.target.files[0];
+      setFileAvatar({
+        file: file1,
+        name: new Date().getTime + '-' + file1.name,
+      });
+      setIsChangeAvatar(true);
+    }
+  };
+  useEffect(() => {
+    if (fileAvatar && isChangeAvatar) {
+      readFile(fileAvatar.file).then((data) => {
+        setAvatar(data);
+      });
+    }
+    if (!fileAvatar && !isChangeAvatar) {
+      setAvatar(null);
+    }
+  }, [fileAvatar]);
   const handleEnalbeInput = () => {
     const inputArray = document.querySelectorAll('.input__info');
     if (!isEnalbeInput) {
@@ -203,7 +238,6 @@ export default function Info({ user, id }: Props) {
       setIsEnabledInput(false);
     }
   };
-
   const handleCancle = () => {
     setValue('name', user.name);
     setValue('email', user.email);
@@ -212,6 +246,36 @@ export default function Info({ user, id }: Props) {
     setValue('month', birthday.month);
     setValue('year', birthday.year);
     setValue('gender', user.gender);
+  };
+  const handleRemoveAvatar = () => {
+    setAvatar(null);
+    setIsChangeAvatar(false);
+    setFileAvatar(undefined);
+  };
+  const onAcceptChangeAvatar = async () => {
+    try {
+      if (fileAvatar) {
+        const formData = new FormData();
+        setUploadAvatarProgress(1);
+        formData.append('file', fileAvatar.file);
+        const response = await UserApi.updateAvatar(
+          formData,
+          (e: ProgressEvent) => {
+            const percent = Math.round((e.loaded * 100) / e.total);
+            setUploadAvatarProgress(percent);
+          }
+        );
+        const { fileName } = response;
+        dispatch(
+          updateInformation({
+            avatarUrl: fileName,
+          })
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      handleRemoveAvatar();
+    }
   };
   useEffect(() => {
     console.log(user);
@@ -242,6 +306,15 @@ export default function Info({ user, id }: Props) {
     setValue('month', birthday.month);
     setValue('year', birthday.year);
   }, [birthday]);
+  useEffect(() => {
+    if (uploadAvatarProgress === 100) {
+      setTimeout(() => {
+        handleRemoveAvatar();
+        setUploadAvatarProgress(0);
+      }, 1000);
+    }
+  }, [uploadAvatarProgress]);
+  console.log(user);
   return (
     <form onSubmit={onSubmit}>
       <Flex
@@ -252,30 +325,88 @@ export default function Info({ user, id }: Props) {
       >
         {user._id === myId ? (
           <div>
-            <Avatar width="72px" height="72px" src={user.avatarUrl}>
-              <label
-                htmlFor="upload-avatar"
-                style={{
-                  cursor: 'pointer',
-                }}
-              >
-                <AvatarBadge
-                  borderColor="papayawhip"
-                  bg="gray"
-                  boxSize="1.25em"
-                  children={<AiFillCamera color="#f5f5f5" />}
+            <Avatar
+              position={'relative'}
+              width="72px"
+              height="72px"
+              role="group"
+              src={avatar ? avatar : `${SERVER_URL}/images/${user.avatarUrl}`}
+            >
+              {uploadAvatarProgress > 0 && uploadAvatarProgress <= 100 && (
+                <Flex
+                  width={'72px'}
+                  height={'72px'}
+                  backdropFilter="auto"
+                  backdropContrast="60%"
+                  position={'absolute'}
+                  rounded="full"
+                  justifyContent={'center'}
+                  alignItems={'center'}
+                >
+                  <CircularProgress value={uploadAvatarProgress} opacity={1} />
+                </Flex>
+              )}
+              {isChangeAvatar && (
+                <IconButton
+                  position={'absolute'}
+                  size="xs"
+                  textAlign={'center'}
+                  rounded="full"
+                  top="0"
+                  right="0"
+                  visibility={'hidden'}
+                  aria-label="remove avatar upload"
+                  onClick={handleRemoveAvatar}
+                  icon={<FaTimes />}
+                  _groupHover={{
+                    visibility: 'visible',
+                  }}
                 />
-              </label>
+              )}
+              {isChangeAvatar ? (
+                <IconButton
+                  position={'absolute'}
+                  size="xs"
+                  textAlign={'center'}
+                  rounded="full"
+                  bottom="0"
+                  right="0"
+                  visibility={'visible'}
+                  aria-label="accept change avatar"
+                  onClick={onAcceptChangeAvatar}
+                  color="green.300"
+                  icon={<FaCheck />}
+                />
+              ) : (
+                <label
+                  htmlFor="upload-avatar"
+                  style={{
+                    cursor: 'pointer',
+                  }}
+                >
+                  <AvatarBadge
+                    borderColor="papayawhip"
+                    bg="gray"
+                    boxSize="1.25em"
+                    children={<AiFillCamera color="#f5f5f5" />}
+                  />
+                </label>
+              )}
             </Avatar>
             <Input
               type="file"
               hidden
               id="upload-avatar"
               accept="image/png, image/gif, image/jpeg"
+              onChange={handleOnInputAvatarChange}
             />
           </div>
         ) : (
-          <Avatar width="72px" height="72px" src={user.avatarUrl}></Avatar>
+          <Avatar
+            width="72px"
+            height="72px"
+            src={`${SERVER_URL}/images/${user.avatarUrl}`}
+          ></Avatar>
         )}
         <Tooltip
           hasArrow

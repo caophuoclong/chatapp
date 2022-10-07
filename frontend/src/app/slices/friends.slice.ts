@@ -71,6 +71,16 @@ export const friendsSlice = createSlice({
           }
         }
       })
+    },
+    updateAcceptFriend: (state: Friends, action:PayloadAction<string>)=>{
+      state.friendShips.forEach((friendShip)=>{
+        if(friendShip._id === action.payload){
+          friendShip.statusCode = {
+            code: "a",
+            name: 'Accept'
+          };
+        }
+      })
     }
   },
   extraReducers(builder) {
@@ -107,7 +117,7 @@ export const friendsSlice = createSlice({
   },
 });
 
-export const {changeStatusCode, rejectFriendShip, changeOnlineStatus, addNewFriend} = friendsSlice.actions;
+export const {changeStatusCode, rejectFriendShip, changeOnlineStatus, addNewFriend, updateAcceptFriend} = friendsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 

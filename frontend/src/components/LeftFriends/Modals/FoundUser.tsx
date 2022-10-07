@@ -46,14 +46,15 @@ type Props = {
   flag?: 'sender' | 'target' | '';
   friendShipId: string | '';
 };
-const ShowButton = (
+function ShowButton(
   statusCode: StatusCode | null,
   handleAddFriend: () => void,
   flag: 'sender' | 'target' | '' = '',
-  friendShipId: string
-) => {
-  const toast = useToast();
-  const dispatch = useAppDispatch();
+  friendShipId: string,
+  toast: any,
+  dispatch: any,
+  t: any
+) {
   const onAccept = async () => {
     try {
       await FriendsApi.handleAccept(friendShipId);
@@ -108,20 +109,44 @@ const ShowButton = (
       });
     }
   };
-  const { t } = useTranslation();
-  if (statusCode === null)
+  console.log(statusCode);
+  if (statusCode === null) {
     return (
       <Button width="50%" onClick={handleAddFriend}>
         {t('AddFriend')}
       </Button>
     );
-  switch (statusCode.code) {
-    case 'p':
-      return flag === 'target' ? (
-        <Menu>
-          <MenuButton
-            rounded="lg"
+  } else {
+    switch (statusCode.code) {
+      case 'p':
+        return flag === 'target' ? (
+          <Menu>
+            <MenuButton
+              rounded="lg"
+              width="50%"
+              _hover={{
+                bg: 'yellow.300',
+              }}
+              _active={{
+                bg: 'yellow.300',
+              }}
+              bg="yellow.300"
+            >
+              Tuy chon
+            </MenuButton>
+            <MenuList>
+              <MenuItem onClick={onAccept}>{t('Accept')}</MenuItem>
+              <MenuItem onClick={onReject}>{t('Reject')}</MenuItem>
+            </MenuList>
+          </Menu>
+        ) : (
+          <Button
             width="50%"
+            disabled
+            _disabled={{
+              bg: 'yellow.300',
+              cursor: 'not-allowed',
+            }}
             _hover={{
               bg: 'yellow.300',
             }}
@@ -130,74 +155,52 @@ const ShowButton = (
             }}
             bg="yellow.300"
           >
-            Tuy chon
-          </MenuButton>
-          <MenuList>
-            <MenuItem onClick={onAccept}>{t('Accept')}</MenuItem>
-            <MenuItem onClick={onReject}>{t('Reject')}</MenuItem>
-          </MenuList>
-        </Menu>
-      ) : (
-        <Button
-          width="50%"
-          disabled
-          _disabled={{
-            bg: 'yellow.300',
-            cursor: 'not-allowed',
-          }}
-          _hover={{
-            bg: 'yellow.300',
-          }}
-          _active={{
-            bg: 'yellow.300',
-          }}
-          bg="yellow.300"
-        >
-          {t('Waitting')}
-        </Button>
-      );
-    case 'a':
-      return (
-        <Button
-          width="50%"
-          disabled
-          _disabled={{
-            bg: 'blue.300',
-            cursor: 'not-allowed',
-          }}
-          _active={{
-            bg: 'blue.300',
-          }}
-          _hover={{
-            bg: 'blue.300',
-          }}
-          bg="blue.300"
-        >
-          {t('Friend')}
-        </Button>
-      );
-    case 'b':
-      return (
-        <Button
-          width="50%"
-          disabled
-          _disabled={{
-            bg: 'red.300',
-            cursor: 'not-allowed',
-          }}
-          _hover={{
-            bg: 'red.300',
-          }}
-          _active={{
-            bg: 'red.300',
-          }}
-          bg="red.300"
-        >
-          {t('Blocked')}
-        </Button>
-      );
+            {t('Waitting')}
+          </Button>
+        );
+      case 'a':
+        return (
+          <Button
+            width="50%"
+            disabled
+            _disabled={{
+              bg: 'blue.300',
+              cursor: 'not-allowed',
+            }}
+            _active={{
+              bg: 'blue.300',
+            }}
+            _hover={{
+              bg: 'blue.300',
+            }}
+            bg="blue.300"
+          >
+            {t('Friend')}
+          </Button>
+        );
+      case 'b':
+        return (
+          <Button
+            width="50%"
+            disabled
+            _disabled={{
+              bg: 'red.300',
+              cursor: 'not-allowed',
+            }}
+            _hover={{
+              bg: 'red.300',
+            }}
+            _active={{
+              bg: 'red.300',
+            }}
+            bg="red.300"
+          >
+            {t('Blocked')}
+          </Button>
+        );
+    }
   }
-};
+}
 export default function FoundUser({
   user,
   friendShipStatusCode,
@@ -207,28 +210,27 @@ export default function FoundUser({
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
+  const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const toast = useToast();
   const navigate = useNavigate();
   const myId = useAppSelector((state) => state.userSlice.info._id);
-  console.log(useAppSelector((state) => state.userSlice.info));
   const socket = useAppSelector((state) => state.globalSlice.socket);
   const handleAddFriend = async () => {
     try {
-      socket?.emit('createFriendShip', user._id);
-      // const response = await FriendsApi.addFriend(user._id);
-      // const { _id } = response.data.friendShip;
-      // dispatch(
-      //   addNewFriend({
-      //     _id: _id,
-      //     user: user,
-      //     statusCode: {
-      //       code: 'p',
-      //       name: 'Pending',
-      //     },
-      //     flag: 'sender',
-      //   })
-      // );
+      const response = await FriendsApi.addFriend(user._id);
+      const { _id } = response.data.friendShip;
+      dispatch(
+        addNewFriend({
+          _id: _id,
+          user: user,
+          statusCode: {
+            code: 'p',
+            name: 'Pending',
+          },
+          flag: 'sender',
+        })
+      );
       toast({
         title: t('Success'),
         description: t('Send__Request__Success'),
@@ -247,7 +249,6 @@ export default function FoundUser({
       });
     }
   };
-  const dispatch = useAppDispatch();
   const handleCreateConversation = () => {
     ConversationsApi.createConversationByFriendShip(friendShipId).then(
       (response) => {
@@ -261,8 +262,6 @@ export default function FoundUser({
       }
     );
   };
-  console.log(myId);
-  console.log(user._id);
   return (
     <Box boxSizing="border-box" maxHeight={'600px'} position="relative">
       {!isLargerThanHD && (
@@ -309,7 +308,10 @@ export default function FoundUser({
             friendShipStatusCode,
             handleAddFriend,
             flag,
-            friendShipId
+            friendShipId,
+            toast,
+            dispatch,
+            t
           )}
           <Button width="50%" onClick={handleCreateConversation}>
             {t('Message')}

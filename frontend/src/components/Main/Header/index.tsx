@@ -25,6 +25,7 @@ import ModalShowInfo from '~/components/ModalShowInfo';
 import moment from 'moment';
 import { IUser } from '../../../interfaces/IUser';
 import { setInterval } from 'timers/promises';
+import { SERVER_URL } from '~/configs';
 type Props = {
   name: string;
   avatarUrl: string;
@@ -46,7 +47,7 @@ const AvatarMemo = React.memo(function AvatarMemo({
         base: 'none',
         lg: 'block',
       }}
-      src={src}
+      src={`${SERVER_URL}/images/${src}`}
     >
       <AvatarBadge
         borderColor={isOnline ? 'white' : 'papayawhip'}
