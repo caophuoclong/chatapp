@@ -8,7 +8,7 @@ export default class Auth{
             username,
             password
         })
-        
+        console.log(response);
         return response;
     }
     static async register({
@@ -24,8 +24,8 @@ export default class Auth{
             name,
         })
     }
-    static async refreshToken(){
-        return await axiosClient.get("/auth/refresh-token");
+    static refreshToken(){
+        return axiosClient.get("/auth/refresh-token");
     }
     static async forgotPassword(email: string){
         console.log(email);

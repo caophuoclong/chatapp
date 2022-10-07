@@ -133,7 +133,7 @@ export default function Header({ name, avatarUrl, friendShip, type }: Props) {
             {friendShip.statusCode.code === 'a' &&
               myFriend &&
               (myFriend.isOnline ? (
-                <Text fontSize={'12px'}>{t('ActiveNow')}</Text>
+                <Text fontSize={'12px'}>{t('Active')}</Text>
               ) : (
                 <Text fontSize={'12px'}>
                   {(t('LastActive') as (time: string | number) => String)(

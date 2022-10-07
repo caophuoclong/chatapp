@@ -4,6 +4,8 @@ import { initReactI18next } from "react-i18next";
 // the translations
 // (tip move them in a JSON file and import them,
 // or even better, manage them separated from your code: https://react.i18next.com/guides/multiple-translation-files)
+const maxYear = new Date().getFullYear() - 1;
+const minYear = 1900;
 const resources = {
   en: {
     translation: {
@@ -89,9 +91,31 @@ const resources = {
       "Password__Doesnot__Match": "Confirm password does not match",
       "Password__Matched": "Confirm password matched",
       "Email__Not__Exist": "Email does not exist",
-
-
-
+      "Sent": "Sent",
+      "Received": "Received",
+      "Sending": "Sending",
+      "Seen": "Seen",
+      "Invalid__Password": "Invalid password",
+      "Username__Required": "Username is required",
+      "Password__Required": "Password is required",
+      "Email__Required": "Email is required",
+      "Request": "Request",
+      "Year__Required": "Year is required",
+      "Month__Required": "Month is required",
+      "Date__Required": "Day is required",
+      "Year__Max": `Year must be less than ${maxYear}`,
+      "Year__Min": `Year must be greater than ${minYear}`,
+      "Month__Max": "Month must be less than 12",
+      "Month__Min": "Month must be greater than 0",
+      "Day__Max": "Day must be less than 31",
+      "Day__Min": "Day must be greater than 0",
+      "Show__info": "Show info",
+      "Date__30": "Date must be less than 30",
+      "Date__31": "Date must be less than 31",
+      "Date__29": "Date must be less than 29",
+      "Phone__Invalid": "Phone number is invalid",
+      "Success__Update__Info": "Update info success",
+      "Fail__Update__Info": "Update info fail",
     
     }
   },
@@ -179,7 +203,30 @@ const resources = {
       "Password__Doesnot__Match": "Mật khẩu chưa trùng khớp",
       "Password__Matched": "Mật khẩu trùng khớp",
       "Email__Not__Exist": "Email không tồn tại",
-
+      "Sent": "Đã gửi",
+      "Received": "Đã nhận",
+      "Sending": "Đang gửi",
+      "Seen": "Đã xem",
+      "Username__Required": "Tên đăng nhập không được để trống",
+      "Password__Required": "Mật khẩu không được để trống",
+      "Email__Required": "Email không được để trống",
+      "Request": "Lời mời",
+      "Year__Required": "Năm sinh không được để trống",
+      "Month__Required": "Tháng sinh không được để trống",
+      "Date__Required": "Ngày sinh không được để trống",
+      "Year__Max": `Năm phải nhỏ hơn ${maxYear}`,
+      "Year__Min": `Năm tối thiểu ${minYear}`,
+      "Month__Max": "Tháng phải nhỏ hơn 12",
+      "Month__Min": "Tháng phải tối thiểu 1",
+      "Day__Max": "Ngày phải nhỏ hơn 31",
+      "Day__Min": "Ngày phải tối thiểu 1",
+      "Show__info": "Hiển thị thông tin",
+      "Date__30": "Phải nhỏ hơn 30",
+      "Date__31": "Phải nhỏ hơn 31",
+      "Date__29": "Phải nhỏ hơn 29",
+      "Phone__Invalid": "Số điện thoại không hợp lệ",
+      "Success__Update__Info": "Cập nhật thông tin thành công",
+      "Fail__Update__Info": "Cập nhật thông tin thất bại",
     }
   }
 };

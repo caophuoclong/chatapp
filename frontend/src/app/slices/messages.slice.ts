@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '@app/store';
-import { IMessage } from '../../interfaces/IMessage';
+import { IMessage, MessageStatusType } from '../../interfaces/IMessage';
 import MessagesApi from '../../services/apis/Messages.api';
+import Message from '../../components/Main/MessagesBox/Message/index';
 
 // Define a type for the slice state
 interface MessageState {
@@ -26,6 +27,7 @@ export const getMessages = createAsyncThunk(
   }) => {
     const response = await MessagesApi.getMessages(conversationId, skip);
     response.data.conversationId = conversationId;
+    console.log(response);
     return response;
   }
 );
@@ -41,6 +43,17 @@ export const messageSlice = createSlice({
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
+    initMessage: (state: MessageState, action: PayloadAction<string>)=>{
+      return {
+        ...state,
+        messages: {
+          [action.payload] : {
+            count: 0,
+            data: []
+          }
+        }
+      }
+    },
     addMessage:(state: MessageState, action: PayloadAction<{
       message: IMessage,
       conversationId: string,
@@ -48,9 +61,38 @@ export const messageSlice = createSlice({
       const { message, conversationId } = action.payload;
       if(!state.messages[conversationId]){
         state.messages[conversationId].data = [];
+      }else{
+        const set = new Set(state.messages[conversationId].data);
+        set.add(message);
+        state.messages[conversationId].data = Array.from(set);
+        // state.messages[conversationId].data.push(message);
+        state.messages[conversationId].count++;
       }
-      state.messages[conversationId].data.push(message);
-      state.messages[conversationId].count++;
+    },
+    updateSentMessage: (state: MessageState, action: PayloadAction<{
+      conversationId: string,
+      tempId: string,
+      value: Partial<IMessage>
+    }>)=>{
+      const { conversationId, value, tempId } = action.payload;
+      console.log(conversationId);
+      const index = state.messages[conversationId].data.findIndex((message)=>message._id === tempId);
+      console.log(index);
+      state.messages[conversationId].data[index] = {
+        ...state.messages[conversationId].data[index],
+        ...value
+      }
+    },
+    updateReceivedMessage: (state: MessageState, action: PayloadAction<{conversationId: string, messageId: string}>)=>{
+      const {conversationId, messageId} = action.payload;
+      if(state.messages[conversationId]){
+        const index = state.messages[conversationId].data.findIndex((message)=>message._id === messageId);
+      state.messages[conversationId].data[index] = {
+        ...state.messages[conversationId].data[index],
+        status: MessageStatusType.RECEIVED
+      }
+      }
+      
     }
 
   },
@@ -80,7 +122,7 @@ export const messageSlice = createSlice({
   },
 });
 
-export const {addMessage} = messageSlice.actions;
+export const {addMessage, updateSentMessage, updateReceivedMessage, initMessage} = messageSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 

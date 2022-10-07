@@ -15,6 +15,9 @@ import Picker from 'emoji-picker-react';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import MessagesApi from '../../../services/apis/Messages.api';
 import { addMessage } from '~/app/slices/messages.slice';
+import { IMessage, MessageStatusType } from '~/interfaces/IMessage';
+import randomInt from '~/utils/randomInt';
+import { updateLastestMessage } from '~/app/slices/conversations.slice';
 type Props = {};
 function useOutside<T extends HTMLElement>(
   ref: React.RefObject<T>,
@@ -40,6 +43,7 @@ export default function InputBox({}: Props) {
   const [isPickerShow, setIsPickerShow] = useState(false);
   const { colorMode } = useColorMode();
   const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.userSlice.info);
   const choosenConversationId = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
@@ -57,20 +61,30 @@ export default function InputBox({}: Props) {
   });
   const socket = useAppSelector((state) => state.globalSlice.socket);
   const sendMessage = async () => {
-    const message = {
+    const message: IMessage = {
+      _id: (Date.now() + randomInt(0, 9999)).toString(),
       destination: choosenConversationId,
       content: content,
-      attachment: [],
+      attachments: [],
       parentMessage: null,
+      status: MessageStatusType.SENDING,
+      createdAt: Date.now(),
+      sender: user,
     };
     try {
+      dispatch(
+        addMessage({ message: message, conversationId: choosenConversationId })
+      );
+      dispatch(
+        updateLastestMessage({
+          message: message,
+          conversationId: choosenConversationId,
+        })
+      );
       // const response = await MessagesApi.sendMessage(message);
       // const data = response.data.data;
       socket?.emit('createMessage', message);
 
-      // dispatch(
-      //   addMessage({ message: data, conversationId: choosenConversationId })
-      // );
       setContent('');
     } catch (error) {
       console.log(error);

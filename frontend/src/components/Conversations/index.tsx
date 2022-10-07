@@ -11,6 +11,15 @@ export default function Conversations({}: Props) {
   const conversations = useAppSelector(
     (state) => state.conversationsSlice.conversations
   );
+  const restedConversations = [...conversations];
+  restedConversations.sort((a, b) => {
+    if (a.lastMessage && b.lastMessage) {
+      return b.lastMessage.createdAt - a.lastMessage.createdAt;
+    } else {
+      return -1;
+    }
+  });
+
   return (
     <Box
       height={{
@@ -21,7 +30,7 @@ export default function Conversations({}: Props) {
       paddingX="1rem"
       boxSizing="border-box"
     >
-      {conversations.map((item: IConversation, index) => (
+      {restedConversations.map((item: IConversation, index) => (
         <Conversation {...item} key={index} />
       ))}
     </Box>

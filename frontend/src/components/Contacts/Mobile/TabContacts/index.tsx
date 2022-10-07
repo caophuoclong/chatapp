@@ -4,6 +4,7 @@ import { useAppSelector } from '~/app/hooks';
 import Friend from '../Friend';
 import { useTranslation } from 'react-i18next';
 import Groups from '../Groups';
+import FriendRequest from '../FriendRequest';
 
 type Props = {};
 
@@ -17,7 +18,7 @@ export default function TabContacts({}: Props) {
       <TabList justifyContent={'space-between'}>
         <Tab>{t('Friends')}</Tab>
         <Tab>{t('Group')}</Tab>
-        <Tab>{t('Other')}</Tab>
+        <Tab>{t('Request')}</Tab>
       </TabList>
       <TabPanels height="100%" overflow="auto">
         <TabPanel padding="0">
@@ -36,7 +37,7 @@ export default function TabContacts({}: Props) {
           <Groups />
         </TabPanel>
         <TabPanel padding="0">
-          <p>three!</p>
+          <FriendRequest />
         </TabPanel>
       </TabPanels>
     </Tabs>

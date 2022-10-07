@@ -95,7 +95,7 @@ export default function NewGroup({ height }: Props) {
       position="relative"
     >
       <Flex
-        height="10%"
+        height="5%"
         width="100%"
         alignItems={'center'}
         padding="0.5rem 1rem"
@@ -167,9 +167,9 @@ export default function NewGroup({ height }: Props) {
       >
         <CheckboxGroup value={value}>
           {friendList.map(
-            (fri) =>
+            (fri, index) =>
               fri.statusCode.code === 'a' && (
-                <Flex>
+                <Flex key={index}>
                   <Contact
                     avatarUrl={fri.user.avatarUrl}
                     name={fri.user.name}

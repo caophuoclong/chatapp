@@ -46,9 +46,7 @@ export const conversationsSlice = createSlice({
         if(conversation){
             conversation.lastMessage = action.payload.message;
         }
-
-    }
-    
+    },
   },
   extraReducers(builder) {
       builder.addCase(getMyConversations.pending, (state)=>{

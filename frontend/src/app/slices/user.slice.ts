@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import UserApi from '~/services/apis/User.api'
 import { AxiosResponse } from 'axios';
-import { IUser } from '~/interfaces/IUser';
+import { Gender, IUser } from '~/interfaces/IUser';
 
 export const getMe =  createAsyncThunk("Get me", async ()=>{
   try{
@@ -29,7 +29,7 @@ const initialState: UserState = {
     email: "",
     phone: "",
     birthday: "",
-    gender: null,
+    gender: Gender.OTHER,
     isOnline: false,
     lastOnline: 0
   },
@@ -41,7 +41,9 @@ export const userSlice = createSlice({
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
-    
+    updateInformation: (state, action: PayloadAction<Partial<IUser>>) => {
+      state.info = {...state.info, ...action.payload}
+    }
   },
   extraReducers(builder) {
     builder.addCase(getMe.pending, (state: UserState, action: PayloadAction<any>)=>{
@@ -62,7 +64,7 @@ export const userSlice = createSlice({
   },
 })
 
-export const {  } = userSlice.actions
+export const { updateInformation } = userSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 

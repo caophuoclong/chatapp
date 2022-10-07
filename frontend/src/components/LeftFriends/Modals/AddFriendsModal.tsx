@@ -19,6 +19,7 @@ import FriendsApi from '~/services/apis/Friends.api';
 import FoundUser from './FoundUser';
 import { IUser } from '~/interfaces/IUser';
 import { StatusCode } from '../../../interfaces/IFriendShip';
+import { useAppSelector } from '~/app/hooks';
 
 type Props = {
   setShow: () => void;
@@ -28,11 +29,8 @@ export default function AddFriendsModal({ setShow }: Props) {
   const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [foundUsers, setFoundUsers] = useState<IUser>();
-  const [friendShipStatus, setFriendShipStatus] = useState<StatusCode | null>(
-    null
-  );
-  const [friendShipId, setFriendShipId] = useState('');
-  const [flag, setFlag] = useState<'sender' | 'target' | ''>('');
+  const friendShips = useAppSelector((state) => state.friendsSlice.friendShips);
+  const friendShip = friendShips.find((fr) => fr.user.username === username);
   const toast = useToast();
   const handleSearch = async () => {
     try {
@@ -40,9 +38,6 @@ export default function AddFriendsModal({ setShow }: Props) {
       console.log(response);
       const data = response.data.data;
       const user = data.user as IUser;
-      setFriendShipStatus(data.friendShip as StatusCode | null);
-      setFlag(data.flag);
-      setFriendShipId(data.friendShipId);
       setFoundUsers(user);
       if (!user) {
         toast({
@@ -85,12 +80,11 @@ export default function AddFriendsModal({ setShow }: Props) {
               {foundUsers && (
                 <FoundUser
                   user={foundUsers}
-                  friendShipStatusCode={friendShipStatus}
-                  setFrienShipStatus={(s: StatusCode | null) =>
-                    setFriendShipStatus(s)
+                  friendShipStatusCode={
+                    friendShip ? friendShip.statusCode : null
                   }
-                  friendShipId={friendShipId}
-                  flag={flag}
+                  friendShipId={friendShip ? friendShip._id : ''}
+                  flag={friendShip ? friendShip.flag : ''}
                 />
               )}
             </Box>

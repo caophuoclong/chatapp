@@ -22,6 +22,7 @@ type Props = {
 
 export default function SettingModal({ isOpen, onClose }: Props) {
   const { t } = useTranslation();
+  console.log(12312313);
   return (
     <Modal
       isOpen={isOpen}

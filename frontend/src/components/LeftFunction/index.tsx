@@ -43,7 +43,7 @@ export default function LeftFunction({}: Props) {
         base: 'none',
         lg: 'flex',
       }}
-      width={'75px'}
+      width={'4%'}
       //   bg="red.100"
       borderRight={
         colorMode === 'dark'
