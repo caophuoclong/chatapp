@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { stringify } from 'querystring';
 import { Repository } from 'typeorm';
+import { SocketService } from '~/socket/socket.service';
 import { User } from '~/user/entities/user.entity';
 import { FriendShip } from './entities/friendship.entity';
 
@@ -11,7 +12,8 @@ export class FriendshipService {
     @InjectRepository(FriendShip)
     private readonly friendShip: Repository<FriendShip>,
     @InjectRepository(User)
-    private readonly user: Repository<User>
+    private readonly user: Repository<User>,
+    private readonly socket: SocketService
   ) {}
   async addFreiend(requestId: string, addressId: string) {
     try {
@@ -66,6 +68,7 @@ export class FriendshipService {
           };
           this.friendShip.create(friendship);
           await this.friendShip.save(friendship);
+          this.socket.emitToUser(addressId, 'createFriendShipSuccess', friendship);
           return {
             statusCode: 200,
             message: 'Friendship created successfully',
@@ -129,6 +132,7 @@ export class FriendshipService {
         if (x.userAddress === requestId || x.userRequest === requestId) {
           friendShip.statusCode.code = 'a';
           await this.friendShip.save(friendShip);
+          this.socket.emitToUser(x.userRequest, 'onAcceptFriend', friendShip);
           return {
             statusCode: 200,
             message: 'Friendship accepted successfully',

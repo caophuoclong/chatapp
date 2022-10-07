@@ -24,6 +24,7 @@ export class FriendShipGateway{
     ){}
     @SubscribeMessage("createFriendShip")
     async createFriendShip(@ConnectedSocket()client: CustomSocket, @MessageBody() userId: string){
+        console.log(userId);
         const res_event_sender = "createFriendShipSuccess_sender"
         const res_event_target = "createFriendShipSuccess_target"
         const [response, socketId]  = await Promise.all([this.friendShipService.addFreiend(client.user._id, userId), this.redisClient.get(userId)])        

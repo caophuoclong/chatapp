@@ -513,5 +513,21 @@ export class UserService {
       message: "Update last online successfull"
     }
   }
+  async updateAvatar(_id: string, avatarName: string){
+    const user = await this.userRepository.findOneBy({
+      _id: _id
+    })
+    if(!user) return {
+      statusCode: 404,
+      message: "User not found"
+    }
+    user.avatarUrl = avatarName;
+    await this.userRepository.save(user);
+    return {
+      statusCode: 200,
+      message: "Update avatar successfull",
+      fileName: avatarName
+    }
+  }
 
 }

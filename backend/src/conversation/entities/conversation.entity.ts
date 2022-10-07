@@ -78,8 +78,7 @@ createdAt: number;
   })
   lastMessage: Message
   @OneToOne(type => FriendShip, f => f._id,{
-    onDelete: "NO ACTION",
-    
+    onDelete: "CASCADE",
   })
   @JoinColumn({
     name: "friendship",

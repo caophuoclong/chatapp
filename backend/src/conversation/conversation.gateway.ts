@@ -1,12 +1,12 @@
 import { Inject, UseGuards } from "@nestjs/common";
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from "@nestjs/websockets";
-import WsGuards from "./auth/ws-auth.guard";
-import { ConversationService } from './conversation/conversation.service';
+import WsGuards from "../auth/ws-auth.guard";
+import { ConversationService } from './conversation.service';
 import { Observable } from 'rxjs';
-import { User } from "./user/entities/user.entity";
+import { User } from "../user/entities/user.entity";
 import { RedisClientType } from '@redis/client';
 import { Server } from "socket.io";
-import CustomSocket from "./interfaces/CustomInterface";
+import CustomSocket from "../interfaces/CustomInterface";
 
 @WebSocketGateway({
   cors:{

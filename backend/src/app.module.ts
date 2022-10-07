@@ -35,8 +35,13 @@ import * as redisStore from 'cache-manager-redis-store';
 import { redisConfig } from './configs/index';
 import { PasswordResetToken } from './entities/passResetToken.entity';
 import { RedisModule } from './redis.module';
-import { ConversationGateway } from './conversation.gateway';
+import { ConversationGateway } from './conversation/conversation.gateway';
 import { FriendShipGateway } from './friendship.gateway';
+import { SocketModule } from './socket/socket.module';
+import { AppGateway } from './app.gateway';
+import { MulterModule } from '@nestjs/platform-express';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -85,6 +90,7 @@ import { FriendShipGateway } from './friendship.gateway';
       },
     }),
     MessageModule,
+    SocketModule,
   ],
   controllers: [AppController],
   providers: [
@@ -92,10 +98,9 @@ import { FriendShipGateway } from './friendship.gateway';
     AuthService,
     LocalStrategy,
     JwtStrategy,
-    SocketGateway,
     MessageGateway,
-    ConversationGateway,
-    FriendShipGateway
+    FriendShipGateway,
+    AppGateway
 
   ],
 })

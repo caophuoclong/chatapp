@@ -4,9 +4,11 @@ import { AppModule } from './app.module';
 import {SwaggerModule, DocumentBuilder} from "@nestjs/swagger"
 import cookieParser  from "cookie-parser";
 import * as dotenv from 'dotenv';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 dotenv.config()
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors({
     origin: ["http://192.168.193.194:3000", "http://localhost:3000", "https://6325fb1041b1717377238ccc--sparkling-gaufre-774277.netlify.app", "https://bebes.site"],
     credentials: true
@@ -20,6 +22,9 @@ async function bootstrap() {
   app.use(cookieParser())
   app.setGlobalPrefix("/api")
   app.useGlobalPipes(new ValidationPipe())
+  app.useStaticAssets(join(__dirname, '..', 'images'), {
+    prefix: '/images/',
+  });
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
   await app.listen(process.env.PORT || 3003);
