@@ -19,22 +19,27 @@ import { AuthService } from './auth/auth.service';
 import WsGuards from './auth/ws-auth.guard';
 import CustomSocket from './interfaces/CustomInterface';
 import { MessageService } from './message/message.service';
+import { SocketService } from './socket/socket.service';
 import { UserService } from './user/user.service';
 @WebSocketGateway({
   cors: {
     origin: '*',
   },
 })
-export class SocketGateway {
+export class AppGateway {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
     private readonly messageServce: MessageService,
     @Inject('REDIS_CLIENT')
     private readonly redisClient: RedisClientType,
+    private socketService: SocketService
   ) {}
   @WebSocketServer()
   server: Server;
+  afterInit(server: Server) {
+    this.socketService.Socket = server;
+  }
   async handleConnection(@ConnectedSocket() client: Socket) {
     const token = client.handshake.headers.authorization.split(' ')[1];
     if (token === 'null') {

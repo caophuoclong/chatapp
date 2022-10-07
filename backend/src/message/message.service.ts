@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
-import { Message } from './entities/message.entity';
+import { Message, MessageStatusType } from './entities/message.entity';
 import { Repository } from 'typeorm';
 import { User } from '~/user/entities/user.entity';
 import { Conversation } from '../conversation/entities/conversation.entity';
@@ -17,6 +17,9 @@ export class MessageService {
     private readonly messageRepository: Repository<Message>,
     @InjectRepository(Conversation)
     private readonly conversationRepository: Repository<Conversation>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+
     private readonly ConversationService: ConversationService,
     private readonly UserService: UserService,
   ) {}
@@ -64,15 +67,16 @@ export class MessageService {
     skip: number,
     limit: number,
   ) {
+    console.log("🚀 ~ file: message.service.ts ~ line 70 ~ MessageService ~ conversationId", conversationId)
     try {
-      const user = await this.UserService.get(userId);
+      // const user = await this.UserService.get(userId);
       const conversation = await this.conversationRepository.findOne({
         where: {
           _id: conversationId,
-          participants: user.data,
         },
+        relations: ["participants"],
       });
-      if (!conversation) {
+      if (!conversation && !conversation.participants.find((user) => user._id === userId)) {
         return {
           statusCode: 404,
           message: 'Conversation not found',
@@ -105,6 +109,93 @@ export class MessageService {
         message: error.message,
         data: null,
       };
+    }
+  }
+  async receiveMessage(messageId: string) {
+    // console.log(messageId);
+    try {
+      const message = await this.messageRepository.findOne({
+        where: {
+          _id: messageId,
+        },
+        relations: ["destination", "sender"],
+        select:{
+          _id: true,
+          sender: {
+            _id: true
+          },
+          destination:{
+            _id: true
+          }
+        }
+      });
+      if (!message) {
+        return {
+          statusCode: 404,
+          message: 'Message not found',
+          data: null,
+        };
+      }
+      message.status = MessageStatusType.RECEIVED;
+      const data = await this.messageRepository.save(message);
+      return {
+        statusCode: 200,
+        message: 'Message read successfully',
+        data: data,
+      };
+    } catch (error) {
+      return {
+        statusCode: 500,
+        message: error.message,
+        data: null,
+      };
+    }
+  }
+  async markAsReceived(userId: string){
+    try{
+      const user = await this.userRepository.findOne({
+        where:{
+          _id: userId,
+        },
+        relations: ["conversations"]
+      })
+      if(!user){
+        return {
+          statusCode: 404,
+          message: 'User not found',
+          data: null,
+        };
+      }
+      const conversations = user.conversations;
+      let x = [];
+      for(let i = 0; i < conversations.length; i++){
+        const conversation = conversations[i];
+        const messages = await this.messageRepository.find({
+          where:{
+            destination: conversation,
+            status: MessageStatusType.SENT
+          },
+          relations: ["sender", "destination"]
+        })
+        for(let j = 0; j < messages.length; j++){
+          const message = messages[j];
+          if(message.sender._id !== userId)
+          message.status = MessageStatusType.RECEIVED;
+          await this.messageRepository.save(message);
+          x.push({
+            senderId: message.sender._id,
+            conversationId: conversation._id,
+            messageId: message._id
+          })
+        }
+        
+      }return{
+        statusCode: 200,
+        message: 'Messages marked as received',
+        data: x
+      }
+    }catch(error){
+      throw new HttpException(error.message, 500);
     }
   }
   findAll() {

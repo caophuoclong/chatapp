@@ -17,6 +17,7 @@ import { UserService } from '../user/user.service';
 import { FriendshipService } from '~/friendship/friendship.service';
 import { Conversation } from './entities/conversation.entity';
 import moment from 'moment';
+import { SocketService } from '~/socket/socket.service';
 
 @Injectable()
 export class ConversationService {
@@ -30,6 +31,7 @@ export class ConversationService {
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     private readonly friendshipService: FriendshipService,
+    private readonly socketService: SocketService,
   ) {}
   async createFromFriendship(
     createFromFriendShipDto: CreateConversationDtoFromFriendshipDto,
@@ -63,11 +65,14 @@ export class ConversationService {
           };
         }
         const conversation = await this.conversation.create();
-        conversation.participants = user;
+        conversation.participants = user;        
         conversation.lastMessage = null;
         conversation.friendship = friendShip;
         conversation.createdAt = new Date().getTime();
         const con = await this.conversation.save(conversation);
+        user.map((user)=>{
+          this.socketService.emitToUser(user._id, 'createConversationSuccess', con);
+        })
         return {
           statusCode: 200,
           message: 'success',
@@ -119,6 +124,7 @@ export class ConversationService {
     }
   }
   async getMessagesConversation(conversationId: string) {
+    console.log("🚀 ~ file: conversation.service.ts ~ line 122 ~ ConversationService ~ getMessagesConversation ~ conversationId", conversationId)
     try {
       const conversation = await this.conversation.findOne({
         where: {

@@ -2,6 +2,7 @@ import { PartialType } from '@nestjs/mapped-types';
 import { IsEmail, IsEmpty, IsOptional, Matches } from 'class-validator';
 import { CreateUserDto } from './create-user.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { Gender } from '../entities/user.entity';
 
 
 export class UpdateUserDto  {
@@ -40,4 +41,11 @@ export class UpdateUserDto  {
         message: "Date must be in format dd/mm/yyyy or dd-mm-yyyy or dd.mm.yyyy"
     })
     birthday: string;
+    @ApiProperty({
+        description: "Gender",
+        required: false
+    })
+    @IsOptional()
+    gender: Gender;
+
 }

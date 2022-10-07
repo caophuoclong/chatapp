@@ -12,6 +12,8 @@ import {
   Query,
   ParseUUIDPipe,
   Req,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -24,6 +26,8 @@ import { JWTAuthGuard } from '../auth/jwt-auth.guard';
 import { AuthService } from '~/auth/auth.service';
 import Utils from '~/utils';
 import { ApiTags, ApiHeader, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery, ApiBody, ApiProperty } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 @ApiTags('User')
 @ApiBearerAuth()
 @UseGuards(JWTAuthGuard)
@@ -101,6 +105,21 @@ export class UserController {
   getFriendShip(@Request() req, @Query("userId") userId){
     return this.userService.getFriendShip(req.user._id, userId)
   }
+  @Post("/update-avatar")
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: "./images",
+      filename: (req, file, cb) => {
+        const fileName = `${Date.now()}-${file.originalname}`;
+        cb(null, fileName)
+        req.body.fileName = fileName;
+      }
+    })
+  }))
+  updateAvatar(@UploadedFile() file: Express.Multer.File, @Request() req) {
+    return this.userService.updateAvatar(req.user._id, req.body.fileName);
+  }
 
+  }
  
-}
+

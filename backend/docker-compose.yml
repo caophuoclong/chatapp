@@ -1,5 +1,17 @@
 version: '3.9'
 services:
+  app:
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - '3003:3003'
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - mysql
+      - redis
   mysql:
     container_name: mysql
     user: root
@@ -22,3 +34,15 @@ services:
       - "6379:6379"
     volumes:
       - ./redis:/data
+  nginx:
+    image: nginx:latest
+    restart: always
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - 
+    depends_on:
+      - app

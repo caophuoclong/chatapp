@@ -8,12 +8,14 @@ import { UserModule } from '../user/user.module';
 import { FriendshipModule } from '../friendship/friendship.module';
 import { Conversation } from './entities/conversation.entity';
 import { UserService } from '~/user/user.service';
+import { SocketModule } from '~/socket/socket.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, FriendShip, Conversation]),
     forwardRef(()=> UserModule),
     FriendshipModule,
+    SocketModule
   ],
   controllers: [ConversationController],
   providers: [ConversationService],
