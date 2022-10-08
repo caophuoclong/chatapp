@@ -16,6 +16,7 @@ import { Link, useParams } from 'react-router-dom';
 import { setChoosenConversationID } from '~/app/slices/global.slice';
 import { IUser } from '../../../interfaces/IUser';
 import { useRef } from 'react';
+import { SERVER_URL } from '~/configs';
 
 const renderDirectConversation = (participants: IUser[], myId: string) => {
   return {
@@ -89,7 +90,9 @@ export default function Conversation({
         src={
           type === 'group'
             ? avatarUrl
-            : renderDirectConversation(participants, user._id).avatarUrl
+            : `${SERVER_URL}/images/${
+                renderDirectConversation(participants, user._id).avatarUrl
+              }`
         }
       />
       <Box width="80%">

@@ -30,6 +30,7 @@ import {
   setChoosenConversationID,
   setShowScreen,
 } from '~/app/slices/global.slice';
+import { SERVER_URL } from '~/configs';
 
 type Props = {
   user: IUser;
@@ -60,38 +61,39 @@ export default function Friend({
   );
   console.log('🚀 ~ file: index.tsx ~ line 58 ~ conversations', conversations);
   const createConversation = (e: React.MouseEvent<HTMLDivElement>) => {
-    let isExist = false;
-    let tempConId = '';
+    // let isExist = false;
+    // let tempConId = '';
 
-    conversations.forEach((conversation) => {
-      if (conversation.type === 'direct') {
-        if (
-          conversation.participants.filter((item) => item._id === user._id)
-            .length
-        ) {
-          isExist = true;
-          tempConId = conversation._id;
+    // conversations.forEach((conversation) => {
+    //   if (conversation.type === 'direct') {
+    //     if (
+    //       conversation.participants.filter((item) => item._id === user._id)
+    //         .length
+    //     ) {
+    //       isExist = true;
+    //       tempConId = conversation._id;
+    //     }
+    //   }
+    // });
+    // if (!isExist) {
+    //   if (socket) {
+    //     socket.emit('createConversationFromFriendShip', friendShipId);
+    //   }
+
+    // } else {
+    //   dispatch(setChoosenConversationID(tempConId));
+    //   dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
+    // }
+    ConversationsApi.createConversationByFriendShip(friendShipId).then(
+      (response) => {
+        if (response) {
+          const data = response.data.data as IConversation;
+          dispatch(addConversation(data));
+          dispatch(setChoosenConversationID(data._id));
+          dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
         }
       }
-    });
-    if (!isExist) {
-      if (socket) {
-        socket.emit('createConversationFromFriendShip', friendShipId);
-      }
-      // ConversationsApi.createConversationByFriendShip(friendShipId).then(
-      //   (response) => {
-      //     if (response) {
-      //       const data = response.data.data as IConversation;
-      //       dispatch(addConversation(data));
-      // dispatch(setChoosenConversationID(data._id));
-      // dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
-      //     }
-      //   }
-      // );
-    } else {
-      dispatch(setChoosenConversationID(tempConId));
-      dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
-    }
+    );
   };
   const onAccept = async () => {
     try {
@@ -161,7 +163,7 @@ export default function Friend({
       onClick={createConversation}
       cursor="pointer"
     >
-      <Avatar src={user.avatarUrl}>
+      <Avatar src={`${SERVER_URL}/images/${user.avatarUrl}`}>
         {!isPending && (
           <AvatarBadge
             borderColor={isOnline ? 'white' : 'papayawhip'}

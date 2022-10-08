@@ -1,9 +1,9 @@
 import axios from 'axios';
 import queryString from 'query-string';
+import { SERVER_URL } from '~/configs';
 import Auth from './apis/Auth.api';
-const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 const axiosClient = axios.create({
-  baseURL: SERVER_URL,
+  baseURL: SERVER_URL + "/api",
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

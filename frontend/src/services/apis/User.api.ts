@@ -1,5 +1,6 @@
 import { Gender, IUser } from "~/interfaces/IUser";
 import axiosClient from "../axiosClient";
+import { AxiosResponse } from 'axios';
 export interface UpdateInfomationDTO{
     name: string,
     email: string,
@@ -16,6 +17,22 @@ export default class UserApi{
     static async updateInfoMation(data: Partial<UpdateInfomationDTO>){
         return await axiosClient.patch("/user/update-info", {
             ...data
+        })
+    }
+    static updateAvatar(data: FormData, func: (e: ProgressEvent)=>void){
+        return new Promise<{
+            fileName: string
+        }>(async(resolve, reject)=>{
+            try{
+                const response = await axiosClient.post("/user/update-avatar", data, {
+                    onUploadProgress: func
+                }
+                
+                );
+                resolve(response.data);
+            }catch(error){
+                reject(error);
+            }
         })
     }
 }

@@ -9,6 +9,7 @@ import {
   addNewFriend,
   changeOnlineStatus,
   getFriendsList,
+  updateAcceptFriend,
 } from '~/app/slices/friends.slice';
 import {
   addConversation,
@@ -72,7 +73,8 @@ export default function Home({}: Props) {
       dispatch(getFriendsList());
       dispatch(getMyConversations());
       const now = Date.now();
-      const expriedTime = localStorage.getItem('expriedTime') || 0;
+      const expriedTime = localStorage.getItem('expiredTime') || 0;
+      console.log(now, expriedTime);
       if (now < +expriedTime) {
         const s = connectSocket();
         dispatch(setSocket(s));
@@ -112,7 +114,6 @@ export default function Home({}: Props) {
           }
         );
         s.on('u_created_conversation', (data: IConversation) => {
-          console.log(data);
           s.emit('joinRoom', data._id);
           dispatch(addConversation(data));
           dispatch(initMessage(data._id));
@@ -178,7 +179,6 @@ export default function Home({}: Props) {
           userRequest: IUser;
         }
         s.on('createFriendShipSuccess_sender', (data: ICreatedFriendShip) => {
-          console.log(data);
           dispatch(
             addNewFriend({
               _id: data._id,
@@ -191,8 +191,7 @@ export default function Home({}: Props) {
             })
           );
         });
-        s.on('createFriendShipSuccess_target', (data: ICreatedFriendShip) => {
-          console.log(data);
+        s.on('createFriendShipSuccess', (data: ICreatedFriendShip) => {
           dispatch(
             addNewFriend({
               _id: data._id,
@@ -204,6 +203,9 @@ export default function Home({}: Props) {
               flag: 'target',
             })
           );
+        });
+        s.on('onAcceptFriend', (data: ICreatedFriendShip) => {
+          dispatch(updateAcceptFriend(data._id));
         });
       }
     }

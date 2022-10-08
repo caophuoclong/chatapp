@@ -28,6 +28,7 @@ import {
   setShowScreen,
 } from '~/app/slices/global.slice';
 import { ENUM_SCREEN } from '../../../../app/slices/global.slice';
+import { SERVER_URL } from '~/configs';
 
 type Props = {
   user: IUser;
@@ -41,6 +42,10 @@ export default function Friend({ user, isOnline, friendShipId }: Props) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [showInfo, setShowInfo] = useState(false);
+  const conversations = useAppSelector(
+    (state) => state.conversationsSlice.conversations
+  );
+  const socket = useAppSelector((state) => state.globalSlice.socket);
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
@@ -57,6 +62,38 @@ export default function Friend({ user, isOnline, friendShipId }: Props) {
         }
       }
     );
+    // let isExist = false;
+    // let tempConId = '';
+
+    // conversations.forEach((conversation) => {
+    //   if (conversation.type === 'direct') {
+    //     if (
+    //       conversation.participants.filter((item) => item._id === user._id)
+    //         .length
+    //     ) {
+    //       isExist = true;
+    //       tempConId = conversation._id;
+    //     }
+    //   }
+    // });
+    // if (!isExist) {
+    //   if (socket) {
+    //     socket.emit('createConversationFromFriendShip', friendShipId);
+    //   }
+    //   // ConversationsApi.createConversationByFriendShip(friendShipId).then(
+    //   //   (response) => {
+    //   //     if (response) {
+    //   //       const data = response.data.data as IConversation;
+    //   //       dispatch(addConversation(data));
+    //   //        dispatch(setChoosenConversationID(data._id));
+    //   //        dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
+    //   //     }
+    //   //   }
+    //   // );
+    // } else {
+    //   dispatch(setChoosenConversationID(tempConId));
+    //   dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
+    // }
   };
   return (
     <Flex
@@ -71,7 +108,7 @@ export default function Friend({ user, isOnline, friendShipId }: Props) {
       role="group"
       onClick={createConversation}
     >
-      <Avatar src={user.avatarUrl}>
+      <Avatar src={`${SERVER_URL}/images/${user.avatarUrl}`}>
         <AvatarBadge
           borderColor={isOnline ? 'white' : 'papayawhip'}
           bg={isOnline ? 'green.500' : 'tomato'}

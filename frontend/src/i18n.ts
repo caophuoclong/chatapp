@@ -116,7 +116,7 @@ const resources = {
       "Phone__Invalid": "Phone number is invalid",
       "Success__Update__Info": "Update info success",
       "Fail__Update__Info": "Update info fail",
-    
+      "User__Not__Found": "User not found",
     }
   },
   vn: {
@@ -227,6 +227,7 @@ const resources = {
       "Phone__Invalid": "Số điện thoại không hợp lệ",
       "Success__Update__Info": "Cập nhật thông tin thành công",
       "Fail__Update__Info": "Cập nhật thông tin thất bại",
+      "User__Not__Found": "Không tìm thấy người dùng",
     }
   }
 };
