@@ -43,6 +43,6 @@ services:
       - "443:443"
     volumes:
       - ./nginx:/etc/nginx/conf.d
-      - 
+      - ./public:/var/www/html
     depends_on:
       - app
