@@ -46,6 +46,7 @@ services:
       - '3306:3306'
     volumes:
       - ./data:/var/lib/mysql
+      - ./mysql/conf.d:/etc/mysql/conf.d/
     environment:
       MYSQL_ROOT_PASSWORD: 516489C@k
       MYSQL_DATABASE: chatapp
@@ -68,4 +69,9 @@ services:
       - "443:443"
     volumes:
       - ./nginx:/etc/nginx/conf.d/
-      # - ./nginx/ssl:/etc/nginx/ssl
+      - ./ssl:/etc/nginx/ssl
+  # certbot:
+  #   image: certbot/certbot:latest
+  #   volumes:
+  #     - ./certbot/www/:/var/www/certbot/:rw
+  #     - ./certbot/conf/:/etc/letsencrypt/:rw
