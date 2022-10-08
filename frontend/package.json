@@ -57,9 +57,10 @@
   },
   "scripts": {
     "start": "cat ./dev.env > .env && react-app-rewired start",
-    "build": "cat ./prod1.env > .env && react-app-rewired build",
+    "build": "cat ./dev.env > .env && react-app-rewired build",
     "test": "react-app-rewired test",
-    "eject": "react-app-rewired eject"
+    "eject": "react-app-rewired eject",
+    "start:build": "pm2 serve -s build 3000 --spa"
   },
   "eslintConfig": {
     "extends": [
