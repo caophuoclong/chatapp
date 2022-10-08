@@ -117,6 +117,8 @@ const resources = {
       "Success__Update__Info": "Update info success",
       "Fail__Update__Info": "Update info fail",
       "User__Not__Found": "User not found",
+      "Display__Name": "Display name",
+      "Required": "Required",
     }
   },
   vn: {
@@ -228,6 +230,9 @@ const resources = {
       "Success__Update__Info": "Cập nhật thông tin thành công",
       "Fail__Update__Info": "Cập nhật thông tin thất bại",
       "User__Not__Found": "Không tìm thấy người dùng",
+      "Display__Name": "Tên hiển thị",
+      "Invalid__Password": "Mật khẩu không hợp lệ",
+      "Required": "Không được để trống",
     }
   }
 };

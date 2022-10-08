@@ -74,7 +74,8 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.log(error);
+    // console.log(error);
+    throw error;
     // if (
     //   error.response.status === 400 &&
     //   error.response.data.message === 'User not found'

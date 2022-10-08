@@ -16,7 +16,7 @@ export default class Auth{
         password,
         email,
         name,
-    }:IRegisterRequest){
+    }:Omit<IRegisterRequest, "confirmPassword">){
         return axiosClient.post("/auth/register", {
             username,
             password,
