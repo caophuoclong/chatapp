@@ -19,3 +19,13 @@ export const redisConfig = ()=>({
     redis_port: process.env.REDIS_PORT,
     redis_password: process.env.REDIS_PASSWORD,
 })
+export const mailConfig = ()=>({
+    mail_host: process.env.MAIL_HOST,
+    mail_port: process.env.MAIL_PORT,
+    mail_user: process.env.MAIL_USER,
+    mail_password: process.env.MAIL_PASSWORD,
+    mail_from: process.env.MAIL_FROM,
+})
+export const appConfig = ()=>({
+    client_host: process.env.CLIENT_HOST,
+})

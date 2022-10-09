@@ -38,5 +38,8 @@ export default class Utils implements IUtils{
     hashToken(){
         return randomBytes(48).toString("hex");
     }
+    randomToken(){
+        return randomBytes(48).toString("hex");
+    }
 
 }

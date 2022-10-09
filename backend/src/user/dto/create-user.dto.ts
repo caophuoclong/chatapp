@@ -30,5 +30,8 @@ export class CreateUserDto {
     birthday: string;
 
     salt: string;
+    @ApiProperty()
+    @IsOptional()
+    lan: "en" | "vn" = "en";
 
 }

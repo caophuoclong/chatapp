@@ -14,12 +14,15 @@ import { AuthModule } from '~/auth/auth.module';
 import { ConversationModule } from '../conversation/conversation.module';
 import { PasswordResetToken } from '../entities/passResetToken.entity';
 import { RedisModule } from '~/redis.module';
+import { MailModule } from '../mail/mail.module';
+import { Confirmation } from '~/entities/confirmation.entity';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, PasswordResetToken]),
+    TypeOrmModule.forFeature([User, PasswordResetToken, Confirmation]),
     FriendshipModule,
     forwardRef(() => ConversationModule),
-    RedisModule
+    RedisModule,
+    MailModule
   ],
   controllers: [UserController],
   providers: [

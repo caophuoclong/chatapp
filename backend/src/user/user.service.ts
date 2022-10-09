@@ -13,6 +13,8 @@ import { ConversationService } from '../conversation/conversation.service';
 import { PasswordResetToken } from '~/entities/passResetToken.entity';
 import { RedisClientType } from 'redis';
 import { IListFriend } from '~/interfaces/IListFriend';
+import { MailService } from '~/mail/mail.service';
+import { Confirmation } from '~/entities/confirmation.entity';
 @Injectable()
 export class UserService {
   constructor(
@@ -26,9 +28,14 @@ export class UserService {
     @Inject(forwardRef(()=> ConversationService))
     private readonly conversationService: ConversationService,
     @Inject("REDIS_CLIENT")
-    private readonly redisClient: RedisClientType
+    private readonly redisClient: RedisClientType,
+    private readonly mailService: MailService,
+    @InjectRepository(Confirmation)
+    private readonly confirmationRepository: Repository<Confirmation>,
   ) {}
   async register(createUserDto: CreateUserDto) {
+      const lan = createUserDto.lan;
+      delete createUserDto.lan;
     try {
       const { salt, hashedPassowrd } = await this.utils.hashPassword(
         createUserDto.password,
@@ -37,6 +44,15 @@ export class UserService {
       createUserDto.salt = salt;
       const user = this.userRepository.create(createUserDto);
       await this.userRepository.save(user);
+      const confirmation: Omit<Confirmation, "_id"> = {
+        user: user,
+        token: this.utils.randomToken(),
+      }
+
+      await this.confirmationRepository.save(confirmation);
+      this.mailService.sendUserConfirmation(user, confirmation.token, lan).then((result)=>{
+        console.log(result);
+      });
       return {
         statusCode: 200,
         message: 'User created successfully',
@@ -56,7 +72,8 @@ export class UserService {
           salt: true,
           password: true,
           username: true,
-          name: true
+          name: true,
+          active: true
         }
       });
       if (!user) {
@@ -67,11 +84,15 @@ export class UserService {
         user.salt,
         user.password,
       );
+
       if (!verified) {
         throw new HttpException('Password does not match', 403);
       }
       delete user.salt;
       delete user.password;
+      if(!user.active){
+        throw new HttpException('User not active', 403);
+      }
       return {
         statusCode: 200,
         message: 'Login success',
@@ -443,7 +464,7 @@ export class UserService {
       .then((response) => response)
       .catch((error) => new HttpException(error, 400));
   }
-  async createForgotToken(email: string){
+  async createForgotToken(email: string, lan: "en" | "vn"){
     const user = await this.userRepository.findOneBy({
       email: email
     })
@@ -456,6 +477,8 @@ export class UserService {
       user: user._id
     })
     await this.passFogotToken.save(PasswordForgotToken);
+    const link = `${process.env.CLIENT_HOST}/set-password?token=${token}&lan=${lan}`;
+    this.mailService.sendMailRecovery(user, link, lan);
     return {
       token: token,
       url: "http://localhost:3000/set-password?token=" + token
@@ -527,6 +550,34 @@ export class UserService {
       statusCode: 200,
       message: "Update avatar successfull",
       fileName: avatarName
+    }
+  }
+  async verifyAccount(token: string){
+    try{
+      const confirmation = await this.confirmationRepository.findOne({
+        where:{
+          token: token
+        },
+        relations: ["user"]
+      })
+      if(token){
+        const user = await this.userRepository.findOneBy({
+          _id: confirmation.user._id
+        })
+        user.active = true;
+        await this.userRepository.save(user);
+        await this.confirmationRepository.remove(confirmation);
+        return {
+          statusCode: 200,
+          message: "Verify account successfull"
+        }
+      }
+      throw new Error("Token not found")
+    }catch(error){
+            return {
+        statusCode: 400,
+        message: "Could not verify account. Because token is invalid"
+      }
     }
   }
 
