@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Drawer,
@@ -23,6 +23,7 @@ import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import { setShowInfoConversation } from '~/app/slices/global.slice';
 import { useTranslation } from 'react-i18next';
 import IConversation from '../../../interfaces/IConversation';
+import IFriendShip from '../../../interfaces/IFriendShip';
 
 type Props = {
   choosenConversation: IConversation;
@@ -37,6 +38,8 @@ export default function Main({ choosenConversation }: Props) {
     (state) => state.globalSlice.conversation.showInfoConversation
   );
   const dispatch = useAppDispatch();
+  const [friendShip, setFriendShip] = useState<IFriendShip>();
+  const friendShips = useAppSelector((state) => state.friendsSlice.friendShips);
   const r = new RegExp('/message/[A-Za-z0-9]{3,16}/info');
   const { t } = useTranslation();
   useEffect(() => {
@@ -44,6 +47,12 @@ export default function Main({ choosenConversation }: Props) {
       ? dispatch(setShowInfoConversation(true))
       : dispatch(setShowInfoConversation(false));
   }, [location]);
+  useEffect(() => {
+    const friendShip = friendShips.find((friendShip) => {
+      return choosenConversation.friendship._id === friendShip._id;
+    });
+    setFriendShip(friendShip);
+  }, [friendShips]);
   return choosenConversation ? (
     <Flex
       width={{
@@ -56,7 +65,7 @@ export default function Main({ choosenConversation }: Props) {
       <Header
         name={choosenConversation.name}
         avatarUrl={choosenConversation.avatarUrl}
-        friendShip={choosenConversation.friendship}
+        friendShip={friendShip}
         type={choosenConversation.type}
       />
       <MessagesBox />

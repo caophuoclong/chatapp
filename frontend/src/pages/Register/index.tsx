@@ -29,6 +29,7 @@ import { regPassword } from '../SetPassword';
 import { yupResolver } from '@hookform/resolvers/yup';
 import LoadingScreen from '~/components/LoadingScreen';
 import capitalizeFirstLetter from '~/utils/capitalizeFirstLetter';
+import NotifySentEmail from './NotifySentEmail';
 
 type Props = {};
 
@@ -39,6 +40,7 @@ export default function Register({}: Props) {
   // const [isLoading, setIsLoading] = useState<boolean>(false);
   const loading = useAppSelector((state) => state.globalSlice.loading);
   const { t } = useTranslation();
+  const lang = useAppSelector((state) => state.globalSlice.lan);
   const registerSchema = yup.object().shape({
     name: yup.string().required(t('Required')),
     username: yup.string().required(t('Username__Required')),
@@ -67,23 +69,25 @@ export default function Register({}: Props) {
     setError,
   } = methods;
   console.log(errors);
+  const [notifyShow, setNotifyShow] = useState(false);
   const onSubmit = async (data: IRegisterRequest) => {
     try {
+      data.lan = lang;
       console.log(data);
       const res = await dispatch(register(data));
       const response = await unwrapResult(res);
-      console.log(response);
       if (response && response.data.statusCode === 200) {
-        toast({
-          title: t('Success'),
-          description: t('Success__Register'),
-          status: 'success',
-          position: isLargerThanHD ? 'top-right' : 'bottom',
-          duration: 1000,
-          onCloseComplete: () => {
-            navigate('/login');
-          },
-        });
+        // toast({
+        //   title: t('Success'),
+        //   description: t('Success__Register'),
+        //   status: 'success',
+        //   position: isLargerThanHD ? 'top-right' : 'bottom',
+        //   duration: 1000,
+        //   onCloseComplete: () => {
+        //     navigate('/login');
+        //   },
+        // });
+        setNotifyShow(true);
       }
     } catch (error: any) {
       console.log(error);
@@ -134,10 +138,17 @@ export default function Register({}: Props) {
       }
     }
   };
+  const handleCloseNotify = () => {
+    setNotifyShow(false);
+    navigate('/login');
+  };
   return (
     <>
       {loading.register && <LoadingScreen />}
       <FormProvider {...methods}>
+        {notifyShow && (
+          <NotifySentEmail isOpen={notifyShow} onClose={handleCloseNotify} />
+        )}
         <Box
           bg="none"
           position="absolute"

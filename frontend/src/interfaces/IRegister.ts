@@ -4,6 +4,7 @@ interface IRegisterRequest{
     email: string;
     name: string;
     confirmPassword: string;
+    lan?: "en" | "vn";
 
 }
 interface IRegisterResponse{

@@ -66,15 +66,15 @@ function ShowButton(
         isClosable: true,
         position: 'top-right',
       });
-      // dispatch(
-      //   changeStatusCode({
-      //     friendShipId: friendShipId,
-      //     statusCode: {
-      //       code: 'a',
-      //       name: 'Accept',
-      //     },
-      //   })
-      // );
+      dispatch(
+        changeStatusCode({
+          friendShipId: friendShipId,
+          statusCode: {
+            code: 'a',
+            name: 'Accept',
+          },
+        })
+      );
     } catch (error) {
       toast({
         title: t('Error'),
@@ -216,10 +216,12 @@ export default function FoundUser({
   const navigate = useNavigate();
   const myId = useAppSelector((state) => state.userSlice.info._id);
   const socket = useAppSelector((state) => state.globalSlice.socket);
+  console.log(myId);
   const handleAddFriend = async () => {
     try {
       const response = await FriendsApi.addFriend(user._id);
       const { _id } = response.data.friendShip;
+      console.log(response);
       dispatch(
         addNewFriend({
           _id: _id,
@@ -297,7 +299,10 @@ export default function FoundUser({
           position="relative"
           transform={'translateY(-32px)'}
         >
-          <Avatar src={user.avatarUrl} size="lg" />
+          <Avatar
+            src={`${process.env.REACT_APP_SERVER_URL}/images/${user.avatarUrl}`}
+            size="lg"
+          />
           <Text fontWeight={700}>{user.name}</Text>
         </Flex>
       </Box>

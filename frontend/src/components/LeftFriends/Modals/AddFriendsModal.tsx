@@ -13,7 +13,7 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import FriendsApi from '~/services/apis/Friends.api';
 import FoundUser from './FoundUser';
@@ -32,46 +32,57 @@ export default function AddFriendsModal({ setShow }: Props) {
   const [username, setUsername] = useState('');
   const [foundUsers, setFoundUsers] = useState<IUser | null>();
   const friendShips = useAppSelector((state) => state.friendsSlice.friendShips);
+  console.log(friendShips);
   const [friendShip, setFriendShip] = useState<IFriendShip>();
   const toast = useToast();
-  const { handleSubmit, register } = useForm({
+  const { handleSubmit, register, watch } = useForm({
     defaultValues: {
       username: '',
     },
   });
+  const x = watch('username');
+  console.log(x);
   const formRef = useRef<HTMLFormElement>(null);
 
   const onSubmit = handleSubmit(async (data) => {
     const { username } = data;
     if (username.length > 0) {
-      try {
-        const response = await FriendsApi.getUserByUsername(username);
-        console.log(response);
-        if (response.data.statusCode === 404) {
-          toast({
-            title: t('Error'),
-            description: t('User__Not__Found'),
-            status: 'error',
-            duration: 3000,
-            position: 'top-right',
-          });
-          setFoundUsers(null);
-        } else {
-          const data = response.data.data;
-          const user = data.user as IUser;
-          console.log(user);
-          setFriendShip(
-            friendShips.find((fr) => fr.user.username === username)
-          );
-          setFoundUsers(user);
+      const fr = friendShips.find((fr) => fr.user.username === username);
+      if (fr) {
+        setFoundUsers(fr.user);
+        setFriendShip(fr);
+      } else {
+        try {
+          const response = await FriendsApi.getUserByUsername(username);
+          console.log(response);
+          if (response.data.statusCode === 404) {
+            toast({
+              title: t('Error'),
+              description: t('User__Not__Found'),
+              status: 'error',
+              duration: 3000,
+              position: 'top-right',
+            });
+            setFoundUsers(null);
+          } else {
+            const data = response.data.data;
+            const user = data.user as IUser;
+            console.log(user);
+            setUsername(user.username);
+            setFoundUsers(user);
+          }
+        } catch (error) {
+          // console.log(error);
         }
-      } catch (error) {
-        // console.log(error);
       }
     }
   });
+  useEffect(() => {
+    setFriendShip(friendShips.find((fr) => fr.user.username === x));
+  }, [friendShips]);
+  console.log(friendShip);
   const handleEnterPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    console.log(e);
+    // console.log(e);
   };
   return (
     <Modal onClose={setShow} size={'sm'} isOpen={true}>

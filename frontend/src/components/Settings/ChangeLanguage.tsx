@@ -25,7 +25,7 @@ export default function ChangeLanguage({}: Props) {
     moment.locale(lan === 'vn' ? 'vi' : 'es');
   }, [lan]);
   return (
-    <Stack direction={'row'}>
+    <Stack direction={'row'} zIndex={1000}>
       <Text>{t('Language')}</Text>
       <VN width={32} height={24} />
       <Switch

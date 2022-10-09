@@ -16,6 +16,7 @@ export const login =  createAsyncThunk("login", async (data: ILoginRequest)=>{
 export const register = createAsyncThunk("register", (data: Omit<IRegisterRequest, "confirmPassword">)=>{
   return new Promise<any>(async (resolve, reject)=>{
     try{
+      console.log(data);
       const response = await Auth.register(data);
       resolve(response);
     }

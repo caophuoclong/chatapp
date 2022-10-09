@@ -31,6 +31,7 @@ import { FaUser } from 'react-icons/fa';
 import { BsKey } from 'react-icons/bs';
 import { yupResolver } from '@hookform/resolvers/yup';
 import ErrorShow from '~/components/ErrorShow';
+import NotActive from './NotActive';
 type Props = {};
 const loginSchema = yup.object().shape({
   username: yup.string().required('Username__Required').trim().lowercase(),
@@ -41,7 +42,7 @@ export default function Login({}: Props) {
     (state) => state.globalSlice.isLargerThanHD
   );
   const { t } = useTranslation();
-
+  const [showNotActive, setShowNotActive] = React.useState<boolean>(false);
   const isLogin = useAppSelector((state) => state.globalSlice.loading.login);
   const toast = useToast();
   const navigate = useNavigate();
@@ -74,21 +75,29 @@ export default function Login({}: Props) {
         },
       });
     } catch (error: any) {
-      toast({
-        title: t('Error'),
-        description: t('Password__NotMatch'),
-        status: 'error',
-        position: isLargerThanHD ? 'top-right' : 'bottom',
-        duration: 3000,
-        isClosable: true,
-      });
+      if (error.message === 'NotActive') {
+        setShowNotActive(true);
+      } else {
+        toast({
+          title: t('Error'),
+          description: t('Password__NotMatch'),
+          status: 'error',
+          position: isLargerThanHD ? 'top-right' : 'bottom',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
     }
-    console.log(data);
   };
-  console.log(errors.password);
   return (
     <>
       {isLogin && <LoadingScreen />}
+      {showNotActive && (
+        <NotActive
+          onClose={() => setShowNotActive(false)}
+          isOpen={showNotActive}
+        />
+      )}
       <FormProvider {...methods}>
         <Box
           bg="none"

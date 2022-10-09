@@ -119,6 +119,14 @@ const resources = {
       "User__Not__Found": "User not found",
       "Display__Name": "Display name",
       "Required": "Required",
+      "Back__To__Login": "Back to login",
+      "Thanks__Title": "Verify your email successfully!",
+      "Thanks__Content": "Your account has been verified successfully. Please login to continue.",
+      "Thanks__Title__Error": "Something went wrong!",
+      "Thanks__Content__Error": "Your account has been verified unsuccessfully or it has verified. Please try again.",
+      "Notify__SentEmail": (email: string)=>`A verification email has been sent to ${email}. Please check your email to verify your account before you sign in.`,
+      "Not__Active": "Your account is not active. Please check your email to verify your account before you sign in.",
+
     }
   },
   vn: {
@@ -233,6 +241,13 @@ const resources = {
       "Display__Name": "Tên hiển thị",
       "Invalid__Password": "Mật khẩu không hợp lệ",
       "Required": "Không được để trống",
+      "Back__To__Login": "Trở về trang đăng nhập",
+      "Thanks__Title": "Xác nhận thành công",
+      "Thanks__Content": "Tài khoản của bạn đã được xác nhận thành công. Bạn có thể đăng nhập ngay bây giờ",
+      "Thanks__Title__Error": "Có lỗi xảy ra!",
+      "Thanks__Content__Error": "Xác thực tài khoản không thành công hoặc tài khoản đã được xác thực. Vui lòng thử lại",
+      "Notify__SentEmail": (email: string) => `Một email xác nhận đã được gửi đến ${email}. Vui lòng kiểm tra email để xác nhận tài khoản trước khi đăng nhập`,
+      "Not__Active": "Tài khoản chưa được kích hoạt, vui lòng kiểm tra email để kích hoạt tài khoản",
     }
   }
 };

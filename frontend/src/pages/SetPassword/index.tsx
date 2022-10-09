@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -14,7 +14,7 @@ import {
 import queryString from 'query-string';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import { useLocation, useNavigate, useNavigationType } from 'react-router-dom';
-import { login } from '~/app/slices/global.slice';
+import { login, handleChangeLanguage } from '~/app/slices/global.slice';
 import { unwrapResult } from '@reduxjs/toolkit';
 import background from '~/assets/images/bg_login.png';
 import { useTranslation } from 'react-i18next';
@@ -62,8 +62,13 @@ export default function SetPassword({}: Props) {
   const toast = useToast();
   const navigate = useNavigate();
   const { search } = useLocation();
+  const dispatch = useAppDispatch();
   const token = queryString.parse(search).token as string;
-  console.log(token);
+  const lan = queryString.parse(search).lan as 'en' | 'vn';
+  useEffect(() => {
+    console.log(lan);
+    dispatch(handleChangeLanguage(lan));
+  }, [search]);
   const onSubmit = handleSubmit(async (data) => {
     try {
       const { newPassword, confirmPassword } = data;
