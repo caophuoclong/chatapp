@@ -37,6 +37,20 @@ services:
   #     - NODE_ENV=development
   #   depends_on:
   #     - server
+  admin:
+    container_name: phpadmin
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+      - PMA_USER=root
+      - PMA_PASSWORD=516489C@k
+    depends_on:
+      - mysql
+      
   mysql:
     container_name: mysql
     user: root
