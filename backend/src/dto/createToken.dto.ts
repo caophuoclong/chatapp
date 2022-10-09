@@ -1,9 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, Matches } from "class-validator";
+import { IsNotEmpty, IsOptional, Matches } from "class-validator";
 
 export class CreateForgotToken{
     @ApiProperty()
     email: string
+    @ApiProperty()
+    @IsOptional()
+    lan: "en" | "vn" = "en"
 }
 
 export class ResetPassword{

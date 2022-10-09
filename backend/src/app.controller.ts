@@ -33,6 +33,7 @@ export class AppController {
   register(@Body() createUserDto: CreateUserDto) {
     // console.log(createUserDto);
     // return "123"
+    console.log(createUserDto);
     return this.authService.register(createUserDto);
   }
   @Get("/auth/refresh-token")
@@ -60,7 +61,8 @@ export class AppController {
   }
   @Post("/auth/create_forgot_token")
   createForgotToken(@Body() createForgotToken: CreateForgotToken){
-    return this.userService.createForgotToken(createForgotToken.email);
+    console.log(createForgotToken);
+    return this.userService.createForgotToken(createForgotToken.email, createForgotToken.lan);
   }
   @Post("/auth/createNewPassword/:token")
   @ApiParam({
@@ -68,5 +70,9 @@ export class AppController {
   })
   createNewPassword(@Param("token") token: string, @Body() resetPassword: ResetPassword){
     return this.userService.resetPassword(token, resetPassword.newPassword);
+  }
+  @Post("/auth/verifyAccount")
+  verifyAccount(@Body() body: {token: string}){
+    return this.userService.verifyAccount(body.token);
   }
 }

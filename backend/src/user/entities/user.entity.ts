@@ -81,4 +81,9 @@ export class User {
         default: Gender.OTHER
     })
     gender: Gender
+    @Column({
+        type: "boolean",
+        default: false
+    })
+    active: boolean
 }

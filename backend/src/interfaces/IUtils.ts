@@ -5,5 +5,6 @@ export interface IUtils{
     }>;
     verify(password: string, salt: string, hashedPassword: string): Promise<boolean>;
     hashToken(): string;
+    randomToken(): string;
 }
 export const IUtils1 = Symbol("IUtils");

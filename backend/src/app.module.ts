@@ -1,5 +1,6 @@
 import { PassportModule } from '@nestjs/passport';
 import {
+  Global,
   MiddlewareConsumer,
   Module,
   NestModule,
@@ -9,7 +10,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SocketGateway } from './socket.gateway';
 import { UserModule } from './user/user.module';
-import { config, databaseConfig } from './configs';
+import { appConfig, config, databaseConfig, mailConfig } from './configs';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './user/entities/user.entity';
 import { AuthService } from './auth/auth.service';
@@ -42,14 +43,17 @@ import { AppGateway } from './app.gateway';
 import { MulterModule } from '@nestjs/platform-express';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { MailModule } from './mail/mail.module';
+import { Confirmation } from './entities/confirmation.entity';
 
 @Module({
   imports: [
     RedisModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, config, redisConfig],
+      load: [databaseConfig, config, redisConfig, mailConfig, appConfig],
     }),
+    
     TypeOrmModule.forRootAsync({
       useFactory: () => {
         const config = databaseConfig();
@@ -69,11 +73,13 @@ import { join } from 'path';
             UnRead,
             Attachment,
             PasswordResetToken,
+            Confirmation
           ],
           autoLoadEntities: true,
           synchronize: true,
         };
       },
+    
     }),
     UserModule,
     MessageModule,
@@ -91,6 +97,7 @@ import { join } from 'path';
     }),
     MessageModule,
     SocketModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [
