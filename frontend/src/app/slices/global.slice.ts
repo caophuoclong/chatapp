@@ -13,8 +13,28 @@ export enum ENUM_SCREEN {
 export const login =  createAsyncThunk("login", async (data: ILoginRequest)=>{
   return await Auth.login(data);
 })
-export const register = createAsyncThunk("register", async (data: IRegisterRequest)=>{
-  return await Auth.register(data);
+export const register = createAsyncThunk("register", (data: Omit<IRegisterRequest, "confirmPassword">)=>{
+  return new Promise<any>(async (resolve, reject)=>{
+    try{
+      console.log(data);
+      const response = await Auth.register(data);
+      resolve(response);
+    }
+    catch(error: any){
+      console.log(error);
+      console.log(error.response);
+      if(error.response.data.message.includes("Duplicate")){
+      reject({
+        message: error.response.data.message
+      })}
+      else{
+        reject({
+          message: "Unknown"
+        })
+      
+    }
+  }
+  })
 })
 // Define a type for the slice state
 interface GlobalState {
@@ -27,7 +47,8 @@ interface GlobalState {
     showScreen: ENUM_SCREEN,
     socket: Socket | null,
     loading: {
-      login: boolean
+      login: boolean,
+      register: boolean,
     }
     autoChangeColorMode: boolean,
 }
@@ -44,6 +65,7 @@ const initialState: GlobalState = {
    socket: null,
    loading:{
     login: false,
+    register: false,
    },
    autoChangeColorMode: false,
 }
@@ -92,15 +114,15 @@ export const global = createSlice({
       state.loading.login = false
     })
     builder.addCase(register.pending, (state, action) => {
-      state.loading.login = true
+      state.loading.register = true
     }
     )
     builder.addCase(register.fulfilled, (state, action) => {
-      state.loading.login = false
+      state.loading.register = false
     }
     )
     builder.addCase(register.rejected, (state, action) => {
-      state.loading.login = false
+      state.loading.register = false
     }
     )
 

@@ -43,6 +43,7 @@ axiosClient.interceptors.request.use(
       '/auth/create_forgot_token',
       '/auth/createNewPassword',
       '/auth/refresh-token',
+      "/auth/confirm"
     ];
     const isUnSecureUrl = unSecureUrl.some((url) => config.url?.includes(url));
     if (isUnSecureUrl) return config;
@@ -75,6 +76,7 @@ axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
     console.log(error);
+    throw error;
     // if (
     //   error.response.status === 400 &&
     //   error.response.data.message === 'User not found'

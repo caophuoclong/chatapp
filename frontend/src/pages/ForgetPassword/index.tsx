@@ -10,6 +10,7 @@ import { login } from '~/app/slices/global.slice';
 import { unwrapResult } from '@reduxjs/toolkit';
 import { useTranslation } from 'react-i18next';
 import Auth from '~/services/apis/Auth.api';
+import NotifySentEmail from '../Register/NotifySentEmail';
 
 type Props = {};
 
@@ -22,6 +23,8 @@ export default function ForgetPassword({}: Props) {
   const toast = useToast();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const lan = useAppSelector((state) => state.globalSlice.lan);
+  const [isSent, setIsSent] = React.useState<boolean>(false);
   const onSubmit = async (data: { email: string }) => {
     const { email } = data;
     // validate email
@@ -39,16 +42,9 @@ export default function ForgetPassword({}: Props) {
       });
     } else {
       try {
-        const response = await Auth.forgotPassword(email);
+        const response = await Auth.forgotPassword(email, lan);
         console.log(response);
-        toast({
-          title: t('Success'),
-          description: t('Detail__Recover__Email'),
-          status: 'success',
-          position: isLargerThanHD ? 'top-right' : 'bottom',
-          duration: 3000,
-          isClosable: true,
-        });
+        setIsSent(true);
       } catch (error: any) {
         if (error.response.status === 404) {
           toast({
@@ -65,8 +61,15 @@ export default function ForgetPassword({}: Props) {
       }
     }
   };
+  const handleCloseNotify = () => {
+    setIsSent(false);
+    navigate('/login');
+  };
   return (
     <>
+      {isSent && (
+        <NotifySentEmail isOpen={isSent} onClose={handleCloseNotify} />
+      )}
       {isLargerThanHD ? (
         <Desktop onSubmit={onSubmit} />
       ) : (

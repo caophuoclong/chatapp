@@ -36,6 +36,7 @@ import NewGroup from './components/NewGroup';
 import moment from 'moment-timezone';
 import ForgetPassword from './pages/ForgetPassword';
 import SetPassword from './pages/SetPassword/index';
+import Confirm from './pages/Confirm/index';
 function App() {
   const { setColorMode } = useColorMode();
   const dispatch = useAppDispatch();
@@ -99,6 +100,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgetPassword />} />
       <Route path="/set-password" element={<SetPassword />} />
+      <Route path="/auth/confirm" element={<Confirm />} />
     </Routes>
   );
 }

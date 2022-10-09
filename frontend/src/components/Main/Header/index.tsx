@@ -29,7 +29,7 @@ import { SERVER_URL } from '~/configs';
 type Props = {
   name: string;
   avatarUrl: string;
-  friendShip: IFriendShip;
+  friendShip: IFriendShip | undefined;
   type: 'group' | 'direct';
 };
 const AvatarMemo = React.memo(function AvatarMemo({
@@ -66,13 +66,18 @@ export default function Header({ name, avatarUrl, friendShip, type }: Props) {
   const friendShips = useAppSelector((state) => state.friendsSlice.friendShips);
   const [myFriend, setMyFriend] = useState<IUser | null>(null);
   useEffect(() => {
-    if (type === 'direct') {
+    console.log(type);
+    console.log(friendShips);
+    console.log(friendShip);
+    if (type === 'direct' && friendShip) {
       setMyFriend(
         friendShips.find((friendShip1) => friendShip1._id === friendShip._id)!
           .user
       );
     }
   }, [friendShips]);
+  console.log(friendShip);
+  console.log(myFriend);
   const dispatch = useAppDispatch();
   const { colorMode } = useColorMode();
   return (

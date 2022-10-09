@@ -3,6 +3,8 @@ interface IRegisterRequest{
     password: string;
     email: string;
     name: string;
+    confirmPassword: string;
+    lan?: "en" | "vn";
 
 }
 interface IRegisterResponse{

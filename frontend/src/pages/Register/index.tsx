@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
   Flex,
   Text,
+  Tooltip,
   useMediaQuery,
   useToast,
 } from '@chakra-ui/react';
@@ -26,62 +27,95 @@ import ChangeLanguage from '~/components/Settings/ChangeLanguage';
 import * as yup from 'yup';
 import { regPassword } from '../SetPassword';
 import { yupResolver } from '@hookform/resolvers/yup';
+import LoadingScreen from '~/components/LoadingScreen';
+import capitalizeFirstLetter from '~/utils/capitalizeFirstLetter';
+import NotifySentEmail from './NotifySentEmail';
 
 type Props = {};
-export const registerSchema = yup.object().shape({
-  name: yup.string().required('Name__Required'),
-  username: yup.string().required('Username__Required'),
-  email: yup.string().email('Invalid__Email').required('Email__Required'),
-  password: yup
-    .string()
-    .required('Password__Required')
-    .matches(regPassword, 'Invalid__Password'),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref('password'), null], 'Password__Doesnot__Match'),
-});
+
 export default function Register({}: Props) {
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
+  // const [isLoading, setIsLoading] = useState<boolean>(false);
+  const loading = useAppSelector((state) => state.globalSlice.loading);
   const { t } = useTranslation();
+  const lang = useAppSelector((state) => state.globalSlice.lan);
+  const registerSchema = yup.object().shape({
+    name: yup.string().required(t('Required')),
+    username: yup.string().required(t('Username__Required')),
+    email: yup.string().email('Invalid__Email').required('Email__Required'),
+    password: yup
+      .string()
+      .required('Password__Required')
+      .matches(regPassword, 'Invalid__Password'),
+    confirmPassword: yup
+      .string()
+      .test('password-match', 'Password__Doesnot__Match', function (value) {
+        return this.parent.password === value;
+      }),
+  });
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const toast = useToast();
+
   const methods = useForm<IRegisterRequest>({
     resolver: yupResolver(registerSchema),
+    mode: 'onChange',
   });
-
+  const {
+    formState: { errors },
+    setFocus,
+    setError,
+  } = methods;
+  console.log(errors);
+  const [notifyShow, setNotifyShow] = useState(false);
   const onSubmit = async (data: IRegisterRequest) => {
     try {
+      data.lan = lang;
+      console.log(data);
       const res = await dispatch(register(data));
-      const response = unwrapResult(res);
-      toast({
-        title: t('Success'),
-        description: t('Success__Register'),
-        status: 'success',
-        position: isLargerThanHD ? 'top-right' : 'bottom',
-        duration: 1000,
-        onCloseComplete: () => {
-          navigate('/login');
-        },
-      });
+      const response = await unwrapResult(res);
+      if (response && response.data.statusCode === 200) {
+        // toast({
+        //   title: t('Success'),
+        //   description: t('Success__Register'),
+        //   status: 'success',
+        //   position: isLargerThanHD ? 'top-right' : 'bottom',
+        //   duration: 1000,
+        //   onCloseComplete: () => {
+        //     navigate('/login');
+        //   },
+        // });
+        setNotifyShow(true);
+      }
     } catch (error: any) {
-      const data1 = error.response.data;
       console.log(error);
-      if (data1) {
-        if (data1.message.includes('Duplicate')) {
-          const value = data1.message.split(' ')[2];
-          toast({
-            title: t('Error'),
-            description: (t('IsExist') as (x: string) => string)(
-              getKeyByValue(data, (value as string).replaceAll("'", '')) || ''
-            ),
-            position: isLargerThanHD ? 'top-right' : 'bottom',
-            status: 'error',
-            duration: 3000,
-            isClosable: true,
-          });
+      if (error !== null) {
+        if (error.message.includes('Duplicate')) {
+          const value = error.message.split(' ')[2];
+          const { name, ...rest } = data;
+          const key = getKeyByValue<typeof rest>(rest, value);
+          console.log(key);
+          if (key) {
+            setFocus(key);
+            setError(key, {
+              type: 'custom',
+              message: (t('IsExist') as (x: string) => string)(
+                t(capitalizeFirstLetter(key.replaceAll("'", '')))
+              ),
+            });
+            toast({
+              title: t('Error'),
+              description: (t('IsExist') as (x: string) => string)(
+                t(capitalizeFirstLetter(key.replaceAll("'", '')))
+              ),
+              position: isLargerThanHD ? 'top-right' : 'bottom',
+              status: 'error',
+              duration: 3000,
+              isClosable: true,
+            });
+          }
         } else {
           toast({
             title: t('Error'),
@@ -104,9 +138,17 @@ export default function Register({}: Props) {
       }
     }
   };
+  const handleCloseNotify = () => {
+    setNotifyShow(false);
+    navigate('/login');
+  };
   return (
     <>
+      {loading.register && <LoadingScreen />}
       <FormProvider {...methods}>
+        {notifyShow && (
+          <NotifySentEmail isOpen={notifyShow} onClose={handleCloseNotify} />
+        )}
         <Box
           bg="none"
           position="absolute"
@@ -155,27 +197,41 @@ export default function Register({}: Props) {
                 <MyInput
                   icon={<FaUser size="34px" />}
                   name="name"
-                  placeholder={t('Name')}
+                  isError={errors.name ? true : false}
+                  labelError={errors.name?.message}
+                  placeholder={t('Display__Name')}
                 />
+
                 <MyInput
                   icon={<FaUser size="34px" />}
                   name="username"
                   placeholder={t('Username')}
+                  isError={errors.username ? true : false}
+                  labelError={errors.username?.message}
                 />
+
                 <MyInput
+                  isError={errors.email ? true : false}
+                  labelError={errors.email?.message}
                   icon={<MdEmail size="34px" />}
                   name="email"
                   placeholder={t('Email')}
                 />
+
                 <MyInput
                   icon={<BsKey size="34px" />}
                   name="password"
                   type="password"
                   placeholder={t('Password')}
+                  isError={errors.password ? true : false}
+                  labelError={errors.password?.message}
                 />
+
                 <MyInput
+                  isError={errors.confirmPassword ? true : false}
+                  labelError={errors.confirmPassword?.message}
                   icon={<BsKey size="34px" />}
-                  name="configmPassword"
+                  name="confirmPassword"
                   type="password"
                   placeholder={t('Confirm__Password')}
                 />
