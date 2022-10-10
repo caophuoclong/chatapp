@@ -211,9 +211,9 @@ export default function Home({}: Props) {
     }
   }, []);
   const friendShips = useAppSelector((state) => state.friendsSlice.friendShips);
-  useEffect(() => {
-    dispatch(getFriendsList());
-  }, [friendShips]);
+  // useEffect(() => {
+  //   dispatch(getFriendsList());
+  // }, [friendShips]);
   const handle = async () => {
     const response = await Auth.refreshToken();
     console.log(response);
