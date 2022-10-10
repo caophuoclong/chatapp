@@ -84,4 +84,9 @@ createdAt: number;
     name: "friendship",
   })
   friendship: FriendShip
+  @Column({
+    type: "bigint",
+    default: new Date().getTime()
+  })
+  updateAt: number;
 }

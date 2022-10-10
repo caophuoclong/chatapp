@@ -99,7 +99,7 @@ export class ConversationService {
       // console.log(createConversationDto.participants);
       const conversation = this.conversation.create();
       const users = await (
-        await this.userService.getUsers(createConversationDto.participants)
+        await this.userService.getUsers(JSON.parse(createConversationDto.participants))
       ).data;
       const owner = await (await this.userService.get(ownerId)).data;
       conversation.name = createConversationDto.name;
@@ -108,6 +108,7 @@ export class ConversationService {
       conversation.type = 'group';
       conversation.visible = createConversationDto.visible;
       conversation.createdAt = new Date().getTime();
+      conversation.avatarUrl = createConversationDto.avatarUrl
 
       const saved = await this.conversation.save(conversation);
       return {
@@ -116,6 +117,7 @@ export class ConversationService {
         data: saved,
       };
     } catch (error) {
+      console.log(error);
       return {
         statusCode: 500,
         message: 'error',

@@ -37,6 +37,7 @@ export class MessageService {
       if (conversation) {
         message.destination = conversation;
         conversation.lastMessage = message;
+        conversation.updateAt =  createMessageDto.updateAt;
         const data = await this.messageRepository.save(message);
         await this.conversationRepository.save(conversation);
         delete data.destination;
@@ -44,6 +45,7 @@ export class MessageService {
           statusCode: 200,
           message: 'Message created successfully',
           data: data,
+          updateAt: conversation.updateAt
         };
       } else {
         return {
