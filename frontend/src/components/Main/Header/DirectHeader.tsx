@@ -21,7 +21,11 @@ export default function DirectHeader({ friendShip }: Props) {
         }}
       >
         <AvatarMemo
-          src={friendShip.user.avatarUrl}
+          src={
+            friendShip && friendShip.user && friendShip.user.avatarUrl
+              ? friendShip.user.avatarUrl
+              : ''
+          }
           isOnline={friendShip.user?.isOnline}
         />
       </button>
