@@ -68,7 +68,11 @@ export default function ForgetPassword({}: Props) {
   return (
     <>
       {isSent && (
-        <NotifySentEmail isOpen={isSent} onClose={handleCloseNotify} />
+        <NotifySentEmail
+          isOpen={isSent}
+          onClose={handleCloseNotify}
+          content={t('Notify__Sent__Recover__Password')}
+        />
       )}
       {isLargerThanHD ? (
         <Desktop onSubmit={onSubmit} />

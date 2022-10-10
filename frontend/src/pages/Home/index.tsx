@@ -15,6 +15,7 @@ import {
   addConversation,
   getMyConversations,
   updateLastestMessage,
+  updateLatestUpdateConversation,
 } from '~/app/slices/conversations.slice';
 import { connectSocket } from '../../providers/SocketProvider';
 import {
@@ -49,6 +50,8 @@ import { useTranslation } from 'react-i18next';
 import IConversation from '~/interfaces/IConversation';
 import IFriendShip from '../../interfaces/IFriendShip';
 import { IUser } from '~/interfaces/IUser';
+import moment from 'moment';
+import { updateConversation } from '~/app/slices/conversations.slice';
 
 type Props = {};
 
@@ -82,17 +85,24 @@ export default function Home({}: Props) {
           console.log(data);
         });
         s.on('newMessage', (data) => {
-          const { destination, ...message } = data;
+          const { destination, updateAt, ...message } = data;
           dispatch(
             addMessage({
               message: message,
               conversationId: destination,
             })
           );
+          // dispatch(
+          //   updateLastestMessage({
+          //     message: message,
+          //     conversationId: destination,
+          //   })
+          // );
           dispatch(
-            updateLastestMessage({
-              message: message,
+            updateLatestUpdateConversation({
               conversationId: destination,
+              updateAt,
+              message,
             })
           );
           s.emit('markReceiveMessage', message._id);
@@ -210,6 +220,10 @@ export default function Home({}: Props) {
       }
     }
   }, []);
+  const lan = useAppSelector((state) => state.globalSlice.lan);
+  useEffect(() => {
+    moment.locale(lan === 'en' ? 'en' : 'vi');
+  }, [lan]);
   const friendShips = useAppSelector((state) => state.friendsSlice.friendShips);
   // useEffect(() => {
   //   dispatch(getFriendsList());
@@ -218,6 +232,15 @@ export default function Home({}: Props) {
     const response = await Auth.refreshToken();
     console.log(response);
   };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      dispatch(getFriendsList());
+      dispatch(getMyConversations());
+    }, 50000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
   // return <Button onClick={handle}>hihi</Button>;
   // return (
   //   <Box width="100vw" position="absolute">

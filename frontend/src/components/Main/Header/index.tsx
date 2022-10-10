@@ -8,6 +8,7 @@ import {
   AvatarBadge,
   useColorMode,
   Tag,
+  SkeletonCircle,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -21,18 +22,24 @@ import {
   setShowInfoConversation,
   setChoosenConversationID,
 } from '~/app/slices/global.slice';
-import ModalShowInfo from '~/components/ModalShowInfo';
+import ModalShowInfo from '~/components/Modals/ModalShowInfo';
 import moment from 'moment';
 import { IUser } from '../../../interfaces/IUser';
 import { setInterval } from 'timers/promises';
 import { SERVER_URL } from '~/configs';
+import GroupHeader from './GroupHeader';
+import DirectHeader from './DirectHeader';
+import HeaderBtn from './HeaderBtn';
 type Props = {
   name: string;
   avatarUrl: string;
   friendShip: IFriendShip | undefined;
+  participants: IUser[];
   type: 'group' | 'direct';
+  _id: string;
+  owner: IUser;
 };
-const AvatarMemo = React.memo(function AvatarMemo({
+export const AvatarMemo = React.memo(function AvatarMemo({
   src,
   isOnline,
 }: {
@@ -57,29 +64,22 @@ const AvatarMemo = React.memo(function AvatarMemo({
     </Avatar>
   );
 });
-export default function Header({ name, avatarUrl, friendShip, type }: Props) {
+export default function Header({
+  name,
+  avatarUrl,
+  friendShip,
+  type,
+  participants,
+  _id,
+  owner,
+}: Props) {
   const { t } = useTranslation();
-  const [showFriendInfo, setShowFriendInfo] = useState(false);
   const showInfo = useAppSelector(
     (state) => state.globalSlice.conversation.showInfoConversation
   );
-  const friendShips = useAppSelector((state) => state.friendsSlice.friendShips);
-  const [myFriend, setMyFriend] = useState<IUser | null>(null);
-  useEffect(() => {
-    console.log(type);
-    console.log(friendShips);
-    console.log(friendShip);
-    if (type === 'direct' && friendShip) {
-      setMyFriend(
-        friendShips.find((friendShip1) => friendShip1._id === friendShip._id)!
-          .user
-      );
-    }
-  }, [friendShips]);
-  console.log(friendShip);
-  console.log(myFriend);
   const dispatch = useAppDispatch();
   const { colorMode } = useColorMode();
+
   return (
     <Flex
       boxSizing="border-box"
@@ -107,81 +107,19 @@ export default function Header({ name, avatarUrl, friendShip, type }: Props) {
           dispatch(setChoosenConversationID(''));
         }}
       />
-      {friendShip ? (
-        <button
-          onClick={() => {
-            setShowFriendInfo(true);
-          }}
-        >
-          <AvatarMemo src={avatarUrl} isOnline={myFriend?.isOnline} />
-        </button>
-      ) : (
-        <>
-          <AvatarMemo src={avatarUrl} isOnline={myFriend?.isOnline} />
-        </>
-      )}
-      {}
-      {myFriend && (
-        <ModalShowInfo
-          showInfo={showFriendInfo}
-          setShowInfo={(e: boolean) => {
-            setShowFriendInfo(e);
-          }}
-          user={myFriend}
+      {type === 'group' && (
+        <GroupHeader
+          participants={participants}
+          name={name}
+          avatarUrl={avatarUrl}
+          _id={_id}
+          owner={owner}
         />
       )}
-      <Box marginX="1rem">
-        <Text fontWeight={600} noOfLines={1}>
-          {name}
-        </Text>
-        {friendShip ? (
-          <>
-            {friendShip.statusCode.code === 'a' &&
-              myFriend &&
-              (myFriend.isOnline ? (
-                <Text fontSize={'12px'}>{t('Active')}</Text>
-              ) : (
-                <Text fontSize={'12px'}>
-                  {(t('LastActive') as (time: string | number) => String)(
-                    moment(new Date(+myFriend.lastOnline)).fromNow()
-                  )}
-                </Text>
-              ))}
-            {friendShip.statusCode.code === 'p' && (
-              <Tag size="sm" colorScheme={'yellow'}>
-                {t('Pending')}
-              </Tag>
-            )}
-          </>
-        ) : (
-          ''
-        )}
-      </Box>
-      <Flex marginLeft="auto" gap=".4rem">
-        <IconButton
-          bg="none"
-          rounded="full"
-          aria-label="Call video"
-          icon={<BsCameraVideoFill />}
-        />
-        <IconButton
-          bg="none"
-          rounded="full"
-          aria-label="Call"
-          icon={<IoCallSharp />}
-        />
-        <IconButton
-          onClick={() => {
-            dispatch(setShowInfoConversation(true));
-          }}
-          bg={
-            showInfo ? (colorMode === 'dark' ? 'gray.700' : 'gray.200') : 'none'
-          }
-          rounded="full"
-          aria-label="Show infor conversations"
-          icon={<GiHamburgerMenu />}
-        />
-      </Flex>
+      {type === 'direct' && friendShip && (
+        <DirectHeader friendShip={friendShip} />
+      )}
+      <HeaderBtn />
     </Flex>
   );
 }

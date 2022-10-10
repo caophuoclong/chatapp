@@ -47,6 +47,27 @@ export const conversationsSlice = createSlice({
             conversation.lastMessage = action.payload.message;
         }
     },
+    updateLatestUpdateConversation: (state: Conversations, action:PayloadAction<{
+      conversationId: string,
+      updateAt: number,
+      message: IMessage
+    }>)=>{
+       const conversation = state.conversations.find(conversation=>{
+            return conversation._id === action.payload.conversationId;
+        })
+        if(conversation){
+            conversation.updateAt = action.payload.updateAt;
+            conversation.lastMessage = action.payload.message;
+        }
+    },
+    updateConversation: (state: Conversations, action:PayloadAction<IConversation>)=>{
+        const index = state.conversations.findIndex(conversation=>{
+            return conversation._id === action.payload._id;
+        })
+        if(index !== -1){
+            state.conversations[index] = action.payload;
+        }
+    }
   },
   extraReducers(builder) {
       builder.addCase(getMyConversations.pending, (state)=>{
@@ -59,7 +80,7 @@ export const conversationsSlice = createSlice({
   },
 })
 
-export const { addConversation, updateLastestMessage } = conversationsSlice.actions
+export const { addConversation, updateLastestMessage, updateConversation, updateLatestUpdateConversation } = conversationsSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 

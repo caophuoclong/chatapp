@@ -1,11 +1,17 @@
 import { SearchIcon } from '@chakra-ui/icons';
 import {
   Avatar,
+  AvatarBadge,
+  Box,
   Button,
   Checkbox,
   CheckboxGroup,
   Flex,
   Input,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -16,14 +22,17 @@ import {
   useCheckboxGroup,
   useToast,
 } from '@chakra-ui/react';
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { IoCamera, IoCameraOutline, IoCameraSharp } from 'react-icons/io5';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import { addConversation } from '~/app/slices/conversations.slice';
 import NewGroup from '~/components/NewGroup';
 import Contact from '~/components/NewGroup/Contact';
+import { SERVER_URL } from '~/configs';
 import IFriendShip from '~/interfaces/IFriendShip';
 import ConversationsApi from '~/services/apis/Conversations.api';
+import readFile from '~/utils/readFile';
 
 type Props = {
   setShow: () => void;
@@ -54,10 +63,12 @@ export default function CreateGroupModal({ setShow }: Props) {
   const handleCreateGroup = () => {
     const participants = [...value];
     participants.push(myId);
-    ConversationsApi.createGroupConversation(
-      groupName,
-      participants as string[]
-    )
+    const data = new FormData();
+    data.append('name', groupName);
+    data.append('participants', JSON.stringify(participants));
+    if (file) data.append('file', file);
+    data.append('visible', 'false');
+    ConversationsApi.createGroupConversation(data)
       .then((res) => {
         console.log(res);
         dispatch(addConversation(res.data.data));
@@ -81,6 +92,24 @@ export default function CreateGroupModal({ setShow }: Props) {
         });
       });
   };
+  const [file, setFile] = useState<File | null>();
+  const [previewAvatar, setPreviewAvatar] = useState<string>('');
+  useEffect(() => {
+    (async () => {
+      if (file) {
+        try {
+          const preview = await readFile(file);
+          setPreviewAvatar(preview);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    })();
+  }, [file]);
+  const removeAvatar = () => {
+    setFile(null);
+    setPreviewAvatar('');
+  };
   return (
     <Modal onClose={setShow} size={'sm'} isOpen={true}>
       <ModalOverlay />
@@ -89,7 +118,48 @@ export default function CreateGroupModal({ setShow }: Props) {
         <ModalCloseButton />
         <ModalBody padding="0">
           <Flex padding="1rem" gap="1rem" height="10%">
-            <Avatar />
+            {previewAvatar ? (
+              <Menu>
+                {() => (
+                  <>
+                    <MenuButton>
+                      <Avatar src={previewAvatar} size="md" />
+                    </MenuButton>
+                    <MenuList>
+                      <MenuItem>
+                        <label
+                          htmlFor="conversationAvatarUpload"
+                          style={{
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {t('Change__Avatar')}
+                        </label>
+                      </MenuItem>
+                      <MenuItem onClick={() => removeAvatar()}>
+                        {t('Remove__Avatar')}
+                      </MenuItem>
+                    </MenuList>
+                  </>
+                )}
+              </Menu>
+            ) : (
+              <label
+                htmlFor="conversationAvatarUpload"
+                style={{ cursor: 'pointer' }}
+              >
+                <Flex
+                  width={'48px'}
+                  height={'48px'}
+                  rounded="full"
+                  border="1px solid black"
+                  justifyContent={'center'}
+                  alignItems="center"
+                >
+                  <IoCamera size="40px" fill="gray.700" />
+                </Flex>
+              </label>
+            )}
             <Flex width="80%">
               <Input
                 placeholder={t('Set__Group__Name')}
@@ -100,6 +170,15 @@ export default function CreateGroupModal({ setShow }: Props) {
                 }
               />
             </Flex>
+            <input
+              id="conversationAvatarUpload"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                if (e.target.files) setFile(e.target.files[0]);
+              }}
+              type="file"
+              accept=""
+              hidden
+            />
           </Flex>
           <Flex
             alignItems={'center'}
@@ -126,7 +205,7 @@ export default function CreateGroupModal({ setShow }: Props) {
                 fri.statusCode.code === 'a' && (
                   <Flex padding="1rem">
                     <Contact
-                      avatarUrl={fri.user.avatarUrl}
+                      avatarUrl={`${SERVER_URL}/images/${fri.user.avatarUrl}`}
                       name={fri.user.name}
                     />
                     <Checkbox

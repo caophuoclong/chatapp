@@ -1,6 +1,7 @@
 import { IMessage } from './IMessage';
 import { IUser } from './IUser';
 import IFriendShip from './IFriendShip';
+export type ConversationType = "group" | "direct";
 export default interface IConversation{
     _id: string,
     name: string;
@@ -9,6 +10,8 @@ export default interface IConversation{
     createdAt: Date,
     participants: Array<IUser>,
     lastMessage: IMessage,
-    type: "group" | "direct"
-    friendship: IFriendShip
+    type:ConversationType,
+    friendship: IFriendShip,
+    owner: IUser,
+    updateAt: number;
 }

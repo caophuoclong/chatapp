@@ -37,9 +37,12 @@ export default function MyMessage({ message, time, _id }: Props) {
   const messages = useAppSelector(
     (state) => state.messageSlice.messages[choosenConversationId].data
   );
-  const lastestMessageId = conversations.filter(
-    (conversation) => conversation._id === choosenConversationId
-  )[0].lastMessage._id;
+  const lastestMessageId = conversations.filter((conversation) => {
+    if (conversation) {
+      return conversation._id === choosenConversationId;
+    }
+    return false;
+  })[0].lastMessage._id;
   const lastestMessage = messages.filter(
     (message) => message._id === lastestMessageId
   )[0];

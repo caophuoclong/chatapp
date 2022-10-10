@@ -9,9 +9,9 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react';
 import React from 'react';
-import { IUser } from '../../interfaces/IUser';
+import { IUser } from '../../../interfaces/IUser';
 import { useTranslation } from 'react-i18next';
-import Info from '../user/Info';
+import Info from '../../user/Info';
 
 type Props = {
   user: IUser;

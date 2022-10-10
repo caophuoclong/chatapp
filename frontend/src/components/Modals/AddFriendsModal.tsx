@@ -16,12 +16,12 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import FriendsApi from '~/services/apis/Friends.api';
-import FoundUser from './FoundUser';
+import FoundUser from '../Modals/FoundUser';
 import { IUser } from '~/interfaces/IUser';
-import { StatusCode } from '../../../interfaces/IFriendShip';
+import { StatusCode } from '../../interfaces/IFriendShip';
 import { useAppSelector } from '~/app/hooks';
 import { useForm } from 'react-hook-form';
-import IFriendShip from '../../../interfaces/IFriendShip';
+import IFriendShip from '../../interfaces/IFriendShip';
 
 type Props = {
   setShow: () => void;
