@@ -19,9 +19,10 @@ import { useTranslation } from 'react-i18next';
 type Props = {
   isOpen: boolean;
   onClose: () => void;
+  content: string;
 };
 
-export default function NotifySentEmail({ isOpen, onClose }: Props) {
+export default function NotifySentEmail({ isOpen, onClose, content }: Props) {
   const [value, setValue] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const { t } = useTranslation();
@@ -50,7 +51,7 @@ export default function NotifySentEmail({ isOpen, onClose }: Props) {
           <Flex flexDirection={'column'} padding="1rem">
             <CircleCheckmark isDone={isComplete} />
             <Text textAlign={'center'} fontWeight="black">
-              {(t('Notify__SentEmail') as (x: string) => string)('email')}
+              {content}
             </Text>
           </Flex>
           <Flex justifyContent={'center'}>

@@ -19,7 +19,7 @@ import { GrGroup } from 'react-icons/gr';
 import { MdOutlineGroups, MdOutlineReportGmailerrorred } from 'react-icons/md';
 import { IUser } from '~/interfaces/IUser';
 import FriendsApi from '~/services/apis/Friends.api';
-import { StatusCode } from '../../../interfaces/IFriendShip';
+import { StatusCode } from '~/interfaces/IFriendShip';
 import { useToast } from '@chakra-ui/react';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import {

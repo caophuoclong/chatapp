@@ -24,6 +24,7 @@ import { setShowInfoConversation } from '~/app/slices/global.slice';
 import { useTranslation } from 'react-i18next';
 import IConversation from '../../../interfaces/IConversation';
 import IFriendShip from '../../../interfaces/IFriendShip';
+import { ConversationType } from '../../../interfaces/IConversation';
 
 type Props = {
   choosenConversation: IConversation;
@@ -31,9 +32,6 @@ type Props = {
 
 export default function Main({ choosenConversation }: Props) {
   let location = useLocation();
-  const isLargerThanHD = useAppSelector(
-    (state) => state.globalSlice.isLargerThanHD
-  );
   const showInfo = useAppSelector(
     (state) => state.globalSlice.conversation.showInfoConversation
   );
@@ -48,11 +46,13 @@ export default function Main({ choosenConversation }: Props) {
       : dispatch(setShowInfoConversation(false));
   }, [location]);
   useEffect(() => {
-    const friendShip = friendShips.find((friendShip) => {
-      return choosenConversation.friendship._id === friendShip._id;
-    });
-    setFriendShip(friendShip);
-  }, [friendShips]);
+    if (choosenConversation.type === 'direct') {
+      const friendShip = friendShips.find((friendShip) => {
+        return choosenConversation.friendship._id === friendShip._id;
+      });
+      setFriendShip(friendShip);
+    }
+  }, [friendShips, choosenConversation]);
   return choosenConversation ? (
     <Flex
       width={{
@@ -66,7 +66,10 @@ export default function Main({ choosenConversation }: Props) {
         name={choosenConversation.name}
         avatarUrl={choosenConversation.avatarUrl}
         friendShip={friendShip}
+        participants={choosenConversation.participants}
         type={choosenConversation.type}
+        _id={choosenConversation._id}
+        owner={choosenConversation.owner}
       />
       <MessagesBox />
       <InputBox />
@@ -83,7 +86,6 @@ export default function Main({ choosenConversation }: Props) {
           <DrawerHeader textAlign={'center'}>
             {t('Info__Conversation')}
           </DrawerHeader>
-
           <DrawerBody margin="0" padding="0">
             <InfoConversation />
           </DrawerBody>

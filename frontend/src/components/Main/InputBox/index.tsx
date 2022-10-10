@@ -17,7 +17,10 @@ import MessagesApi from '../../../services/apis/Messages.api';
 import { addMessage } from '~/app/slices/messages.slice';
 import { IMessage, MessageStatusType } from '~/interfaces/IMessage';
 import randomInt from '~/utils/randomInt';
-import { updateLastestMessage } from '~/app/slices/conversations.slice';
+import {
+  updateLastestMessage,
+  updateConversation,
+} from '~/app/slices/conversations.slice';
 type Props = {};
 function useOutside<T extends HTMLElement>(
   ref: React.RefObject<T>,
@@ -47,6 +50,12 @@ export default function InputBox({}: Props) {
   const choosenConversationId = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
+  const conversations = useAppSelector(
+    (state) => state.conversationsSlice.conversations
+  );
+  const conversation = conversations.find(
+    (c) => c._id === choosenConversationId
+  );
   const onPickerClick = (
     event: any,
     emoji: {
@@ -75,15 +84,28 @@ export default function InputBox({}: Props) {
       dispatch(
         addMessage({ message: message, conversationId: choosenConversationId })
       );
-      dispatch(
-        updateLastestMessage({
-          message: message,
-          conversationId: choosenConversationId,
-        })
-      );
+      // dispatch(
+      //   updateLastestMessage({
+      //     message: message,
+      //     conversationId: choosenConversationId,
+      //   })
+      // );
+      const updateAt = new Date().getTime();
+      if (conversation)
+        dispatch(
+          updateConversation({
+            ...conversation,
+            lastMessage: message,
+            updateAt,
+          })
+        );
+
       // const response = await MessagesApi.sendMessage(message);
       // const data = response.data.data;
-      socket?.emit('createMessage', message);
+      socket?.emit('createMessage', {
+        ...message,
+        updateAt,
+      });
 
       setContent('');
     } catch (error) {

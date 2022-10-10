@@ -61,6 +61,9 @@ export default function Main({ choosenConversation }: Props) {
             avatarUrl={choosenConversation.avatarUrl}
             friendShip={choosenConversation.friendship}
             type={choosenConversation.type}
+            participants={choosenConversation.participants}
+            _id={choosenConversation._id}
+            owner={choosenConversation.owner}
           />
           <MessagesBox />
           <InputBox />

@@ -13,11 +13,7 @@ export default function Conversations({}: Props) {
   );
   const restedConversations = [...conversations];
   restedConversations.sort((a, b) => {
-    if (a.lastMessage && b.lastMessage) {
-      return b.lastMessage.createdAt - a.lastMessage.createdAt;
-    } else {
-      return -1;
-    }
+    return b.updateAt - a.updateAt;
   });
 
   return (

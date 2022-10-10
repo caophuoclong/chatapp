@@ -10,12 +10,21 @@ export default class ConversationsApi{
         })
         return response;
     }
-    static async createGroupConversation(name: string, participants: Array<string>, avatarUrl: string = "https://picsum.photos/200", visible: boolean = false){
-        const response = await axiosClient.post("/conversation/create/group",{
-            name,
-            participants,
-            avatarUrl,
-            visible
+    static async createGroupConversation(data: FormData){
+        return await axiosClient.post("/conversation/create/group", data)
+    }
+    // static async createGroupConversation(name: string, participants: Array<string>, avatarUrl: string = "https://picsum.photos/200", visible: boolean = false){
+    //     const response = await axiosClient.post("/conversation/create/group",{
+    //         name,
+    //         participants,
+    //         avatarUrl,
+    //         visible
+    //     })
+    //     return response;
+    // }
+    static async changeGroupName(_id: string, name: string){
+        const response = await axiosClient.patch(`/conversation/update/${_id}`,{
+            name
         })
         return response;
     }

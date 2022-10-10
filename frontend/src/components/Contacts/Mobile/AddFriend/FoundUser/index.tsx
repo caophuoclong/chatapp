@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 
 import FriendsApi from '../../../../../services/apis/Friends.api';
 import IFriendShip, { StatusCode } from '../../../../../interfaces/IFriendShip';
-import { default as FoundUserDesktop } from '~/components/LeftFriends/Modals/FoundUser';
+import { default as FoundUserDesktop } from '~/components/Modals/FoundUser';
 import { IUser } from '../../../../../interfaces/IUser';
 import { useAppSelector } from '~/app/hooks';
 

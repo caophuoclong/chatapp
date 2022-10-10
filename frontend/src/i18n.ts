@@ -125,8 +125,17 @@ const resources = {
       "Thanks__Title__Error": "Something went wrong!",
       "Thanks__Content__Error": "Your account has been verified unsuccessfully or it has verified. Please try again.",
       "Notify__SentEmail": (email: string)=>`A verification email has been sent to ${email}. Please check your email to verify your account before you sign in.`,
+      "Notify__Sent__Recover__Password": `A recover password email has been sent to your email. Please check your email to recover your password.`,
       "Not__Active": "Your account is not active. Please check your email to verify your account before you sign in.",
-
+      "Member": "Member",
+      "Members": "Members",
+      "Confirm__Change__Group__Name": "Are you sure you want to change the group name? When you change the group name, all members will be notified when you confirm.",
+      "Change__Group__Name": "Change group name",
+      "Confirm" : "Confirm",
+      "Update__Group__Name__Successfully": "Update group name successfully",
+      "Update__Group__Name__Fail": "Update group name fail",
+      "Change__Avatar": "Change avatar",
+      "Remove__Avatar": "Remove avatar",
     }
   },
   vn: {
@@ -247,7 +256,17 @@ const resources = {
       "Thanks__Title__Error": "Có lỗi xảy ra!",
       "Thanks__Content__Error": "Xác thực tài khoản không thành công hoặc tài khoản đã được xác thực. Vui lòng thử lại",
       "Notify__SentEmail": (email: string) => `Một email xác nhận đã được gửi đến ${email}. Vui lòng kiểm tra email để xác nhận tài khoản trước khi đăng nhập`,
+      "Notify__Sent__Recover__Password": "Email khôi phục mật khẩu đã được gửi. Vui lòng kiểm tra email để đặt lại mật khẩu",
       "Not__Active": "Tài khoản chưa được kích hoạt, vui lòng kiểm tra email để kích hoạt tài khoản",
+      "Members": "Thành viên",
+      "Member": "Thành viên",
+      "Confirm__Change__Group__Name": "Bạn có chắc chắn muốn đổi tên nhóm không? Tất cả các thành viên trong nhóm sẽ nhận được thông báo khi bạn xác nhận.",
+      "Change__Group__Name": "Đổi tên nhóm",
+      "Confirm": "Xác nhận",
+      "Update__Group__Name__Successfully": "Đổi tên nhóm thành công",
+      "Update__Group__Name__Fail": "Đổi tên nhóm thất bại",
+      "Change__Avatar": "Đổi ảnh đại diện",
+      "Remove__Avatar": "Xóa ảnh đại diện",
     }
   }
 };

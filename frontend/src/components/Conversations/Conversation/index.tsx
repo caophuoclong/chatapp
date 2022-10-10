@@ -17,6 +17,7 @@ import { setChoosenConversationID } from '~/app/slices/global.slice';
 import { IUser } from '../../../interfaces/IUser';
 import { useRef } from 'react';
 import { SERVER_URL } from '~/configs';
+import { AvatarConversation } from './AvatarConversation';
 
 const renderDirectConversation = (participants: IUser[], myId: string) => {
   return {
@@ -32,6 +33,7 @@ export default function Conversation({
   participants,
   type,
   _id,
+  updateAt,
 }: IConversation) {
   const { colorMode } = useColorMode();
   const { id } = useParams();
@@ -43,6 +45,7 @@ export default function Conversation({
   const choosenConversationID = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
+  console.log(updateAt);
   const contentRef = useRef<HTMLParagraphElement>(null);
   useEffect(() => {
     const p = contentRef.current;
@@ -51,6 +54,7 @@ export default function Conversation({
       console.log(p.clientWidth);
     }
   }, [contentRef]);
+  console.log(999999);
   return (
     <Stack
       onClick={() => {
@@ -80,21 +84,24 @@ export default function Conversation({
       }}
       cursor="pointer"
     >
-      <Avatar
-        size="lg"
-        name={
-          type === 'group'
-            ? name
-            : renderDirectConversation(participants, user._id).name
-        }
-        src={
-          type === 'group'
-            ? avatarUrl
-            : `${SERVER_URL}/images/${
-                renderDirectConversation(participants, user._id).avatarUrl
-              }`
-        }
-      />
+      {type === 'group' && (
+        <AvatarConversation
+          avatarSize="lg"
+          avatarUrl={avatarUrl}
+          participants={participants}
+          size={64}
+        />
+      )}
+      {type === 'direct' && (
+        <Avatar
+          size="lg"
+          name={renderDirectConversation(participants, user._id).name}
+          src={`${SERVER_URL}/images/${
+            renderDirectConversation(participants, user._id).avatarUrl
+          }`}
+        />
+      )}
+
       <Box width="80%">
         <Text
           fontSize="md"
@@ -118,9 +125,14 @@ export default function Conversation({
             </Text>
           </Flex>
         ) : (
-          <Text fontSize="sm" noOfLines={1} color="gray.500">
-            You are not have a message in this conversation
-          </Text>
+          <Flex>
+            <Text fontSize="sm" noOfLines={1} color="gray.500" width="80%">
+              You are not have a message in this conversation
+            </Text>
+            <Text fontSize="sm" noOfLines={1} color="gray.500">
+              {moment(new Date(+updateAt)).format('HH:mm')}
+            </Text>
+          </Flex>
         )}
       </Box>
     </Stack>

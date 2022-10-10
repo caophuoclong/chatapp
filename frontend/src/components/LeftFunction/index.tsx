@@ -23,7 +23,7 @@ import { useTranslation } from 'react-i18next';
 import Info from '~/components/user/Info';
 import { useColorMode } from '@chakra-ui/react';
 import { ENUM_SCREEN, setShowScreen } from '~/app/slices/global.slice';
-import ModalShowInfo from '../ModalShowInfo';
+import ModalShowInfo from '../Modals/ModalShowInfo';
 import { SERVER_URL } from '~/configs';
 
 type Props = {};

@@ -67,6 +67,7 @@ export default function Register({}: Props) {
     formState: { errors },
     setFocus,
     setError,
+    getValues,
   } = methods;
   console.log(errors);
   const [notifyShow, setNotifyShow] = useState(false);
@@ -147,7 +148,13 @@ export default function Register({}: Props) {
       {loading.register && <LoadingScreen />}
       <FormProvider {...methods}>
         {notifyShow && (
-          <NotifySentEmail isOpen={notifyShow} onClose={handleCloseNotify} />
+          <NotifySentEmail
+            isOpen={notifyShow}
+            onClose={handleCloseNotify}
+            content={(t('Notify__SentEmail') as (x: string) => string)(
+              getValues('email')
+            )}
+          />
         )}
         <Box
           bg="none"

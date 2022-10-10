@@ -16,7 +16,7 @@ import React, { useState } from 'react';
 import { FiMoreHorizontal } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import ModalShowInfo from '~/components/ModalShowInfo';
+import ModalShowInfo from '~/components/Modals/ModalShowInfo';
 import { IUser } from '~/interfaces/IUser';
 import { useAppSelector } from '~/app/hooks';
 import { useAppDispatch } from '../../../../app/hooks';

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import { AiOutlineUserAdd, AiOutlineUsergroupAdd } from 'react-icons/ai';
-import AddFriendsModal from './Modals/AddFriendsModal';
-import CreateGroupModal from './Modals/CreateGroupModal';
+import AddFriendsModal from '../Modals/AddFriendsModal';
+import CreateGroupModal from '../Modals/CreateGroupModal';
 import { useAppSelector } from '../../app/hooks';
 import Friend from './Friend';
 import { useTranslation } from 'react-i18next';
