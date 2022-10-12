@@ -11,17 +11,26 @@ import { HiOutlineEmojiHappy, HiPhotograph } from 'react-icons/hi';
 import { GrAttachment } from 'react-icons/gr';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { FcLike } from 'react-icons/fc';
-import Picker from 'emoji-picker-react';
+import Picker, { Emoji, EmojiClickData } from 'emoji-picker-react';
+
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import MessagesApi from '../../../services/apis/Messages.api';
-import { addMessage } from '~/app/slices/messages.slice';
-import { IMessage, MessageStatusType } from '~/interfaces/IMessage';
+import { addMessage, updateMessageScale } from '~/app/slices/messages.slice';
+import {
+  IMessage,
+  MessageStatusType,
+  MessageType,
+} from '~/interfaces/IMessage';
 import randomInt from '~/utils/randomInt';
 import {
   updateLastestMessage,
   updateConversation,
 } from '~/app/slices/conversations.slice';
-type Props = {};
+import IConversation from '~/interfaces/IConversation';
+import EmojiPicker from 'emoji-picker-react';
+type Props = {
+  conversation: IConversation;
+};
 function useOutside<T extends HTMLElement>(
   ref: React.RefObject<T>,
   setHidePicker: () => void
@@ -38,13 +47,19 @@ function useOutside<T extends HTMLElement>(
     };
   }, [ref]);
 }
-export default function InputBox({}: Props) {
+export default function InputBox({ conversation }: Props) {
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
   const [content, setContent] = useState('');
   const [isPickerShow, setIsPickerShow] = useState(false);
   const { colorMode } = useColorMode();
+  const [timeEmojiClick, setTimeEmojiClick] = useState<{
+    time: number;
+    state: 'down' | 'up';
+    messageId: string;
+    value: string;
+  }>();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.userSlice.info);
   const choosenConversationId = useAppSelector(
@@ -53,15 +68,9 @@ export default function InputBox({}: Props) {
   const conversations = useAppSelector(
     (state) => state.conversationsSlice.conversations
   );
-  const conversation = conversations.find(
-    (c) => c._id === choosenConversationId
-  );
-  const onPickerClick = (
-    event: any,
-    emoji: {
-      emoji: string;
-    }
-  ) => {
+
+  const onPickerClick = (emoji: EmojiClickData, event: MouseEvent) => {
+    console.log(emoji);
     setContent(content + emoji.emoji);
   };
   const pickerRef = useRef<HTMLDivElement>(null);
@@ -79,17 +88,12 @@ export default function InputBox({}: Props) {
       status: MessageStatusType.SENDING,
       createdAt: Date.now(),
       sender: user,
+      type: MessageType.TEXT,
     };
     try {
       dispatch(
         addMessage({ message: message, conversationId: choosenConversationId })
       );
-      // dispatch(
-      //   updateLastestMessage({
-      //     message: message,
-      //     conversationId: choosenConversationId,
-      //   })
-      // );
       const updateAt = new Date().getTime();
       if (conversation)
         dispatch(
@@ -112,7 +116,101 @@ export default function InputBox({}: Props) {
       console.log(error);
     }
   };
+  const onSendEmoji = () => {
+    const message = {
+      _id: (Date.now() + randomInt(0, 9999)).toString(),
+      destination: choosenConversationId,
+      content: content,
+      attachments: [],
+      parentMessage: null,
+      status: MessageStatusType.SENDING,
+      createdAt: Date.now(),
+      sender: user,
+      type: MessageType.TEXT,
+    };
+  };
+  const onEmojiDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const { value } = e.currentTarget;
+    const time = new Date().getTime();
+    const id = (Date.now() + randomInt(0, 9999)).toString();
+    setTimeEmojiClick({
+      state: 'down',
+      time: time / 1000,
+      messageId: id,
+      value,
+    });
+  };
+  const onEmojiUp = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const { value } = e.currentTarget;
 
+    console.log(e.currentTarget.value);
+    const time = new Date().getTime();
+    setTimeEmojiClick((prev) => ({
+      state: 'up',
+      time: time / 1000 - (prev ? prev.time : 0),
+      messageId: prev ? prev.messageId : '',
+      value,
+    }));
+  };
+  useEffect(() => {
+    if (timeEmojiClick) {
+      if (timeEmojiClick.state === 'down') {
+        const message = {
+          _id: timeEmojiClick.messageId,
+          destination: choosenConversationId,
+          content: timeEmojiClick.value,
+          attachments: [],
+          parentMessage: null,
+          status: MessageStatusType.SENDING,
+          createdAt: Date.now(),
+          sender: user,
+          scale: 1,
+          type: MessageType.EMOJI,
+        };
+        dispatch(
+          addMessage({
+            message: message,
+            conversationId: choosenConversationId,
+          })
+        );
+        // dispatch(updateConversation({ ...conversation, lastMessage: message }));
+      }
+      const interval = setInterval(() => {
+        if (timeEmojiClick && timeEmojiClick.state === 'down') {
+          dispatch(
+            updateMessageScale({
+              conversationId: choosenConversationId,
+              messageId: timeEmojiClick.messageId,
+            })
+          );
+        }
+      }, 150);
+      if (timeEmojiClick && timeEmojiClick.state === 'up') {
+        clearInterval(interval);
+      }
+      if (
+        timeEmojiClick &&
+        timeEmojiClick.state === 'up' &&
+        timeEmojiClick.time >= 5
+      ) {
+        clearInterval(interval);
+      }
+      return () => clearInterval(interval);
+    }
+
+    // if (timeEmojiClick?.state === 'up' && timeEmojiClick.time < 5) {
+    // const message = {
+    //   _id: (Date.now() + randomInt(0, 9999)).toString(),
+    //   destination: choosenConversationId,
+    //   content: content,
+    //   attachments: [],
+    //   parentMessage: null,
+    //   status: MessageStatusType.SENDING,
+    //   createdAt: Date.now(),
+    //   sender: user,
+    // };
+    // }
+  }, [timeEmojiClick]);
   return (
     <Box
       marginTop="auto"
@@ -124,7 +222,7 @@ export default function InputBox({}: Props) {
       bg="gray.100"
       paddingX={{
         base: '0rem',
-        lg: '1rem',
+        lg: '0rem',
       }}
       borderTop={
         colorMode === 'dark'
@@ -134,8 +232,9 @@ export default function InputBox({}: Props) {
       // paddingY="0.3rem"
     >
       {isLargerThanHD && (
-        <Flex>
+        <Flex paddingX="1rem">
           <IconButton
+            justifyContent={'center'}
             onClick={() => setIsPickerShow(!isPickerShow)}
             aria-label="Emoji"
             bg={isPickerShow ? 'gray.200' : 'none'}
@@ -148,17 +247,32 @@ export default function InputBox({}: Props) {
           />
           <IconButton
             bg="none"
+            justifyContent={'center'}
             aria-label="Photo"
             icon={<HiPhotograph fontSize={'24px'} />}
           />
           <IconButton
             bg="none"
+            justifyContent={'center'}
             aria-label="File"
             icon={<GrAttachment fontSize={'24px'} />}
           />
         </Flex>
       )}
-      <Flex gap="5px" paddingX={isLargerThanHD ? 0 : '1rem'}>
+      <Flex
+        gap="5px"
+        paddingX={isLargerThanHD ? 0 : '1rem'}
+        role="group"
+        borderTop={
+          colorMode === 'dark'
+            ? '1px solid rgba(255, 255, 255,0.3)'
+            : '1px solid  rgba(0, 0, 0, 0.08)'
+        }
+        transition="all 0.3s"
+        _focusWithin={{
+          borderTopColor: '#63b3ed',
+        }}
+      >
         {/* {!isLargerThanHD && (
           <IconButton
             onClick={() => setIsPickerShow(!isPickerShow)}
@@ -173,11 +287,15 @@ export default function InputBox({}: Props) {
           />
         )} */}
         <Input
-          variant={!isLargerThanHD ? 'unstyled' : 'flushed'}
+          variant={'unstyled'}
           value={content}
           placeholder="Flushed"
           size="md"
           width="100%"
+          paddingX={{
+            base: '0rem',
+            lg: '1rem',
+          }}
           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === 'Enter') {
               sendMessage();
@@ -190,7 +308,8 @@ export default function InputBox({}: Props) {
         {!isLargerThanHD ? (
           content ? (
             <IconButton
-              aria-label="Photo"
+              onClick={sendMessage}
+              aria-label="send message"
               icon={<FaTelegramPlane fontSize={'24px'} />}
             />
           ) : (
@@ -206,23 +325,38 @@ export default function InputBox({}: Props) {
             icon={<FaTelegramPlane fontSize={'24px'} />}
           />
         ) : (
-          <IconButton aria-label="Photo" icon={<FcLike fontSize={'24px'} />} />
+          <IconButton
+            aria-label="Photo"
+            onMouseUp={onEmojiUp}
+            onMouseDown={onEmojiDown}
+            value={
+              (conversation.emoji &&
+                conversation.emoji.userId === user._id &&
+                conversation.emoji.emoji) as string
+            }
+            icon={
+              <>
+                {conversation.emoji &&
+                conversation.emoji.userId === user._id ? (
+                  <Emoji unified={conversation.emoji.emoji} />
+                ) : (
+                  <></>
+                )}
+              </>
+            }
+          />
         )}
       </Flex>
       {isPickerShow && (
-        <div ref={pickerRef}>
-          <Picker
-            onEmojiClick={onPickerClick}
-            pickerStyle={{
-              position: isLargerThanHD ? 'absolute' : 'relative',
-              top: '0',
-              transform: isLargerThanHD
-                ? 'translate(0,-100%)'
-                : 'translate(0,0)',
-              width: isLargerThanHD ? '258px' : '100%',
-            }}
-          />
-        </div>
+        <Box
+          ref={pickerRef}
+          position={isLargerThanHD ? 'absolute' : 'relative'}
+          top="0"
+          transform={isLargerThanHD ? 'translate(0,-100%)' : 'translate(0,0)'}
+          width={isLargerThanHD ? '258px' : '100%'}
+        >
+          <Picker onEmojiClick={onPickerClick} />
+        </Box>
       )}
     </Box>
   );

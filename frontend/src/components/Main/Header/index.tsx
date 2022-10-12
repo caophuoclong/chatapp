@@ -107,6 +107,7 @@ export default function Header({
           dispatch(setChoosenConversationID(''));
         }}
       />
+
       {type === 'group' && (
         <GroupHeader
           participants={participants}

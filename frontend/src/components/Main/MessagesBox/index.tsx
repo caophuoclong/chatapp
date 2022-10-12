@@ -4,9 +4,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAppSelector } from '~/app/hooks';
 import MyMessage from './Message/MyMessage';
 import OtherMessage from './Message/OtherMessage';
-import { IMessage } from '../../../interfaces/IMessage';
+import { IMessage, MessageType } from '../../../interfaces/IMessage';
 import { getMessages } from '~/app/slices/messages.slice';
 import { useAppDispatch } from '../../../app/hooks';
+import { Emoji } from 'emoji-picker-react';
 
 type Props = {};
 function useScrollToBottom<T extends HTMLElement>(ref: React.RefObject<T>) {
@@ -68,7 +69,7 @@ export default function MessagesBox({}: Props) {
       onScroll={handleOnScroll}
       ref={flexRef}
       direction="column"
-      // justifyContent={'flex-end'}
+      justifyContent={'flex-end'}
       // alignItems={"center"}
       boxSizing="border-box"
       width="100%"
@@ -88,14 +89,34 @@ export default function MessagesBox({}: Props) {
             message.sender._id === myId ? (
               <MyMessage
                 key={message._id}
-                message={message.content}
+                message={
+                  message.type === MessageType.EMOJI ? (
+                    <Emoji
+                      unified={message.content}
+                      size={25 * (message.scale || 1)}
+                    />
+                  ) : (
+                    message.content
+                  )
+                }
                 _id={message._id}
+                type={message.type}
                 time={moment(new Date(+message.createdAt)).format('HH:mm')}
               />
             ) : (
               <OtherMessage
                 key={message._id}
-                message={message.content}
+                type={message.type}
+                message={
+                  message.type === MessageType.EMOJI ? (
+                    <Emoji
+                      unified={message.content}
+                      size={25 * (message.scale || 1)}
+                    />
+                  ) : (
+                    message.content
+                  )
+                }
                 time={moment(new Date(+message.createdAt)).format('HH:mm')}
               />
             )

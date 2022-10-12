@@ -1,12 +1,14 @@
 import { Box, Flex, Text, useColorMode } from '@chakra-ui/react';
 import React from 'react';
+import { MessageType } from '../../../../interfaces/IMessage';
 
 type Props = {
-  message: string;
+  message: React.ReactNode | string;
   time: string;
+  type: MessageType;
 };
 
-export default function OtherMessage({ message, time }: Props) {
+export default function OtherMessage({ message, time, type }: Props) {
   const { colorMode } = useColorMode();
   return (
     <Flex
@@ -14,7 +16,13 @@ export default function OtherMessage({ message, time }: Props) {
       rounded="lg"
       direction={'row-reverse'}
       paddingX="1rem"
-      bg={colorMode === 'light' ? 'white' : 'whiteAlpha.300'}
+      bg={
+        type === MessageType.TEXT
+          ? colorMode === 'light'
+            ? 'white'
+            : 'whiteAlpha.300'
+          : 'none'
+      }
       width="fit-content"
       boxShadow="rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px"
     >

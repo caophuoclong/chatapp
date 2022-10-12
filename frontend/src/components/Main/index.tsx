@@ -6,6 +6,8 @@ import { getMe } from '~/app/slices/user.slice';
 import { useAppSelector, useAppDispatch } from '../../app/hooks';
 import Desktop from './Desktop';
 import Mobile from './Mobile';
+import ConversationsApi from '../../services/apis/Conversations.api';
+import { updateEmoji } from '~/app/slices/conversations.slice';
 
 type Props = {};
 
@@ -49,10 +51,18 @@ export default function Main({}: Props) {
           console.log(error);
         }
       }
-      // if (choosenConversation) {
-      //   const x = await dispatch(getFriendsList());
-      //   console.log(unwrapResult(x));
-      // }
+      if (choosenConversation && !conversation?.emoji) {
+        try {
+          const response = await ConversationsApi.getMyEmoji(
+            choosenConversation
+          );
+          const emoji = response.data.data;
+          dispatch(updateEmoji({ _id: choosenConversation, emoji }));
+        } catch (error) {
+          console.log(error);
+        }
+        console.log('Not found emoji');
+      }
     })();
   }, [choosenConversation]);
   return conversation ? (

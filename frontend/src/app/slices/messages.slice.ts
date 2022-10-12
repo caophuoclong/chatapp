@@ -93,7 +93,22 @@ export const messageSlice = createSlice({
         status: MessageStatusType.RECEIVED
       }
       }
+    },
+    updateMessageScale: (state: MessageState, action: PayloadAction<{
+      conversationId: string,
+      messageId: string,
       
+    }>) =>{
+      const {conversationId, messageId} = action.payload;
+      const index = state.messages[conversationId].data.findIndex((message)=>message._id === messageId);
+      let scale1 = state.messages[conversationId].data[index].scale || 1;
+      scale1 +=0.3
+      console.log(scale1);
+      state.messages[conversationId].data[index] = {
+        ...state.messages[conversationId].data[index],
+        scale: scale1
+      }
+
     }
 
   },
@@ -123,7 +138,7 @@ export const messageSlice = createSlice({
   },
 });
 
-export const {addMessage, updateSentMessage, updateReceivedMessage, initMessage} = messageSlice.actions;
+export const {addMessage, updateSentMessage, updateReceivedMessage, initMessage, updateMessageScale} = messageSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 

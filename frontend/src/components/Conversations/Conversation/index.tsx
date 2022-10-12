@@ -19,13 +19,38 @@ import { useRef } from 'react';
 import { SERVER_URL } from '~/configs';
 import { AvatarConversation } from './AvatarConversation';
 
-const renderDirectConversation = (participants: IUser[], myId: string) => {
-  return {
-    avatarUrl: participants.filter((item) => item._id !== myId)[0].avatarUrl,
-    name: participants.filter((item) => item._id !== myId)[0].name,
-  };
+// export const renderDirectConversation = (participants: IUser[]) => {
+//   const myId = useAppSelector((state) => state.userSlice.info._id);
+//   return {
+//     avatarUrl: participants.filter((item) => item._id !== myId)[0].avatarUrl,
+//     name: participants.filter((item) => item._id !== myId)[0].name,
+//   };
+// };
+export const RenderDirectConversationName = ({
+  participants,
+}: {
+  participants: IUser[];
+}) => {
+  const myId = useAppSelector((state) => state.userSlice.info._id);
+  return <>{participants.filter((item) => item._id !== myId)[0].name}</>;
 };
-
+export const RenderDirectConversationAvatar = ({
+  participants,
+  size = 'md',
+}: {
+  participants: IUser[];
+  size?: 'lg' | 'md';
+}) => {
+  const myId = useAppSelector((state) => state.userSlice.info._id);
+  return (
+    <Avatar
+      size={size}
+      src={`${SERVER_URL}/images/${
+        participants.filter((item) => item._id !== myId)[0].avatarUrl
+      }`}
+    />
+  );
+};
 export default function Conversation({
   name,
   avatarUrl,
@@ -93,13 +118,7 @@ export default function Conversation({
         />
       )}
       {type === 'direct' && (
-        <Avatar
-          size="lg"
-          name={renderDirectConversation(participants, user._id).name}
-          src={`${SERVER_URL}/images/${
-            renderDirectConversation(participants, user._id).avatarUrl
-          }`}
-        />
+        <RenderDirectConversationAvatar participants={participants} size="lg" />
       )}
 
       <Box width="80%">
@@ -111,9 +130,11 @@ export default function Conversation({
             color: 'gray.200',
           }}
         >
-          {type === 'group'
-            ? name
-            : renderDirectConversation(participants, user._id).name}
+          {type === 'group' ? (
+            name
+          ) : (
+            <RenderDirectConversationName participants={participants} />
+          )}
         </Text>
         {lastMessage ? (
           <Flex>

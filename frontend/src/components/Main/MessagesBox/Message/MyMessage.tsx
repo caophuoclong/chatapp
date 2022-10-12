@@ -1,14 +1,18 @@
 import { Box, Flex, Text, useColorMode } from '@chakra-ui/react';
 import React from 'react';
 import { useAppSelector } from '~/app/hooks';
-import { MessageStatusType } from '../../../../interfaces/IMessage';
+import {
+  MessageStatusType,
+  MessageType,
+} from '../../../../interfaces/IMessage';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 
 type Props = {
-  message: string;
+  message: React.ReactNode | string;
   time: string;
   _id?: string;
+  type: MessageType;
 };
 
 function ShowStatus(status: MessageStatusType, t: TFunction) {
@@ -24,7 +28,7 @@ function ShowStatus(status: MessageStatusType, t: TFunction) {
   }
 }
 
-export default function MyMessage({ message, time, _id }: Props) {
+export default function MyMessage({ message, time, _id, type }: Props) {
   const { colorMode } = useColorMode();
   const { t } = useTranslation();
 
@@ -54,7 +58,13 @@ export default function MyMessage({ message, time, _id }: Props) {
       rounded="lg"
       direction={'row-reverse'}
       paddingX="1rem"
-      bg={colorMode === 'light' ? 'blue.200' : 'gray.700'}
+      bg={
+        type === MessageType.TEXT
+          ? colorMode === 'light'
+            ? 'white'
+            : 'whiteAlpha.300'
+          : 'none'
+      }
       width="fit-content"
     >
       <Box>

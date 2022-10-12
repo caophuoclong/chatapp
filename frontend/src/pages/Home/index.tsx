@@ -169,6 +169,7 @@ export default function Home({}: Props) {
           }
         );
         s.on('createConversationSuccess', (data: IConversation) => {
+          console.log(data);
           s.emit('joinRoom', data._id);
           dispatch(addConversation(data));
           dispatch(initMessage(data._id));
@@ -232,15 +233,15 @@ export default function Home({}: Props) {
     const response = await Auth.refreshToken();
     console.log(response);
   };
-  useEffect(() => {
-    const interval = setInterval(() => {
-      dispatch(getFriendsList());
-      dispatch(getMyConversations());
-    }, 50000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     dispatch(getFriendsList());
+  //     dispatch(getMyConversations());
+  //   }, 50000);
+  //   return () => {
+  //     clearInterval(interval);
+  //   };
+  // }, []);
   // return <Button onClick={handle}>hihi</Button>;
   // return (
   //   <Box width="100vw" position="absolute">

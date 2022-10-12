@@ -28,4 +28,7 @@ export default class ConversationsApi{
         })
         return response;
     }
+    static async getMyEmoji(conversationId: string){
+        return await axiosClient.get(`/conversation/${conversationId}/emoji`)
+    }
 }
