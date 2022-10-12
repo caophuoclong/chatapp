@@ -84,4 +84,10 @@ export class ConversationController {
     const {_id} = req.user;
     return this.conversationService.deleteConversation(_id,slug);
   }
+  @Get("/:slug/emoji")
+  @ApiParam({name: "slug", description: "The _id of conversation"})
+  getEmoji(@Param("slug", ParseUUIDPipe) slug, @Request() req){
+    const {_id} = req.user;
+    return this.conversationService.getEmoji(slug, _id);
+  }
 }

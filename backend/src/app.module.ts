@@ -45,6 +45,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { MailModule } from './mail/mail.module';
 import { Confirmation } from './entities/confirmation.entity';
+import { Emoji } from './entities/Emoji';
 
 @Module({
   imports: [
@@ -73,7 +74,8 @@ import { Confirmation } from './entities/confirmation.entity';
             UnRead,
             Attachment,
             PasswordResetToken,
-            Confirmation
+            Confirmation,
+            Emoji
           ],
           autoLoadEntities: true,
           synchronize: true,

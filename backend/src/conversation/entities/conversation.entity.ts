@@ -12,6 +12,7 @@ import {
   PrimaryGeneratedColumn,
   Timestamp,
 } from 'typeorm';
+import { Emoji } from '~/entities/Emoji';
 import { Message } from '~/message/entities/message.entity';
 import { User } from '~/user/entities/user.entity';
 import { FriendShip } from '../../friendship/entities/friendship.entity';
@@ -72,7 +73,9 @@ export class Conversation {
     default: new Date().getTime()
 })
 createdAt: number;
-  @OneToOne(type => Message, m => m._id)
+  @OneToOne(type => Message, m => m._id, {
+    onDelete: "CASCADE"
+  })
   @JoinColumn({
     name: "lastmessage"
   })
@@ -89,4 +92,8 @@ createdAt: number;
     default: new Date().getTime()
   })
   updateAt: number;
+  @OneToMany(type => Emoji, e => e.conversationId,{
+    cascade: true
+  })
+  emoji: Emoji[]
 }

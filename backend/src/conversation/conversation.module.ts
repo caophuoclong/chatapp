@@ -9,10 +9,11 @@ import { FriendshipModule } from '../friendship/friendship.module';
 import { Conversation } from './entities/conversation.entity';
 import { UserService } from '~/user/user.service';
 import { SocketModule } from '~/socket/socket.module';
+import { Emoji } from '~/entities/Emoji';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, FriendShip, Conversation]),
+    TypeOrmModule.forFeature([User, FriendShip, Conversation, Emoji]),
     forwardRef(()=> UserModule),
     FriendshipModule,
     SocketModule

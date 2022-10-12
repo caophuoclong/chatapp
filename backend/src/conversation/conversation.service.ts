@@ -18,6 +18,7 @@ import { FriendshipService } from '~/friendship/friendship.service';
 import { Conversation } from './entities/conversation.entity';
 import moment from 'moment';
 import { SocketService } from '~/socket/socket.service';
+import { Emoji } from '~/entities/Emoji';
 
 @Injectable()
 export class ConversationService {
@@ -32,6 +33,8 @@ export class ConversationService {
     private readonly userService: UserService,
     private readonly friendshipService: FriendshipService,
     private readonly socketService: SocketService,
+    @InjectRepository(Emoji)
+    private readonly emojiRepository: Repository<Emoji>,
   ) {}
   async createFromFriendship(
     createFromFriendShipDto: CreateConversationDtoFromFriendshipDto,
@@ -65,14 +68,29 @@ export class ConversationService {
           };
         }
         const conversation = await this.conversation.create();
-        conversation.participants = user;        
+        conversation.participants = user;
         conversation.lastMessage = null;
         conversation.friendship = friendShip;
         conversation.createdAt = new Date().getTime();
         const con = await this.conversation.save(conversation);
-        user.map((user)=>{
-          this.socketService.emitToUser(user._id, 'createConversationSuccess', con);
-        })
+        const emojis = [];
+        for (let i = 0; i < user.length; i++) {
+          const emoji = this.emojiRepository.create();
+          emoji.conversationId = conversation._id;
+          emoji.userId = user[i]._id;
+          emojis.push(emoji);
+        }
+        await this.emojiRepository.save(emojis);
+        console.log(emojis);
+        console.log(con);
+        conversation.emoji = emojis;
+        user.map((user) => {
+          this.socketService.emitToUser(
+            user._id,
+            'createConversationSuccess',
+            con,
+          );
+        });
         return {
           statusCode: 200,
           message: 'success',
@@ -99,7 +117,9 @@ export class ConversationService {
       // console.log(createConversationDto.participants);
       const conversation = this.conversation.create();
       const users = await (
-        await this.userService.getUsers(JSON.parse(createConversationDto.participants))
+        await this.userService.getUsers(
+          JSON.parse(createConversationDto.participants),
+        )
       ).data;
       const owner = await (await this.userService.get(ownerId)).data;
       conversation.name = createConversationDto.name;
@@ -108,9 +128,18 @@ export class ConversationService {
       conversation.type = 'group';
       conversation.visible = createConversationDto.visible;
       conversation.createdAt = new Date().getTime();
-      conversation.avatarUrl = createConversationDto.avatarUrl
-
+      conversation.avatarUrl = createConversationDto.avatarUrl;
       const saved = await this.conversation.save(conversation);
+      const emojis = [];
+      for (let i = 0; i < users.length; i++) {
+        const emoji = this.emojiRepository.create();
+        emoji.conversationId = conversation._id;
+        emoji.userId = users[i]._id;
+        emojis.push(emoji);
+      }
+      await this.emojiRepository.save(emojis);
+
+      conversation.emoji = emojis;
       return {
         statusCode: 200,
         message: 'create group conversation success',
@@ -126,7 +155,10 @@ export class ConversationService {
     }
   }
   async getMessagesConversation(conversationId: string) {
-    console.log("🚀 ~ file: conversation.service.ts ~ line 122 ~ ConversationService ~ getMessagesConversation ~ conversationId", conversationId)
+    console.log(
+      '🚀 ~ file: conversation.service.ts ~ line 122 ~ ConversationService ~ getMessagesConversation ~ conversationId',
+      conversationId,
+    );
     try {
       const conversation = await this.conversation.findOne({
         where: {
@@ -219,10 +251,10 @@ export class ConversationService {
     try {
       const participants = await this.user
         .createQueryBuilder('user')
-        .innerJoin("isMember", "iM", "iM.user_id = user._id")
-        .where("iM.conversation_id = :id", { id: conversationId })
-        .limit(type === "group" ? perpage : 2)
-        .skip(type === "group" ? page * perpage : 0)
+        .innerJoin('isMember', 'iM', 'iM.user_id = user._id')
+        .where('iM.conversation_id = :id', { id: conversationId })
+        .limit(type === 'group' ? perpage : 2)
+        .skip(type === 'group' ? page * perpage : 0)
         .getMany();
       return {
         data: participants,
@@ -438,6 +470,40 @@ export class ConversationService {
       });
       return response;
     } catch (error) {
+      return {
+        statusCode: 500,
+        message: error.message,
+        data: null,
+      };
+    }
+  }
+  async getEmoji(slug: string, userId: string){
+    try{
+      const conversation = await this.conversation.findOne({where:{_id:slug},
+      relations: {
+        emoji: {
+          userId: true
+        }
+      }})
+      if(!conversation){
+        return {
+          statusCode: 404,
+          message: 'conversation not found',
+          data: null,
+        };
+      }
+      const emoji = conversation.emoji.filter(e => (e.userId as User)._id === userId)
+      const emo = {
+        ...emoji[0]
+      }
+      emo.userId = (emoji[0].userId as User)._id
+      return{
+        statusCode:200,
+        message:'get emoji success',
+        data: emo
+      }
+
+    }catch(error){
       return {
         statusCode: 500,
         message: error.message,

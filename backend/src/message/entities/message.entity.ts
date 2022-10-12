@@ -7,6 +7,14 @@ export enum MessageStatusType{
     RECEIVED = "RECEIVED",
     SEEN = "SEEN"
 }
+export enum MessageType{
+    TEXT = "TEXT",
+    IMAGE = "IMAGE",
+    VIDEO = "VIDEO",
+    AUDIO = "AUDIO",
+    FILE = "FILE",
+    EMOJI="EMOJI"
+}
 @Entity()
 export class Message {
     @PrimaryGeneratedColumn("uuid")
@@ -41,4 +49,15 @@ export class Message {
     },
     )
     status: MessageStatusType;
+    @Column({
+        type: "enum",
+        enum: MessageType,
+        default: MessageType.TEXT
+    })
+    type: MessageType;
+    @Column({
+        type: "int",
+        default: 1,
+    })
+    scale: number
 }
