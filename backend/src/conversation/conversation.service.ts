@@ -511,4 +511,54 @@ export class ConversationService {
       };
     }
   }
+  async updateEmoji(slug: string, userId: string, emoji: Emoji){
+    try{
+      const foundEmoji = await this.emojiRepository.findOne({
+        where:{
+          _id: emoji._id
+        },
+        relations:{
+          userId: true,
+          conversationId: true,
+        }
+      })
+      if(!foundEmoji){
+        return {
+          statusCode: 404,
+          message: 'emoji not found',
+          data: null,
+        };
+      }
+      console.log(foundEmoji);
+      console.log(userId);
+      console.log(slug);
+      if((foundEmoji.userId as User)._id !== userId || (foundEmoji.conversationId as Conversation)._id !== slug){
+        return {
+          statusCode: 403,
+          message: 'you are not permitted to do this action',
+          data: null,
+        };
+      }
+      foundEmoji.emoji = emoji.emoji;
+      await this.emojiRepository.save(foundEmoji);
+      // const emoji1 = {
+      //   ...foundEmoji,
+      //   emoji: emoji.emoji,
+      //   userId: (foundEmoji.userId as User)._id,
+      //   conversationId: (foundEmoji.conversationId as Conversation)._id
+      // }
+      return{
+        statusCode:200,
+        message:'update emoji success',
+        // data: emoji1
+      }
+    }catch(error){
+      return {
+        statusCode: 500,
+        message: error.message,
+        data: null,
+      };
+    }
+
+  }
 }

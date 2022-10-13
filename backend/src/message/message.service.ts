@@ -29,6 +29,8 @@ export class MessageService {
       message.sender = (await this.UserService.get(senderId)).data;
       message.content = createMessageDto.content;
       message.createdAt = new Date().getTime();
+      message.type = createMessageDto.type;
+      message.scale = createMessageDto.scale;
       const conversation = await this.conversationRepository.findOne({
         where:{
           _id: createMessageDto.destination

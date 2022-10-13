@@ -33,6 +33,7 @@ export class MessageGateway {
     const tempId = payload._id;
     delete payload._id;
     const response = await this.messageService.create(_id, payload);
+    console.log(payload);
     client.emit("sentMessageSuccess", {
       tempId: tempId,
       conversationId: payload.destination,

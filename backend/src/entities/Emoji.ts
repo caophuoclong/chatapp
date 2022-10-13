@@ -18,20 +18,19 @@ import { User } from '../user/entities/user.entity';
 export class Emoji {
     @PrimaryGeneratedColumn('uuid')
     _id: string;
-  @JoinColumn({
-    name: 'user',
-  })
+
   @ManyToOne((type) => User, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'userId' })
   userId: User | string;
   @ManyToOne((type) => Conversation, (Conversation) => Conversation._id, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({
-    name: 'conversation',
+    name: "convesaitonId"
   })
-  conversationId: User | string;
+  conversationId: Conversation | string;
   @Column({
     default: '2764-fe0f',
   })
