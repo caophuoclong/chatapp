@@ -5,6 +5,7 @@ import { Socket } from 'socket.io-client'
 import Auth from '~/services/apis/Auth.api'
 import { ILoginRequest } from '~/interfaces/ILogin';
 import { IRegisterRequest } from '~/interfaces/IRegister';
+import { EmojiStyle } from 'emoji-picker-react'
 export enum ENUM_SCREEN {
   CONVERSATIONS,
   CONTACTS
@@ -51,6 +52,7 @@ interface GlobalState {
       register: boolean,
     }
     autoChangeColorMode: boolean,
+    emojiStyle: EmojiStyle
 }
 
 // Define the initial state using that type
@@ -68,6 +70,7 @@ const initialState: GlobalState = {
     register: false,
    },
    autoChangeColorMode: false,
+   emojiStyle: EmojiStyle.FACEBOOK
 }
 
 export const global = createSlice({

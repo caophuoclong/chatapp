@@ -13,7 +13,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import ChangeLanguage from '~/components/Settings/ChangeLanguage';
 import ToggleTheme from '~/components/Settings/ToggleTheme';
-import Logout from '../../Settings/Logout';
+import Logout from '../Settings/Logout';
 
 type Props = {
   isOpen: boolean;
@@ -22,7 +22,6 @@ type Props = {
 
 export default function SettingModal({ isOpen, onClose }: Props) {
   const { t } = useTranslation();
-  console.log(12312313);
   return (
     <Modal
       isOpen={isOpen}

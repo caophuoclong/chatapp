@@ -18,6 +18,8 @@ import { IUser } from '../../../interfaces/IUser';
 import { useRef } from 'react';
 import { SERVER_URL } from '~/configs';
 import { AvatarConversation } from './AvatarConversation';
+import { MessageType } from '~/interfaces/IMessage';
+import { Emoji } from 'emoji-picker-react';
 
 // export const renderDirectConversation = (participants: IUser[]) => {
 //   const myId = useAppSelector((state) => state.userSlice.info._id);
@@ -70,16 +72,14 @@ export default function Conversation({
   const choosenConversationID = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
-  console.log(updateAt);
   const contentRef = useRef<HTMLParagraphElement>(null);
-  useEffect(() => {
-    const p = contentRef.current;
-    console.log(p);
-    if (p) {
-      console.log(p.clientWidth);
-    }
-  }, [contentRef]);
-  console.log(999999);
+  // useEffect(() => {
+  //   const p = contentRef.current;
+  //   console.log(p);
+  //   if (p) {
+  //     console.log(p.clientWidth);
+  //   }
+  // }, [contentRef]);
   return (
     <Stack
       onClick={() => {
@@ -139,7 +139,12 @@ export default function Conversation({
         {lastMessage ? (
           <Flex>
             <Text fontSize="sm" noOfLines={1} color="gray.500" width={'80%'}>
-              {lastMessage.content} ·{' '}
+              {lastMessage.type === MessageType.EMOJI ? (
+                <Emoji unified={lastMessage.content} size={20} />
+              ) : (
+                lastMessage.content
+              )}{' '}
+              ·{' '}
             </Text>
             <Text fontSize="sm" noOfLines={1} color="gray.500">
               {moment(new Date(+lastMessage.createdAt || 0)).format('HH:mm')}

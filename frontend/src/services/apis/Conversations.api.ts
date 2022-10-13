@@ -1,4 +1,5 @@
 import axiosClient from '../axiosClient';
+import { IEmoji } from '../../interfaces/IConversation';
 export default class ConversationsApi{
     static async getConversation(){
         const response = await axiosClient.get("/user/conversations")
@@ -30,5 +31,10 @@ export default class ConversationsApi{
     }
     static async getMyEmoji(conversationId: string){
         return await axiosClient.get(`/conversation/${conversationId}/emoji`)
+    }
+    static async updateConversationEmoji(conversationId: string, emoji: IEmoji){
+        return await axiosClient.patch(`/conversation/${conversationId}/emoji`,{
+            emoji
+        })
     }
 }

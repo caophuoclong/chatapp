@@ -1,21 +1,41 @@
 import {
   Box,
+  Button,
+  CloseButton,
   Flex,
   IconButton,
   Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Text,
   useColorMode,
+  useDisclosure,
   useMediaQuery,
 } from '@chakra-ui/react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Reducer, useEffect, useReducer, useRef, useState } from 'react';
 import { HiOutlineEmojiHappy, HiPhotograph } from 'react-icons/hi';
 import { GrAttachment } from 'react-icons/gr';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { FcLike } from 'react-icons/fc';
-import Picker, { Emoji, EmojiClickData } from 'emoji-picker-react';
+import Picker, {
+  Emoji,
+  EmojiClickData,
+  EmojiStyle,
+  Theme,
+} from 'emoji-picker-react';
 
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import MessagesApi from '../../../services/apis/Messages.api';
-import { addMessage, updateMessageScale } from '~/app/slices/messages.slice';
+import {
+  addMessage,
+  removeMessage,
+  updateMessageScale,
+} from '~/app/slices/messages.slice';
 import {
   IMessage,
   MessageStatusType,
@@ -27,7 +47,22 @@ import {
   updateConversation,
 } from '~/app/slices/conversations.slice';
 import IConversation from '~/interfaces/IConversation';
-import EmojiPicker from 'emoji-picker-react';
+import {
+  EmojiAction,
+  EmojiReducer,
+  IinitialEmojiState,
+  initialEmojiState,
+  setDefault,
+  setEmojiContent,
+  setMessageId,
+  setState,
+  setTime,
+} from './EmojiState/reducer';
+import CustomPickerEmoji from './CustomPickerEmoji';
+import { useTranslation } from 'react-i18next';
+import { FiMoreHorizontal } from 'react-icons/fi';
+const TIME_SCALE = 1500;
+const EMOJI_SCALE_EVERY = 100;
 type Props = {
   conversation: IConversation;
 };
@@ -48,27 +83,24 @@ function useOutside<T extends HTMLElement>(
   }, [ref]);
 }
 export default function InputBox({ conversation }: Props) {
+  const { t } = useTranslation();
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
+  const { isOpen, onClose, onOpen } = useDisclosure();
+  const [isMore, setIsMore] = useState(false);
   const [content, setContent] = useState('');
   const [isPickerShow, setIsPickerShow] = useState(false);
   const { colorMode } = useColorMode();
-  const [timeEmojiClick, setTimeEmojiClick] = useState<{
-    time: number;
-    state: 'down' | 'up';
-    messageId: string;
-    value: string;
-  }>();
+  const [emojiState, emojiDispatch] = useReducer<
+    Reducer<IinitialEmojiState, EmojiAction>
+  >(EmojiReducer, initialEmojiState);
+  const isDark = useColorMode();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.userSlice.info);
   const choosenConversationId = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
-  const conversations = useAppSelector(
-    (state) => state.conversationsSlice.conversations
-  );
-
   const onPickerClick = (emoji: EmojiClickData, event: MouseEvent) => {
     console.log(emoji);
     setContent(content + emoji.emoji);
@@ -77,7 +109,11 @@ export default function InputBox({ conversation }: Props) {
   useOutside(pickerRef, () => {
     setIsPickerShow(false);
   });
+  const messages = useAppSelector((state) => state.messageSlice.messages)[
+    choosenConversationId
+  ];
   const socket = useAppSelector((state) => state.globalSlice.socket);
+  const emojiStyle = useAppSelector((state) => state.globalSlice.emojiStyle);
   const sendMessage = async () => {
     const message: IMessage = {
       _id: (Date.now() + randomInt(0, 9999)).toString(),
@@ -103,9 +139,6 @@ export default function InputBox({ conversation }: Props) {
             updateAt,
           })
         );
-
-      // const response = await MessagesApi.sendMessage(message);
-      // const data = response.data.data;
       socket?.emit('createMessage', {
         ...message,
         updateAt,
@@ -116,49 +149,39 @@ export default function InputBox({ conversation }: Props) {
       console.log(error);
     }
   };
-  const onSendEmoji = () => {
-    const message = {
-      _id: (Date.now() + randomInt(0, 9999)).toString(),
-      destination: choosenConversationId,
-      content: content,
-      attachments: [],
-      parentMessage: null,
-      status: MessageStatusType.SENDING,
-      createdAt: Date.now(),
-      sender: user,
-      type: MessageType.TEXT,
-    };
+  const handleOnRightClickEmoji = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (e.button === 2) {
+      onOpen();
+    }
   };
+
   const onEmojiDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // handleOnRightClickEmoji(e);
     const { value } = e.currentTarget;
     const time = new Date().getTime();
     const id = (Date.now() + randomInt(0, 9999)).toString();
-    setTimeEmojiClick({
-      state: 'down',
-      time: time / 1000,
-      messageId: id,
-      value,
-    });
+    if (e.button === 0) {
+      emojiDispatch(setState('down'));
+      emojiDispatch(setMessageId(id));
+      emojiDispatch(setEmojiContent(value));
+    }
   };
   const onEmojiUp = (e: React.MouseEvent<HTMLButtonElement>) => {
     const { value } = e.currentTarget;
-
-    console.log(e.currentTarget.value);
+    e.preventDefault();
     const time = new Date().getTime();
-    setTimeEmojiClick((prev) => ({
-      state: 'up',
-      time: time / 1000 - (prev ? prev.time : 0),
-      messageId: prev ? prev.messageId : '',
-      value,
-    }));
+    emojiDispatch(setState('up'));
   };
+
   useEffect(() => {
-    if (timeEmojiClick) {
-      if (timeEmojiClick.state === 'down') {
+    if (emojiState) {
+      let interval: any;
+      if (emojiState.state === 'down') {
         const message = {
-          _id: timeEmojiClick.messageId,
+          _id: emojiState.messageId,
           destination: choosenConversationId,
-          content: timeEmojiClick.value,
+          content: emojiState.content,
           attachments: [],
           parentMessage: null,
           status: MessageStatusType.SENDING,
@@ -173,44 +196,69 @@ export default function InputBox({ conversation }: Props) {
             conversationId: choosenConversationId,
           })
         );
-        // dispatch(updateConversation({ ...conversation, lastMessage: message }));
+        interval = setInterval(() => {
+          if (emojiState.state === 'down') {
+            emojiDispatch(setTime(emojiState.time + EMOJI_SCALE_EVERY));
+          }
+        }, EMOJI_SCALE_EVERY);
       }
-      const interval = setInterval(() => {
-        if (timeEmojiClick && timeEmojiClick.state === 'down') {
+
+      if (
+        emojiState &&
+        emojiState.state === 'up' &&
+        emojiState.time < TIME_SCALE
+      ) {
+        const { messageId } = emojiState;
+        const message = messages.data.find(
+          (message) => message._id === messageId
+        );
+        console.log(
+          '🚀 ~ file: index.tsx ~ line 204 ~ useEffect ~ message',
+          message
+        );
+        const updateAt = new Date().getTime();
+        if (conversation && message) {
           dispatch(
-            updateMessageScale({
-              conversationId: choosenConversationId,
-              messageId: timeEmojiClick.messageId,
+            updateConversation({
+              ...conversation,
+              lastMessage: message!,
+              updateAt,
             })
           );
+          socket?.emit('createMessage', {
+            ...message,
+            updateAt,
+          });
+          emojiDispatch(setDefault());
+          clearInterval(interval);
         }
-      }, 150);
-      if (timeEmojiClick && timeEmojiClick.state === 'up') {
-        clearInterval(interval);
       }
-      if (
-        timeEmojiClick &&
-        timeEmojiClick.state === 'up' &&
-        timeEmojiClick.time >= 5
-      ) {
+      if (emojiState && emojiState.time >= TIME_SCALE) {
         clearInterval(interval);
+        dispatch(
+          removeMessage({
+            conversationID: choosenConversationId,
+            messageID: emojiState.messageId,
+          })
+        );
+        emojiDispatch(setDefault());
       }
       return () => clearInterval(interval);
     }
-
-    // if (timeEmojiClick?.state === 'up' && timeEmojiClick.time < 5) {
-    // const message = {
-    //   _id: (Date.now() + randomInt(0, 9999)).toString(),
-    //   destination: choosenConversationId,
-    //   content: content,
-    //   attachments: [],
-    //   parentMessage: null,
-    //   status: MessageStatusType.SENDING,
-    //   createdAt: Date.now(),
-    //   sender: user,
-    // };
-    // }
-  }, [timeEmojiClick]);
+  }, [emojiState.state, emojiState.time]);
+  useEffect(() => {
+    if (messages) {
+      const message = messages.data.find((m) => m._id === emojiState.messageId);
+      if (message && emojiState.state === 'down') {
+        dispatch(
+          updateMessageScale({
+            conversationId: choosenConversationId,
+            messageId: emojiState.messageId,
+          })
+        );
+      }
+    }
+  }, [emojiState.time]);
   return (
     <Box
       marginTop="auto"
@@ -261,7 +309,8 @@ export default function InputBox({ conversation }: Props) {
       )}
       <Flex
         gap="5px"
-        paddingX={isLargerThanHD ? 0 : '1rem'}
+        paddingY=".5rem"
+        paddingX={isLargerThanHD ? 0 : '.5rem'}
         role="group"
         borderTop={
           colorMode === 'dark'
@@ -273,50 +322,78 @@ export default function InputBox({ conversation }: Props) {
           borderTopColor: '#63b3ed',
         }}
       >
-        {/* {!isLargerThanHD && (
-          <IconButton
-            onClick={() => setIsPickerShow(!isPickerShow)}
-            aria-label="Emoji"
-            bg={isPickerShow ? 'gray.200' : 'none'}
-            icon={
-              <HiOutlineEmojiHappy
-                fontSize={'24px'}
-                color={isPickerShow ? '#63B3ED' : ''}
-              />
-            }
-          />
-        )} */}
-        <Input
-          variant={'unstyled'}
-          value={content}
-          placeholder="Flushed"
-          size="md"
-          width="100%"
-          paddingX={{
-            base: '0rem',
-            lg: '1rem',
-          }}
-          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-            if (e.key === 'Enter') {
-              sendMessage();
-            }
-          }}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-            setContent(event.target.value);
-          }}
-        />
+        <Box width="100%">
+          {!isMore ? (
+            <Input
+              variant={'unstyled'}
+              value={content}
+              placeholder="Flushed"
+              size="md"
+              width="100%"
+              height="100%"
+              paddingX={{
+                base: '0rem',
+                lg: '1rem',
+              }}
+              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                if (e.key === 'Enter') {
+                  sendMessage();
+                }
+              }}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setContent(event.target.value);
+              }}
+            />
+          ) : (
+            <></>
+          )}
+        </Box>
+
         {!isLargerThanHD ? (
           content ? (
             <IconButton
+              size="sm"
               onClick={sendMessage}
               aria-label="send message"
               icon={<FaTelegramPlane fontSize={'24px'} />}
             />
           ) : (
-            <IconButton
-              aria-label="Photo"
-              icon={<HiPhotograph fontSize={'24px'} />}
-            />
+            <>
+              <IconButton
+                size="sm"
+                aria-label="Emoji"
+                onMouseUp={onEmojiUp}
+                onMouseDown={onEmojiDown}
+                onContextMenu={handleOnRightClickEmoji}
+                value={
+                  (conversation.emoji &&
+                    conversation.emoji.userId === user._id &&
+                    conversation.emoji.emoji) as string
+                }
+                icon={
+                  <>
+                    {conversation.emoji &&
+                    conversation.emoji.userId === user._id ? (
+                      <Emoji
+                        unified={conversation.emoji.emoji}
+                        emojiStyle={emojiStyle}
+                        size={24}
+                      />
+                    ) : (
+                      <></>
+                    )}
+                  </>
+                }
+              />
+              <IconButton
+                onClick={() => {
+                  setIsMore(!isMore);
+                }}
+                aria-label="show more"
+                size="sm"
+                icon={<FiMoreHorizontal fontSize={'24px'} />}
+              />
+            </>
           )
         ) : content ? (
           <IconButton
@@ -326,9 +403,10 @@ export default function InputBox({ conversation }: Props) {
           />
         ) : (
           <IconButton
-            aria-label="Photo"
+            aria-label="Emoji"
             onMouseUp={onEmojiUp}
             onMouseDown={onEmojiDown}
+            onContextMenu={handleOnRightClickEmoji}
             value={
               (conversation.emoji &&
                 conversation.emoji.userId === user._id &&
@@ -338,7 +416,10 @@ export default function InputBox({ conversation }: Props) {
               <>
                 {conversation.emoji &&
                 conversation.emoji.userId === user._id ? (
-                  <Emoji unified={conversation.emoji.emoji} />
+                  <Emoji
+                    unified={conversation.emoji.emoji}
+                    emojiStyle={emojiStyle}
+                  />
                 ) : (
                   <></>
                 )}
@@ -347,6 +428,32 @@ export default function InputBox({ conversation }: Props) {
           />
         )}
       </Flex>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader
+            borderBottom={
+              colorMode === 'dark'
+                ? '1px solid rgba(255, 255, 255,0.3)'
+                : '1px solid  rgba(0, 0, 0, 0.08)'
+            }
+          >
+            {t('Emoji__Settings')}
+          </ModalHeader>
+          <Text size="sm" marginY="1rem" paddingX="1.5rem">
+            {t('Emoji__Settings__Detail')}
+          </Text>
+          <ModalBody padding="0">
+            <CustomPickerEmoji />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={onClose}>
+              {t('Cancel')}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       {isPickerShow && (
         <Box
           ref={pickerRef}
@@ -355,7 +462,11 @@ export default function InputBox({ conversation }: Props) {
           transform={isLargerThanHD ? 'translate(0,-100%)' : 'translate(0,0)'}
           width={isLargerThanHD ? '258px' : '100%'}
         >
-          <Picker onEmojiClick={onPickerClick} />
+          <Picker
+            onEmojiClick={onPickerClick}
+            theme={isDark.colorMode === 'dark' ? Theme.DARK : Theme.LIGHT}
+            emojiStyle={emojiStyle}
+          />
         </Box>
       )}
     </Box>

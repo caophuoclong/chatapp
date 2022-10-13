@@ -3,6 +3,7 @@ import {
   Avatar,
   AvatarBadge,
   Box,
+  Button,
   Flex,
   IconButton,
   StackDivider,
@@ -77,7 +78,7 @@ export default class Common<T> extends Component<CommonProps> {
           divider={<StackDivider borderColor="gray.200" />}
         >
           <Box>
-            <Text>123</Text>
+            <Button>Emoji</Button>
             <Text>123</Text>
             <Text>123</Text>
           </Box>

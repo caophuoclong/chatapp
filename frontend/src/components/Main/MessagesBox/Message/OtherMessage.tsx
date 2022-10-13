@@ -13,31 +13,46 @@ export default function OtherMessage({ message, time, type }: Props) {
   return (
     <Flex
       maxWidth="80%"
-      rounded="lg"
-      direction={'row-reverse'}
       paddingX="1rem"
-      bg={
-        type === MessageType.TEXT
-          ? colorMode === 'light'
-            ? 'white'
-            : 'whiteAlpha.300'
-          : 'none'
-      }
+      // bg={
+      //   type === MessageType.TEXT
+      //     ? colorMode === 'light'
+      //       ? 'white'
+      //       : 'whiteAlpha.300'
+      //     : 'none'
+      // }
+      minWidth="100px"
       width="fit-content"
-      boxShadow="rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px"
+      // boxShadow="rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px"
+      className="message"
     >
-      <Box>
-        <Text fontSize={'16px'} wordBreak="break-word">
+      <Flex flexDirection={'column'} width="100%">
+        <Text
+          fontSize={'16px'}
+          wordBreak="break-word"
+          padding=".5rem"
+          rounded="lg"
+          roundedBottomLeft={'none'}
+          bg={
+            type === MessageType.TEXT
+              ? colorMode === 'light'
+                ? 'gray.300'
+                : 'gray.700'
+              : 'none'
+          }
+        >
           {message}
         </Text>
         <Text
+          justifySelf={'flex-end'}
+          alignSelf={'flex-end'}
           fontSize={'13px'}
           color={colorMode === 'light' ? '#4F5359' : 'gray'}
           align="left"
         >
           {time}
         </Text>
-      </Box>
+      </Flex>
     </Flex>
   );
 }

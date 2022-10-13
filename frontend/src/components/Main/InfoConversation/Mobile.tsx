@@ -16,7 +16,6 @@ class Mobile extends Common<MobileProps> {
     super({ conversation: props.conversation });
     this.handleHideInfoConversation = props.onHideInfoConversation;
   }
-
   render() {
     return (
       <React.Fragment>

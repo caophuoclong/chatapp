@@ -1,12 +1,23 @@
-import { Box, Flex, Text, useColorMode } from '@chakra-ui/react';
+import {
+  Avatar,
+  Box,
+  Circle,
+  Flex,
+  Text,
+  useColorMode,
+} from '@chakra-ui/react';
 import React from 'react';
 import { useAppSelector } from '~/app/hooks';
 import {
+  IMessage,
   MessageStatusType,
   MessageType,
 } from '../../../../interfaces/IMessage';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
+import { BsCheckLg, BsCircle } from 'react-icons/bs';
+import { AiFillEye } from 'react-icons/ai';
+import { IUser } from '../../../../interfaces/IUser';
 
 type Props = {
   message: React.ReactNode | string;
@@ -14,24 +25,91 @@ type Props = {
   _id?: string;
   type: MessageType;
 };
-
-function ShowStatus(status: MessageStatusType, t: TFunction) {
-  switch (status) {
+const square = '16px';
+function ShowStatus(
+  lastMessageId: string,
+  messages: IMessage[],
+  t: TFunction,
+  friend?: IUser
+) {
+  const message = messages.filter(
+    (message) => message._id === lastMessageId
+  )[0];
+  // const message = {
+  //   status: MessageStatusType.SEEN,
+  // };
+  switch (message.status) {
     case MessageStatusType.SENT:
-      return t('Sent');
+      return (
+        <Flex
+          border="2px solid"
+          borderColor={'blue.300'}
+          width={square}
+          height={square}
+          rounded="full"
+          justifyContent={'center'}
+          alignItems="center"
+        >
+          <BsCheckLg size="8px" />
+        </Flex>
+      );
     case MessageStatusType.RECEIVED:
-      return t('Received');
+      return (
+        <Flex
+          border="2px solid"
+          borderColor={'blue.300'}
+          width={square}
+          height={square}
+          rounded="full"
+          bg="blue.300"
+          justifyContent={'center'}
+          alignItems="center"
+        >
+          <BsCheckLg size="8px" />
+        </Flex>
+      );
     case MessageStatusType.SEEN:
-      return t('Seen');
+      return (
+        // <Flex
+        //   border="2px solid"
+        //   borderColor={'blue.300'}
+        //   width={square}
+        //   height={square}
+        //   rounded="full"
+        //   bg="blue.300"
+        //   justifyContent={'center'}
+        //   alignItems="center"
+        // >
+        <img
+          src={`${process.env.REACT_APP_SERVER_URL}/images/${friend?.avatarUrl}`}
+          alt={friend?.name + '__' + 'avatar'}
+          style={{
+            width: square,
+            height: square,
+            borderRadius: '100%',
+          }}
+        />
+        // </Flex>
+      );
     default:
-      return t('Sending');
+      return (
+        <Box
+          border="2px solid"
+          borderColor={'blue.300'}
+          width={square}
+          height={square}
+          rounded="full"
+        >
+          {' '}
+        </Box>
+      );
   }
 }
 
 export default function MyMessage({ message, time, _id, type }: Props) {
   const { colorMode } = useColorMode();
   const { t } = useTranslation();
-
+  const user = useAppSelector((state) => state.userSlice.info);
   const choosenConversationId = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
@@ -41,36 +119,67 @@ export default function MyMessage({ message, time, _id, type }: Props) {
   const messages = useAppSelector(
     (state) => state.messageSlice.messages[choosenConversationId].data
   );
-  const lastestMessageId = conversations.filter((conversation) => {
+  const conversation = conversations.filter(
+    (con) => con._id === choosenConversationId
+  )[0];
+  const latestMessageConversation = conversations.filter((conversation) => {
     if (conversation) {
       return conversation._id === choosenConversationId;
     }
     return false;
-  })[0].lastMessage._id;
-  const lastestMessage = messages.filter(
-    (message) => message._id === lastestMessageId
-  )[0];
+  })[0].lastMessage;
 
   return (
     <Flex
       maxWidth="80%"
       marginLeft={'auto'}
       rounded="lg"
-      direction={'row-reverse'}
-      paddingX="1rem"
-      bg={
-        type === MessageType.TEXT
-          ? colorMode === 'light'
-            ? 'white'
-            : 'whiteAlpha.300'
-          : 'none'
-      }
+      direction={'row'}
+      // bg={
+      //   type === MessageType.TEXT
+      //     ? colorMode === 'light'
+      //       ? 'white'
+      //       : 'whiteAlpha.300'
+      //     : 'none'
+      // }
+      justifyContent="flex-end"
+      minWidth="100px"
       width="fit-content"
+      className="message"
     >
       <Box>
-        <Text fontSize={'16px'} wordBreak="break-word">
-          {message}
-        </Text>
+        <Flex gap=".2rem">
+          <Text
+            fontSize={'16px'}
+            wordBreak="break-word"
+            padding=".5rem"
+            rounded="xl"
+            roundedBottomRight={'none'}
+            bg={
+              type === MessageType.TEXT
+                ? colorMode === 'light'
+                  ? 'blue.300'
+                  : 'purple.600'
+                : 'none'
+            }
+          >
+            {message}
+          </Text>
+          {_id &&
+            latestMessageConversation &&
+            _id === latestMessageConversation._id && (
+              <Text alignSelf={'flex-end'}>
+                {ShowStatus(
+                  latestMessageConversation._id,
+                  messages,
+                  t,
+                  conversation.participants.filter(
+                    (participant) => participant._id !== user._id
+                  )[0]
+                )}
+              </Text>
+            )}
+        </Flex>
         <Flex
           fontSize={'13px'}
           color={colorMode === 'light' ? '#4F5359' : 'gray'}
@@ -79,10 +188,6 @@ export default function MyMessage({ message, time, _id, type }: Props) {
           gap="1rem"
         >
           {time}
-
-          {_id && _id === lastestMessage._id && (
-            <Text>{ShowStatus(lastestMessage.status, t)}</Text>
-          )}
         </Flex>
       </Box>
     </Flex>

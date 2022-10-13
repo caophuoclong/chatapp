@@ -23,6 +23,7 @@ export default function MessagesBox({}: Props) {
   const choosenConversation = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
+  const emojiStyle = useAppSelector((state) => state.globalSlice.emojiStyle);
   const myId = useAppSelector((state) => state.userSlice.info._id);
   const messages = useAppSelector((state) => state.messageSlice.messages);
   const [messageReversed, setMessageReversed] = useState<IMessage[]>([]);
@@ -69,8 +70,7 @@ export default function MessagesBox({}: Props) {
       onScroll={handleOnScroll}
       ref={flexRef}
       direction="column"
-      justifyContent={'flex-end'}
-      // alignItems={"center"}
+      marginTop="auto"
       boxSizing="border-box"
       width="100%"
       height={{
@@ -94,6 +94,7 @@ export default function MessagesBox({}: Props) {
                     <Emoji
                       unified={message.content}
                       size={25 * (message.scale || 1)}
+                      emojiStyle={emojiStyle}
                     />
                   ) : (
                     message.content
@@ -112,6 +113,7 @@ export default function MessagesBox({}: Props) {
                     <Emoji
                       unified={message.content}
                       size={25 * (message.scale || 1)}
+                      emojiStyle={emojiStyle}
                     />
                   ) : (
                     message.content

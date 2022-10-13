@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flex, IconButton, Text, VStack } from '@chakra-ui/react';
 import { MdOutlineMoreHoriz, MdSettings } from 'react-icons/md';
-import SettingModal from './SettingModal';
+import SettingModal from '../../Modals/SettingModal';
 
 type Props = {};
 
