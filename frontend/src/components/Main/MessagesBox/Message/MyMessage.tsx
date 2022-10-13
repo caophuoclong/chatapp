@@ -6,7 +6,7 @@ import {
   Text,
   useColorMode,
 } from '@chakra-ui/react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useAppSelector } from '~/app/hooks';
 import {
   IMessage,
@@ -128,7 +128,16 @@ export default function MyMessage({ message, time, _id, type }: Props) {
     }
     return false;
   })[0].lastMessage;
-
+  const showMessageRef = useRef<any>();
+  useEffect(() => {
+    const current = showMessageRef.current;
+    if (current) {
+      if (type === MessageType.TEXT) current.innerHTML = message;
+      else {
+        console.log(message);
+      }
+    }
+  }, [showMessageRef]);
   return (
     <Flex
       maxWidth="80%"
@@ -149,7 +158,7 @@ export default function MyMessage({ message, time, _id, type }: Props) {
     >
       <Box>
         <Flex gap=".2rem">
-          <Text
+          <Box
             fontSize={'16px'}
             wordBreak="break-word"
             padding=".5rem"
@@ -163,8 +172,12 @@ export default function MyMessage({ message, time, _id, type }: Props) {
                 : 'none'
             }
           >
-            {message}
-          </Text>
+            {type === MessageType.TEXT ? (
+              <Text ref={showMessageRef}></Text>
+            ) : (
+              message
+            )}
+          </Box>
           {_id &&
             latestMessageConversation &&
             _id === latestMessageConversation._id && (

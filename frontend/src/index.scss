@@ -110,3 +110,8 @@ $check-color: $brand-success;
 .message:first-child{
   margin-top: auto !important;
 }
+.content__editable[placeholder]:empty:before{
+  content: attr(placeholder);
+  color: #ccc;
+  font-style: italic;
+}

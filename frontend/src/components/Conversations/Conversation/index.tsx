@@ -80,6 +80,15 @@ export default function Conversation({
   //     console.log(p.clientWidth);
   //   }
   // }, [contentRef]);
+  const showContentRef = useRef<any>();
+  useEffect(() => {
+    const { current } = showContentRef;
+    if (current) {
+      if (lastMessage.type === MessageType.TEXT) {
+        current.innerHTML = lastMessage.content;
+      }
+    }
+  }, [showContentRef]);
   return (
     <Stack
       onClick={() => {
@@ -142,7 +151,7 @@ export default function Conversation({
               {lastMessage.type === MessageType.EMOJI ? (
                 <Emoji unified={lastMessage.content} size={20} />
               ) : (
-                lastMessage.content
+                <Text ref={showContentRef}></Text>
               )}{' '}
               ·{' '}
             </Text>

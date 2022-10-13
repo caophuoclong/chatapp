@@ -61,6 +61,7 @@ import {
 import CustomPickerEmoji from './CustomPickerEmoji';
 import { useTranslation } from 'react-i18next';
 import { FiMoreHorizontal } from 'react-icons/fi';
+import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
 const TIME_SCALE = 1500;
 const EMOJI_SCALE_EVERY = 100;
 type Props = {
@@ -101,6 +102,7 @@ export default function InputBox({ conversation }: Props) {
   const choosenConversationId = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
+  const contentRef = useRef<any>('');
   const onPickerClick = (emoji: EmojiClickData, event: MouseEvent) => {
     console.log(emoji);
     setContent(content + emoji.emoji);
@@ -149,6 +151,8 @@ export default function InputBox({ conversation }: Props) {
       console.log(error);
     }
   };
+  const [altPress, setAltPress] = useState(false);
+  const [enterPress, setEnterPress] = useState(false);
   const handleOnRightClickEmoji = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (e.button === 2) {
@@ -259,6 +263,22 @@ export default function InputBox({ conversation }: Props) {
       }
     }
   }, [emojiState.time]);
+  useEffect(() => {
+    if (altPress && enterPress) {
+      setContent(content + '<div><br></div><div><br></div>');
+    }
+  }, [altPress, enterPress]);
+  useEffect(() => {
+    if (!altPress && enterPress && content.length > 1) {
+      const testContent = content.replace(/<[^>]*>?/gm, '');
+      if (testContent.length >= 1) {
+        sendMessage();
+      } else {
+        setContent('');
+      }
+    }
+  }, [content, enterPress]);
+
   return (
     <Box
       marginTop="auto"
@@ -322,36 +342,70 @@ export default function InputBox({ conversation }: Props) {
           borderTopColor: '#63b3ed',
         }}
       >
-        <Box width="100%">
+        <Flex width={'calc(100% - 32px)'}>
           {!isMore ? (
-            <Input
-              variant={'unstyled'}
-              value={content}
-              placeholder="Flushed"
-              size="md"
-              width="100%"
-              height="100%"
-              paddingX={{
-                base: '0rem',
-                lg: '1rem',
+            <ContentEditable
+              className="content__editable"
+              html={content}
+              placeholder="Type a message"
+              style={{
+                width: '100%',
+                outline: 'none',
+                fontSize: '1.2rem',
+                maxHeight: '7rem',
+                overflowY: 'auto',
+                italic: content.length < 1,
               }}
-              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                if (e.key === 'Enter') {
-                  sendMessage();
+              onChange={(e: ContentEditableEvent) => {
+                setContent(e.target.value);
+              }}
+              onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+                if (e.code === 'Enter') {
+                  setEnterPress(true);
+                  e.preventDefault();
+                }
+                if (e.code === 'AltLeft') {
+                  setAltPress(true);
                 }
               }}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setContent(event.target.value);
+              onKeyUp={(e: React.KeyboardEvent<HTMLDivElement>) => {
+                if (e.code === 'AltLeft') {
+                  setAltPress(false);
+                }
+                if (e.code === 'Enter') {
+                  setEnterPress(false);
+                }
               }}
             />
           ) : (
+            // <Input
+            //   variant={'unstyled'}
+            //   value={content}
+            //   placeholder="Flushed"
+            //   size="md"
+            //   width="100%"
+            //   height="100%"
+            //   paddingX={{
+            //     base: '0rem',
+            //     lg: '1rem',
+            //   }}
+            //   onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+            //     if (e.key === 'Enter') {
+            //       sendMessage();
+            //     }
+            //   }}
+            //   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            //     setContent(event.target.value);
+            //   }}
+            // />
             <></>
           )}
-        </Box>
+        </Flex>
 
         {!isLargerThanHD ? (
           content ? (
             <IconButton
+              alignSelf={'flex-end'}
               size="sm"
               onClick={sendMessage}
               aria-label="send message"
@@ -360,6 +414,7 @@ export default function InputBox({ conversation }: Props) {
           ) : (
             <>
               <IconButton
+                alignSelf={'flex-end'}
                 size="sm"
                 aria-label="Emoji"
                 onMouseUp={onEmojiUp}
@@ -386,6 +441,7 @@ export default function InputBox({ conversation }: Props) {
                 }
               />
               <IconButton
+                alignSelf={'flex-end'}
                 onClick={() => {
                   setIsMore(!isMore);
                 }}
@@ -397,12 +453,14 @@ export default function InputBox({ conversation }: Props) {
           )
         ) : content ? (
           <IconButton
+            alignSelf={'flex-end'}
             onClick={sendMessage}
             aria-label="send message"
             icon={<FaTelegramPlane fontSize={'24px'} />}
           />
         ) : (
           <IconButton
+            alignSelf={'flex-end'}
             aria-label="Emoji"
             onMouseUp={onEmojiUp}
             onMouseDown={onEmojiDown}
