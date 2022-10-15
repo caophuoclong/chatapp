@@ -41,7 +41,10 @@ export class MessageGateway {
     const destinationId = payload.destination;
     const message = response.data;
     message.destination = destinationId
-    client.broadcast.to(destinationId).emit("newMessage", message);
+    client.broadcast.to(destinationId).emit("newMessage", {
+      ...message,
+      updateAt: payload.updateAt
+    });
   }
   @UseGuards(WsGuards)
   @SubscribeMessage('markReceiveMessage')

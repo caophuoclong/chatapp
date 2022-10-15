@@ -23,7 +23,7 @@ export class CreateConversationDto {
         description: "The participants id of conversation"
     })
     @IsNotEmpty()
-    participants: Array<string>;
+    participants: string;
     @Optional()
     owner: string;
     @ApiProperty({

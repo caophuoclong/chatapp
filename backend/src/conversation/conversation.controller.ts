@@ -10,8 +10,12 @@ import {
   Query,
   ParseUUIDPipe,
   Request,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { diskStorage } from 'multer';
 import { JWTAuthGuard } from '~/auth/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { CreateConversationDtoFromFriendshipDto } from './dto/create-conversation-friend';
@@ -26,8 +30,21 @@ export class ConversationController {
   constructor(private readonly conversationService: ConversationService) {}
 
   @Post('/create/group')
-  createNewConversation(@Body() createConversationDto: CreateConversationDto, @Request() req) {
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: "./images",
+      filename: (req, file, cb) => {
+        if(file){
+          const fileName = `${Date.now()}-${file.originalname}`;
+          cb(null, fileName)
+          req.body.fileName = fileName;
+        }
+      }
+    })
+  }))
+  createNewConversation(@UploadedFile() file: Express.Multer.File,@Body() createConversationDto: CreateConversationDto, @Request() req) {
     const {_id} = req.user;
+    createConversationDto.avatarUrl = req.body.fileName;
     return this.conversationService.create(_id,createConversationDto);
   }
 

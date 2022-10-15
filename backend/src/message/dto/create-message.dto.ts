@@ -28,4 +28,6 @@ export class CreateMessageDto {
     })
     @Optional()
     parentMessage: string;
+    @Optional()
+    updateAt: number;
 }
