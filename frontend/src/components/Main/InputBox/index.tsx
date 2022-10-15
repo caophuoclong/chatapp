@@ -265,7 +265,7 @@ export default function InputBox({ conversation }: Props) {
   }, [emojiState.time]);
   useEffect(() => {
     if (altPress && enterPress) {
-      setContent(content + '<div><br></div><div><br></div>');
+      setContent(content + '<div><br></div>');
     }
   }, [altPress, enterPress]);
   useEffect(() => {

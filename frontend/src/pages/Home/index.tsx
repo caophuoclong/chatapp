@@ -69,7 +69,8 @@ export default function Home({}: Props) {
   const { t } = useTranslation();
   useEffect(() => {
     const access_token = localStorage.getItem('access_token');
-    if (!access_token) {
+    if (!access_token || access_token === 'undefined') {
+      window.localStorage.clear();
       navigate('/login');
     } else {
       dispatch(getMe());
@@ -77,7 +78,7 @@ export default function Home({}: Props) {
       dispatch(getMyConversations());
       const now = Date.now();
       const expriedTime = localStorage.getItem('expiredTime') || 0;
-      console.log(now, expriedTime);
+      // console.log(now, expriedTime);
       if (now < +expriedTime) {
         const s = connectSocket();
         dispatch(setSocket(s));

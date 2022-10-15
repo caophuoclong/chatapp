@@ -88,7 +88,7 @@ export default function Conversation({
         current.innerHTML = lastMessage.content;
       }
     }
-  }, [showContentRef]);
+  }, [showContentRef, lastMessage]);
   return (
     <Stack
       onClick={() => {
@@ -147,14 +147,17 @@ export default function Conversation({
         </Text>
         {lastMessage ? (
           <Flex>
-            <Text fontSize="sm" noOfLines={1} color="gray.500" width={'80%'}>
+            <Flex fontSize="sm" color="gray.500" width={'80%'}>
               {lastMessage.type === MessageType.EMOJI ? (
                 <Emoji unified={lastMessage.content} size={20} />
               ) : (
-                <Text ref={showContentRef}></Text>
+                <Text ref={showContentRef} noOfLines={1}></Text>
               )}{' '}
-              ·{' '}
-            </Text>
+              <Text marginLeft="auto" fontWeight={'bold'}>
+                {' '}
+                ·{' '}
+              </Text>
+            </Flex>
             <Text fontSize="sm" noOfLines={1} color="gray.500">
               {moment(new Date(+lastMessage.createdAt || 0)).format('HH:mm')}
             </Text>

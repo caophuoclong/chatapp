@@ -1,5 +1,5 @@
 import { Box, Flex, Text, useColorMode } from '@chakra-ui/react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MessageType } from '../../../../interfaces/IMessage';
 
 type Props = {
@@ -10,6 +10,16 @@ type Props = {
 
 export default function OtherMessage({ message, time, type }: Props) {
   const { colorMode } = useColorMode();
+  const showMessageRef = useRef<any>();
+  useEffect(() => {
+    const current = showMessageRef.current;
+    if (current) {
+      if (type === MessageType.TEXT) current.innerHTML = message;
+      else {
+        console.log(message);
+      }
+    }
+  }, [showMessageRef]);
   return (
     <Flex
       maxWidth="80%"
@@ -41,7 +51,11 @@ export default function OtherMessage({ message, time, type }: Props) {
               : 'none'
           }
         >
-          {message}
+          {type === MessageType.TEXT ? (
+            <Text ref={showMessageRef}></Text>
+          ) : (
+            message
+          )}
         </Text>
         <Text
           justifySelf={'flex-end'}
