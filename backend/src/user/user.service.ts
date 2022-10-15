@@ -15,6 +15,7 @@ import { RedisClientType } from 'redis';
 import { IListFriend } from '~/interfaces/IListFriend';
 import { MailService } from '~/mail/mail.service';
 import { Confirmation } from '~/entities/confirmation.entity';
+import { Emoji } from '~/entities/Emoji';
 @Injectable()
 export class UserService {
   constructor(
@@ -32,6 +33,9 @@ export class UserService {
     private readonly mailService: MailService,
     @InjectRepository(Confirmation)
     private readonly confirmationRepository: Repository<Confirmation>,
+    @InjectRepository(Emoji)
+    private readonly emojiRepository: Repository<Emoji>,
+
   ) {}
   async register(createUserDto: CreateUserDto) {
       const lan = createUserDto.lan;
@@ -300,7 +304,7 @@ export class UserService {
               userAddress: true,
               userRequest: true,
               statusCode: true
-            }
+            },
           },
         },
         order:{
@@ -310,7 +314,6 @@ export class UserService {
             }
           }
         },
-
       });
       
       if (!user) {
@@ -318,10 +321,10 @@ export class UserService {
       }
       const conversations = user.conversations;
       for(let i = 0; i < conversations.length; i++){
-        const co = conversations[i];
+      const co = conversations[i];
       const participants = await this.conversationService.getUserOfConversation(co._id, co.type);
       conversations[i].participants = participants.data;
-      }
+      }      
       return {
         statusCode: 200,
         message: 'User found',

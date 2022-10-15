@@ -1,6 +1,7 @@
 import { Optional } from "@nestjs/common";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsNotEmpty, IsUUID } from "class-validator";
+import { MessageType } from "../entities/message.entity";
 
 export class CreateMessageDto {
     @ApiProperty({
@@ -30,4 +31,8 @@ export class CreateMessageDto {
     parentMessage: string;
     @Optional()
     updateAt: number;
+    @Optional()
+    type: MessageType;
+    @Optional()
+    scale: number;
 }

@@ -1,5 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, Table } from "typeorm";
 import { Conversation } from "~/conversation/entities/conversation.entity";
+import { Emoji } from "~/entities/Emoji";
 import { FriendShip } from "~/friendship/entities/friendship.entity";
 import { Message } from "~/message/entities/message.entity";
 import { UnRead } from '../../unread/entities/unread.entity';
@@ -85,5 +86,9 @@ export class User {
         type: "boolean",
         default: false
     })
-    active: boolean
+    active: boolean;
+    @OneToMany(type => Emoji, e => e.userId, {
+        cascade: true
+    })
+    emoji: Emoji[];
 }

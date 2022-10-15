@@ -65,7 +65,7 @@ export class AuthService {
       username: string;
     };
     }catch(error){
-      throw new HttpException("Invalid token", 401);
+      console.log(error);
     }
   }
 }

@@ -17,6 +17,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { JWTAuthGuard } from '~/auth/jwt-auth.guard';
+import { Emoji } from '~/entities/Emoji';
 import { ConversationService } from './conversation.service';
 import { CreateConversationDtoFromFriendshipDto } from './dto/create-conversation-friend';
 import { CreateConversationDto } from './dto/create-conversation.dto';
@@ -83,5 +84,17 @@ export class ConversationController {
   deleteConversation(@Param("slug", ParseUUIDPipe) slug , @Request() req){
     const {_id} = req.user;
     return this.conversationService.deleteConversation(_id,slug);
+  }
+  @Get("/:slug/emoji")
+  @ApiParam({name: "slug", description: "The _id of conversation"})
+  getEmoji(@Param("slug", ParseUUIDPipe) slug, @Request() req){
+    const {_id} = req.user;
+    return this.conversationService.getEmoji(slug, _id);
+  }
+  @Patch("/:slug/emoji")
+  @ApiParam({name: "slug", description: "The _id of conversation"})
+  updateEmoji(@Param("slug", ParseUUIDPipe) slug, @Request() req, @Body() data: Emoji){
+    const {_id} = req.user;
+    return this.conversationService.updateEmoji(slug, _id, data);
   }
 }
