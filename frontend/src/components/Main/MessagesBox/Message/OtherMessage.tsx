@@ -1,35 +1,72 @@
 import { Box, Flex, Text, useColorMode } from '@chakra-ui/react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { MessageType } from '../../../../interfaces/IMessage';
 
 type Props = {
-  message: string;
+  message: React.ReactNode | string;
   time: string;
+  type: MessageType;
 };
 
-export default function OtherMessage({ message, time }: Props) {
+export default function OtherMessage({ message, time, type }: Props) {
   const { colorMode } = useColorMode();
+  const showMessageRef = useRef<any>();
+  useEffect(() => {
+    const current = showMessageRef.current;
+    if (current) {
+      if (type === MessageType.TEXT) current.innerHTML = message;
+      else {
+        console.log(message);
+      }
+    }
+  }, [showMessageRef]);
   return (
     <Flex
       maxWidth="80%"
-      rounded="lg"
-      direction={'row-reverse'}
       paddingX="1rem"
-      bg={colorMode === 'light' ? 'white' : 'whiteAlpha.300'}
+      // bg={
+      //   type === MessageType.TEXT
+      //     ? colorMode === 'light'
+      //       ? 'white'
+      //       : 'whiteAlpha.300'
+      //     : 'none'
+      // }
+      minWidth="100px"
       width="fit-content"
-      boxShadow="rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px"
+      // boxShadow="rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px"
+      className="message"
     >
-      <Box>
-        <Text fontSize={'16px'} wordBreak="break-word">
-          {message}
+      <Flex flexDirection={'column'} width="100%">
+        <Text
+          fontSize={'16px'}
+          wordBreak="break-word"
+          padding=".5rem"
+          rounded="lg"
+          roundedBottomLeft={'none'}
+          bg={
+            type === MessageType.TEXT
+              ? colorMode === 'light'
+                ? 'gray.300'
+                : 'gray.700'
+              : 'none'
+          }
+        >
+          {type === MessageType.TEXT ? (
+            <Text ref={showMessageRef}></Text>
+          ) : (
+            message
+          )}
         </Text>
         <Text
+          justifySelf={'flex-end'}
+          alignSelf={'flex-end'}
           fontSize={'13px'}
           color={colorMode === 'light' ? '#4F5359' : 'gray'}
           align="left"
         >
           {time}
         </Text>
-      </Box>
+      </Flex>
     </Flex>
   );
 }

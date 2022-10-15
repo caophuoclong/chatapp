@@ -37,15 +37,24 @@ export default function GroupHeader({
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [groupName, changeGroupName] = React.useState(name);
   const me = useAppSelector((state) => state.userSlice.info);
+  const isLargerThanHD = useAppSelector(
+    (state) => state.globalSlice.isLargerThanHD
+  );
   useEffect(() => {
     changeGroupName(name);
   }, [name]);
   const onChangeGroupName = (name: string) => {
     changeGroupName(name);
   };
+  const onShowConversationInfo = () => {
+    if (isLargerThanHD) {
+    } else {
+      dispatch(setShowInfoConversation(true));
+    }
+  };
 
   return (
-    <Flex>
+    <Flex onClick={() => onShowConversationInfo}>
       {isOpen && (
         <EditNameGroupChat
           isOpen={isOpen}

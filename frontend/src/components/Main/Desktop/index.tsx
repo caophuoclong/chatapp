@@ -72,7 +72,7 @@ export default function Main({ choosenConversation }: Props) {
         owner={choosenConversation.owner}
       />
       <MessagesBox />
-      <InputBox />
+      <InputBox conversation={choosenConversation} />
       <Drawer
         isOpen={showInfo}
         placement="right"

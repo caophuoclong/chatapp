@@ -76,9 +76,7 @@ export const messageSlice = createSlice({
       value: Partial<IMessage>
     }>)=>{
       const { conversationId, value, tempId } = action.payload;
-      console.log(conversationId);
       const index = state.messages[conversationId].data.findIndex((message)=>message._id === tempId);
-      console.log(index);
       state.messages[conversationId].data[index] = {
         ...state.messages[conversationId].data[index],
         ...value
@@ -93,9 +91,32 @@ export const messageSlice = createSlice({
         status: MessageStatusType.RECEIVED
       }
       }
+    },
+    updateMessageScale: (state: MessageState, action: PayloadAction<{
+      conversationId: string,
+      messageId: string,
       
-    }
+    }>) =>{
+      const {conversationId, messageId} = action.payload;
+      const index = state.messages[conversationId].data.findIndex((message)=>message._id === messageId);
+      if(index >= 0){
+        let scale1 = state.messages[conversationId].data[index].scale || 1;
+        scale1 +=0.255555
+        state.messages[conversationId].data[index] = {
+          ...state.messages[conversationId].data[index],
+          scale: scale1
+        }
+      }
 
+    },
+    removeMessage: (state: MessageState, action: PayloadAction<{
+      conversationID: string,
+      messageID: string;
+    }>)=>{
+      const {conversationID, messageID} = action.payload;
+      const index = state.messages[conversationID].data.findIndex((message)=>message._id === messageID);
+      state.messages[conversationID].data.splice(index, 1);
+    }
   },
   extraReducers(builder) {
     builder.addCase(getMessages.pending,  (state: MessageState)=>{
@@ -123,7 +144,7 @@ export const messageSlice = createSlice({
   },
 });
 
-export const {addMessage, updateSentMessage, updateReceivedMessage, initMessage} = messageSlice.actions;
+export const {addMessage, updateSentMessage, updateReceivedMessage, initMessage, updateMessageScale, removeMessage} = messageSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 

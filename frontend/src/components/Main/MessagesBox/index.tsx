@@ -4,9 +4,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAppSelector } from '~/app/hooks';
 import MyMessage from './Message/MyMessage';
 import OtherMessage from './Message/OtherMessage';
-import { IMessage } from '../../../interfaces/IMessage';
+import { IMessage, MessageType } from '../../../interfaces/IMessage';
 import { getMessages } from '~/app/slices/messages.slice';
 import { useAppDispatch } from '../../../app/hooks';
+import { Emoji } from 'emoji-picker-react';
 
 type Props = {};
 function useScrollToBottom<T extends HTMLElement>(ref: React.RefObject<T>) {
@@ -22,6 +23,7 @@ export default function MessagesBox({}: Props) {
   const choosenConversation = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
+  const emojiStyle = useAppSelector((state) => state.globalSlice.emojiStyle);
   const myId = useAppSelector((state) => state.userSlice.info._id);
   const messages = useAppSelector((state) => state.messageSlice.messages);
   const [messageReversed, setMessageReversed] = useState<IMessage[]>([]);
@@ -68,8 +70,7 @@ export default function MessagesBox({}: Props) {
       onScroll={handleOnScroll}
       ref={flexRef}
       direction="column"
-      // justifyContent={'flex-end'}
-      // alignItems={"center"}
+      marginTop="auto"
       boxSizing="border-box"
       width="100%"
       height={{
@@ -88,14 +89,36 @@ export default function MessagesBox({}: Props) {
             message.sender._id === myId ? (
               <MyMessage
                 key={message._id}
-                message={message.content}
+                message={
+                  message.type === MessageType.EMOJI ? (
+                    <Emoji
+                      unified={message.content}
+                      size={25 * (message.scale || 1)}
+                      emojiStyle={emojiStyle}
+                    />
+                  ) : (
+                    message.content
+                  )
+                }
                 _id={message._id}
+                type={message.type}
                 time={moment(new Date(+message.createdAt)).format('HH:mm')}
               />
             ) : (
               <OtherMessage
                 key={message._id}
-                message={message.content}
+                type={message.type}
+                message={
+                  message.type === MessageType.EMOJI ? (
+                    <Emoji
+                      unified={message.content}
+                      size={25 * (message.scale || 1)}
+                      emojiStyle={emojiStyle}
+                    />
+                  ) : (
+                    message.content
+                  )
+                }
                 time={moment(new Date(+message.createdAt)).format('HH:mm')}
               />
             )

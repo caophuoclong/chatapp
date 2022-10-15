@@ -136,6 +136,8 @@ const resources = {
       "Update__Group__Name__Fail": "Update group name fail",
       "Change__Avatar": "Change avatar",
       "Remove__Avatar": "Remove avatar",
+      "Emoji__Settings": "Emoji setting",
+      "Emoji__Settings__Detail": "You can change the emoji for this chat"
     }
   },
   vn: {
@@ -267,6 +269,8 @@ const resources = {
       "Update__Group__Name__Fail": "Đổi tên nhóm thất bại",
       "Change__Avatar": "Đổi ảnh đại diện",
       "Remove__Avatar": "Xóa ảnh đại diện",
+      "Emoji__Settings": "Thay đổi biểu tượng cảm xúc",
+      "Emoji__Settings__Detail": "Bạn có thể thay đổi biểu tượng cảm xúc cho nhóm này",
     }
   }
 };

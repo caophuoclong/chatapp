@@ -6,6 +6,14 @@ export enum MessageStatusType{
     SENDING = "SENDING",
 
 }
+export enum MessageType{
+    TEXT = "TEXT",
+    IMAGE = "IMAGE",
+    VIDEO = "VIDEO",
+    AUDIO = "AUDIO",
+    FILE = "FILE",
+    EMOJI="EMOJI"
+}
 export interface IMessage{
     _id?: string,
     sender:IUser,
@@ -16,4 +24,7 @@ export interface IMessage{
     parentMessage: null | IMessage,
     status: MessageStatusType,
     destination: string,
+    scale?: number,
+    type: MessageType
+
 }

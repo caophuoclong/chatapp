@@ -69,7 +69,8 @@ export default function Home({}: Props) {
   const { t } = useTranslation();
   useEffect(() => {
     const access_token = localStorage.getItem('access_token');
-    if (!access_token) {
+    if (!access_token || access_token === 'undefined') {
+      window.localStorage.clear();
       navigate('/login');
     } else {
       dispatch(getMe());
@@ -77,7 +78,7 @@ export default function Home({}: Props) {
       dispatch(getMyConversations());
       const now = Date.now();
       const expriedTime = localStorage.getItem('expiredTime') || 0;
-      console.log(now, expriedTime);
+      // console.log(now, expriedTime);
       if (now < +expriedTime) {
         const s = connectSocket();
         dispatch(setSocket(s));
@@ -169,6 +170,7 @@ export default function Home({}: Props) {
           }
         );
         s.on('createConversationSuccess', (data: IConversation) => {
+          console.log(data);
           s.emit('joinRoom', data._id);
           dispatch(addConversation(data));
           dispatch(initMessage(data._id));
@@ -232,15 +234,15 @@ export default function Home({}: Props) {
     const response = await Auth.refreshToken();
     console.log(response);
   };
-  useEffect(() => {
-    const interval = setInterval(() => {
-      dispatch(getFriendsList());
-      dispatch(getMyConversations());
-    }, 50000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     dispatch(getFriendsList());
+  //     dispatch(getMyConversations());
+  //   }, 50000);
+  //   return () => {
+  //     clearInterval(interval);
+  //   };
+  // }, []);
   // return <Button onClick={handle}>hihi</Button>;
   // return (
   //   <Box width="100vw" position="absolute">

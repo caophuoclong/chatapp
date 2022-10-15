@@ -15,6 +15,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BsBellFill, BsBellSlashFill } from 'react-icons/bs';
 import { useColorMode } from '@chakra-ui/react';
+import { useAppDispatch, useAppSelector } from '~/app/hooks';
+import Desktop from './Desktop';
+import { AvatarConversation } from '~/components/Conversations/Conversation/AvatarConversation';
+import Mobile from './Mobile';
+import { setShowInfoConversation } from '~/app/slices/global.slice';
 type Props = {};
 
 export default function InfoConversation({}: Props) {
@@ -22,6 +27,22 @@ export default function InfoConversation({}: Props) {
   const { id } = useParams();
   const { t } = useTranslation();
   const { colorMode } = useColorMode();
+  const isLargerThanHD = useAppSelector(
+    (state) => state.globalSlice.isLargerThanHD
+  );
+  const choosenConversationID = useAppSelector(
+    (state) => state.globalSlice.conversation.choosenConversationID
+  );
+  const conversations = useAppSelector(
+    (state) => state.conversationsSlice.conversations
+  );
+  const conversation = conversations.find(
+    (conversation) => conversation._id === choosenConversationID
+  );
+  const dispatch = useAppDispatch();
+  const onHideInfoConversation = () => {
+    dispatch(setShowInfoConversation(false));
+  };
   return (
     <Box
       width={{
@@ -31,85 +52,16 @@ export default function InfoConversation({}: Props) {
       maxHeight="90%"
       boxSizing="border-box"
     >
-      <Flex
-        display={{
-          base: 'flex',
-          lg: 'none',
-        }}
-        paddingX="1rem"
-        paddingY=".3rem"
-        bg="blue.500"
-        color="white"
-        alignItems={'center'}
-      >
-        <IconButton
-          bg="none"
-          aria-label="Back to message"
-          icon={<ArrowBackIcon fontSize={'24px'} />}
-          onClick={() => {
-            navigate(-1);
-          }}
-        />
-        <Text fontWeight={600}>{t('Option')}</Text>
-      </Flex>
-      <Flex
-        alignItems={'center'}
-        justifyContent="center"
-        direction={'column'}
-        marginY="1rem"
-      >
-        <Avatar
-          src="https://picsum.photos/200"
-          width={{
-            base: '56px',
-            lg: '80px',
-          }}
-          height={{
-            base: '56px',
-            lg: '80px',
-          }}
-        >
-          <AvatarBadge borderColor="papayawhip" bg="tomato" boxSize="1em" />
-        </Avatar>
-        <Box>
-          <Text fontWeight={600} noOfLines={1}>
-            Tran Cao Phuoc Long
-          </Text>
-        </Box>
-      </Flex>
-      <Flex alignItems="center" justifyContent={'center'} gap="1rem">
-        <IconButton
-          aria-label="Search message"
-          rounded="full"
-          icon={<Search2Icon />}
-        />
-        <IconButton
-          aria-label="on/off noti"
-          rounded="full"
-          icon={<BsBellFill />}
-        />
-      </Flex>
-      <VStack
-        margin="1rem"
-        align="stretch"
-        divider={<StackDivider borderColor="gray.200" />}
-      >
-        <Box>
-          <Text>123</Text>
-          <Text>123</Text>
-          <Text>123</Text>
-        </Box>
-        <Box>
-          <Text>123</Text>
-          <Text>123</Text>
-          <Text>123</Text>
-        </Box>
-        <Box>
-          <Text>123</Text>
-          <Text>123</Text>
-          <Text>123</Text>
-        </Box>
-      </VStack>
+      {conversation ? (
+        isLargerThanHD ? (
+          <Desktop conversation={conversation}></Desktop>
+        ) : (
+          <Mobile
+            conversation={conversation}
+            onHideInfoConversation={onHideInfoConversation}
+          ></Mobile>
+        )
+      ) : null}
     </Box>
   );
 }

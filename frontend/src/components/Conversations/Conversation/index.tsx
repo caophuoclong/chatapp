@@ -18,14 +18,41 @@ import { IUser } from '../../../interfaces/IUser';
 import { useRef } from 'react';
 import { SERVER_URL } from '~/configs';
 import { AvatarConversation } from './AvatarConversation';
+import { MessageType } from '~/interfaces/IMessage';
+import { Emoji } from 'emoji-picker-react';
 
-const renderDirectConversation = (participants: IUser[], myId: string) => {
-  return {
-    avatarUrl: participants.filter((item) => item._id !== myId)[0].avatarUrl,
-    name: participants.filter((item) => item._id !== myId)[0].name,
-  };
+// export const renderDirectConversation = (participants: IUser[]) => {
+//   const myId = useAppSelector((state) => state.userSlice.info._id);
+//   return {
+//     avatarUrl: participants.filter((item) => item._id !== myId)[0].avatarUrl,
+//     name: participants.filter((item) => item._id !== myId)[0].name,
+//   };
+// };
+export const RenderDirectConversationName = ({
+  participants,
+}: {
+  participants: IUser[];
+}) => {
+  const myId = useAppSelector((state) => state.userSlice.info._id);
+  return <>{participants.filter((item) => item._id !== myId)[0].name}</>;
 };
-
+export const RenderDirectConversationAvatar = ({
+  participants,
+  size = 'md',
+}: {
+  participants: IUser[];
+  size?: 'lg' | 'md';
+}) => {
+  const myId = useAppSelector((state) => state.userSlice.info._id);
+  return (
+    <Avatar
+      size={size}
+      src={`${SERVER_URL}/images/${
+        participants.filter((item) => item._id !== myId)[0].avatarUrl
+      }`}
+    />
+  );
+};
 export default function Conversation({
   name,
   avatarUrl,
@@ -45,16 +72,23 @@ export default function Conversation({
   const choosenConversationID = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
-  console.log(updateAt);
   const contentRef = useRef<HTMLParagraphElement>(null);
+  // useEffect(() => {
+  //   const p = contentRef.current;
+  //   console.log(p);
+  //   if (p) {
+  //     console.log(p.clientWidth);
+  //   }
+  // }, [contentRef]);
+  const showContentRef = useRef<any>();
   useEffect(() => {
-    const p = contentRef.current;
-    console.log(p);
-    if (p) {
-      console.log(p.clientWidth);
+    const { current } = showContentRef;
+    if (current) {
+      if (lastMessage.type === MessageType.TEXT) {
+        current.innerHTML = lastMessage.content;
+      }
     }
-  }, [contentRef]);
-  console.log(999999);
+  }, [showContentRef, lastMessage]);
   return (
     <Stack
       onClick={() => {
@@ -93,13 +127,7 @@ export default function Conversation({
         />
       )}
       {type === 'direct' && (
-        <Avatar
-          size="lg"
-          name={renderDirectConversation(participants, user._id).name}
-          src={`${SERVER_URL}/images/${
-            renderDirectConversation(participants, user._id).avatarUrl
-          }`}
-        />
+        <RenderDirectConversationAvatar participants={participants} size="lg" />
       )}
 
       <Box width="80%">
@@ -111,15 +139,25 @@ export default function Conversation({
             color: 'gray.200',
           }}
         >
-          {type === 'group'
-            ? name
-            : renderDirectConversation(participants, user._id).name}
+          {type === 'group' ? (
+            name
+          ) : (
+            <RenderDirectConversationName participants={participants} />
+          )}
         </Text>
         {lastMessage ? (
           <Flex>
-            <Text fontSize="sm" noOfLines={1} color="gray.500" width={'80%'}>
-              {lastMessage.content} ·{' '}
-            </Text>
+            <Flex fontSize="sm" color="gray.500" width={'80%'}>
+              {lastMessage.type === MessageType.EMOJI ? (
+                <Emoji unified={lastMessage.content} size={20} />
+              ) : (
+                <Text ref={showContentRef} noOfLines={1}></Text>
+              )}{' '}
+              <Text marginLeft="auto" fontWeight={'bold'}>
+                {' '}
+                ·{' '}
+              </Text>
+            </Flex>
             <Text fontSize="sm" noOfLines={1} color="gray.500">
               {moment(new Date(+lastMessage.createdAt || 0)).format('HH:mm')}
             </Text>

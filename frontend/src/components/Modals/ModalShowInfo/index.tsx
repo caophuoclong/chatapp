@@ -30,7 +30,7 @@ export default function ModalShowInfo({ user, showInfo, setShowInfo }: Props) {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{user.name}</ModalHeader>
+        <ModalHeader>{user && user.name}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Info user={user} />
