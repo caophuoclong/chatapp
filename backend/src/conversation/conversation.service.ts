@@ -512,10 +512,11 @@ export class ConversationService {
     }
   }
   async updateEmoji(slug: string, userId: string, emoji: Emoji){
+    console.log(emoji);
     try{
       const foundEmoji = await this.emojiRepository.findOne({
         where:{
-          _id: emoji._id
+          _id: emoji._id,
         },
         relations:{
           userId: true,
