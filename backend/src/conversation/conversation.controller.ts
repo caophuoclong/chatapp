@@ -93,8 +93,10 @@ export class ConversationController {
   }
   @Patch("/:slug/emoji")
   @ApiParam({name: "slug", description: "The _id of conversation"})
-  updateEmoji(@Param("slug", ParseUUIDPipe) slug, @Request() req, @Body() data: Emoji){
+  updateEmoji(@Param("slug", ParseUUIDPipe) slug, @Request() req, @Body() data: {
+    emoji: Emoji
+  }){
     const {_id} = req.user;
-    return this.conversationService.updateEmoji(slug, _id, data);
+    return this.conversationService.updateEmoji(slug, _id, data.emoji);
   }
 }
