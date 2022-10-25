@@ -3,7 +3,9 @@ import {
   Button,
   CloseButton,
   Flex,
+  HStack,
   IconButton,
+  Image,
   Input,
   Modal,
   ModalBody,
@@ -12,15 +14,18 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Stack,
   Text,
   useColorMode,
   useDisclosure,
   useMediaQuery,
+  useToast,
+  VStack,
 } from '@chakra-ui/react';
 import React, { Reducer, useEffect, useReducer, useRef, useState } from 'react';
 import { HiOutlineEmojiHappy, HiPhotograph } from 'react-icons/hi';
 import { GrAttachment } from 'react-icons/gr';
-import { FaTelegramPlane } from 'react-icons/fa';
+import { FaTelegramPlane, FaTimes } from 'react-icons/fa';
 import { FcLike } from 'react-icons/fc';
 import Picker, {
   Emoji,
@@ -62,6 +67,7 @@ import CustomPickerEmoji from './CustomPickerEmoji';
 import { useTranslation } from 'react-i18next';
 import { FiMoreHorizontal } from 'react-icons/fi';
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
+import { MdLibraryAdd } from 'react-icons/md';
 const TIME_SCALE = 1500;
 const EMOJI_SCALE_EVERY = 100;
 type Props = {
@@ -102,6 +108,7 @@ export default function InputBox({ conversation }: Props) {
   const choosenConversationId = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
+  const lan = useAppSelector((state) => state.globalSlice.lan);
   const contentRef = useRef<any>('');
   const onPickerClick = (emoji: EmojiClickData, event: MouseEvent) => {
     console.log(emoji);
@@ -278,7 +285,29 @@ export default function InputBox({ conversation }: Props) {
       }
     }
   }, [content, enterPress]);
-
+  const uploadImageRef = useRef<HTMLInputElement>(null);
+  const [images, setImages] = useState<File[] | null>(null);
+  const [previewImages, setPreviewImages] = useState<
+    Array<{
+      name: string;
+      url: string;
+    }>
+  >([]);
+  useEffect(() => {
+    if (images) {
+      const previewImage = images.map((image) => {
+        return {
+          name: image.name,
+          url: URL.createObjectURL(image),
+        };
+      });
+      setPreviewImages(previewImage);
+    }
+  }, [images]);
+  useEffect(() => {
+    console.log(previewImages);
+  }, [previewImages]);
+  const toast = useToast();
   return (
     <Box
       marginTop="auto"
@@ -299,7 +328,7 @@ export default function InputBox({ conversation }: Props) {
       }
       // paddingY="0.3rem"
     >
-      {isLargerThanHD && (
+      {isLargerThanHD && previewImages.length === 0 && (
         <Flex paddingX="1rem">
           <IconButton
             justifyContent={'center'}
@@ -316,9 +345,23 @@ export default function InputBox({ conversation }: Props) {
           <IconButton
             bg="none"
             justifyContent={'center'}
+            onClick={() => {
+              toast({
+                title: t('Info'),
+                description: t('Feat__Developing'),
+                status: 'info',
+                position: isLargerThanHD ? 'top-right' : 'bottom',
+                duration: 1000,
+              });
+              // const input = uploadImageRef.current;
+              // if (input) {
+              //   input.click();
+              // }
+            }}
             aria-label="Photo"
             icon={<HiPhotograph fontSize={'24px'} />}
           />
+
           <IconButton
             bg="none"
             justifyContent={'center'}
@@ -327,13 +370,92 @@ export default function InputBox({ conversation }: Props) {
           />
         </Flex>
       )}
+      <input
+        accept="image/png, image/jpeg, image/jpg"
+        multiple
+        ref={uploadImageRef}
+        type="file"
+        hidden
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          const files = e.target.files;
+          if (files && images && images.length > 0) {
+            setImages([...images, ...Array.from(files)]);
+          } else if (files) {
+            setImages(Array.from(files));
+          }
+        }}
+      />
+      {previewImages.length > 0 && (
+        <Flex gap="1rem" padding="1rem">
+          <IconButton
+            onClick={() => {
+              console.log(123131);
+              toast({
+                title: t('Info'),
+                description: t('Feat__Developing'),
+                status: 'info',
+                position: isLargerThanHD ? 'top-right' : 'bottom',
+                duration: 1000,
+              });
+
+              // const input = uploadImageRef.current;
+              // console.log(input);
+              // if (input) {
+              //   input.click();
+              // }
+            }}
+            size="lg"
+            aria-label="add images"
+            padding=".5rem"
+            icon={<MdLibraryAdd size="lg" />}
+          />
+          <Flex
+            width="calc(100% - 48px)"
+            margin="auto"
+            overflow="auto"
+            gap="1rem"
+            flex="1"
+            flexWrap={'nowrap'}
+            justifyContent="flex-start"
+          >
+            {previewImages.map((image) => (
+              <Box rounded="lg" position={'relative'} minWidth="48px">
+                <IconButton
+                  size="xs"
+                  aria-label="remove image"
+                  position="absolute"
+                  right="0"
+                  margin="-.5rem"
+                  bg="black"
+                  rounded="full"
+                  variant={'solid'}
+                  icon={<FaTimes fill="gray" />}
+                  onClick={() => {
+                    setImages(
+                      images?.filter((i) => i.name !== image.name) || []
+                    );
+                  }}
+                />
+                <Image
+                  src={image.url}
+                  width="48px"
+                  height="48px"
+                  rounded="lg"
+                />
+              </Box>
+            ))}
+          </Flex>
+        </Flex>
+      )}
       <Flex
         gap="5px"
         paddingY=".5rem"
         paddingX={isLargerThanHD ? 0 : '.5rem'}
         role="group"
         borderTop={
-          colorMode === 'dark'
+          previewImages.length > 0
+            ? 'none'
+            : colorMode === 'dark'
             ? '1px solid rgba(255, 255, 255,0.3)'
             : '1px solid  rgba(0, 0, 0, 0.08)'
         }
@@ -347,13 +469,14 @@ export default function InputBox({ conversation }: Props) {
             <ContentEditable
               className="content__editable"
               html={content}
-              placeholder="Type a message"
+              placeholder={lan === 'en' ? 'Type a message' : 'Nhập tin nhắn'}
               style={{
                 width: '100%',
                 outline: 'none',
                 fontSize: '1.2rem',
                 maxHeight: '7rem',
                 overflowY: 'auto',
+                paddingLeft: '0.5rem',
                 italic: content.length < 1,
               }}
               onChange={(e: ContentEditableEvent) => {
@@ -451,7 +574,7 @@ export default function InputBox({ conversation }: Props) {
               />
             </>
           )
-        ) : content ? (
+        ) : content || (images && images.length > 0) ? (
           <IconButton
             alignSelf={'flex-end'}
             onClick={sendMessage}

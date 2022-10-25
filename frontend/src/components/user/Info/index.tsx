@@ -314,7 +314,6 @@ export default function Info({ user, id }: Props) {
       }, 1000);
     }
   }, [uploadAvatarProgress]);
-  console.log(user);
   return (
     <form onSubmit={onSubmit}>
       <Flex

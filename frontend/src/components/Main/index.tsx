@@ -56,6 +56,7 @@ export default function Main({}: Props) {
           const response = await ConversationsApi.getMyEmoji(
             choosenConversation
           );
+          console.log(response);
           const emoji = response.data.data;
           dispatch(updateEmoji({ _id: choosenConversation, emoji }));
         } catch (error) {

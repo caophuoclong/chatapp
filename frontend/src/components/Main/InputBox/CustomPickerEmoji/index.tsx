@@ -13,6 +13,7 @@ import { useColorMode } from '@chakra-ui/react';
 import LoadingScreen from '~/components/LoadingScreen';
 import ConversationsApi from '../../../../services/apis/Conversations.api';
 import { updateEmoji } from '~/app/slices/conversations.slice';
+import { IEmoji } from '../../../../interfaces/IConversation';
 
 type Props = {};
 
@@ -63,13 +64,16 @@ export default function CustomPickerEmoji({}: Props) {
   const handleUpdateEmoji = async (value: string) => {
     try {
       setLoading(true);
+
+      const emoji = {
+        ...conversation!.emoji!,
+        emoji: value,
+      };
+      console.log(emoji);
       if (conversation) {
         const response = await ConversationsApi.updateConversationEmoji(
           choosenConversationId,
-          {
-            ...conversation!.emoji!,
-            emoji: value,
-          }
+          emoji
         );
         if (response.data.statusCode === 200) {
           dispatch(

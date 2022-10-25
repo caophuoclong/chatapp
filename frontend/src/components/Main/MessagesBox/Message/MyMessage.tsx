@@ -163,7 +163,7 @@ export default function MyMessage({ message, time, _id, type }: Props) {
             wordBreak="break-word"
             padding=".5rem"
             rounded="xl"
-            roundedBottomRight={'none'}
+            roundedTopRight={'none'}
             bg={
               type === MessageType.TEXT
                 ? colorMode === 'light'

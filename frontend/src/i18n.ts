@@ -137,7 +137,8 @@ const resources = {
       "Change__Avatar": "Change avatar",
       "Remove__Avatar": "Remove avatar",
       "Emoji__Settings": "Emoji setting",
-      "Emoji__Settings__Detail": "You can change the emoji for this chat"
+      "Emoji__Settings__Detail": "You can change the emoji for this chat",
+      "Feat__Developing": "This feature under developing",
     }
   },
   vn: {
@@ -271,6 +272,7 @@ const resources = {
       "Remove__Avatar": "Xóa ảnh đại diện",
       "Emoji__Settings": "Thay đổi biểu tượng cảm xúc",
       "Emoji__Settings__Detail": "Bạn có thể thay đổi biểu tượng cảm xúc cho nhóm này",
+      "Feat__Developing": "Tính năng đang được phát triển",
     }
   }
 };
