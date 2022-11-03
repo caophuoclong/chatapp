@@ -4,6 +4,7 @@
 /data
 /redis
 /images
+/assets
 # Logs
 logs
 *.log
