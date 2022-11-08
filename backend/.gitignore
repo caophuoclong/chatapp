@@ -5,6 +5,8 @@
 /redis
 /images
 /assets
+.env
+dev.env
 # Logs
 logs
 *.log
