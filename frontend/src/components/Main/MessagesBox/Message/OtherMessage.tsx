@@ -52,7 +52,7 @@ export default function OtherMessage({ message, time, type }: Props) {
           }
         >
           {type === MessageType.TEXT ? (
-            <Text ref={showMessageRef}></Text>
+            <span ref={showMessageRef}></span>
           ) : (
             message
           )}

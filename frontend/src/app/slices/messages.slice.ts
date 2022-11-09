@@ -27,7 +27,7 @@ export const getMessages = createAsyncThunk(
   }) => {
     const response = await MessagesApi.getMessages(conversationId, skip);
     response.data.conversationId = conversationId;
-    console.log(response);
+    // console.log(response);
     return response;
   }
 );
@@ -54,6 +54,10 @@ export const messageSlice = createSlice({
         }
       }
     },
+    removeMessageFromMessages: (state:MessageState, action:PayloadAction<string>)=>{
+      delete state.messages[action.payload];
+      return state;
+    } ,
     addMessage:(state: MessageState, action: PayloadAction<{
       message: IMessage,
       conversationId: string,
@@ -62,6 +66,8 @@ export const messageSlice = createSlice({
       if(!state.messages[conversationId]){
         state.messages[conversationId].data = [];
       }else{
+        if(state.messages[conversationId].data === null )
+                  state.messages[conversationId].data = [];
         const {_id} = message;
         const index = state.messages[conversationId].data.findIndex((item: IMessage) => item._id === _id);
         if(index === -1){
@@ -144,7 +150,7 @@ export const messageSlice = createSlice({
   },
 });
 
-export const {addMessage, updateSentMessage, updateReceivedMessage, initMessage, updateMessageScale, removeMessage} = messageSlice.actions;
+export const {addMessage, updateSentMessage, updateReceivedMessage, initMessage, updateMessageScale, removeMessage, removeMessageFromMessages} = messageSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 

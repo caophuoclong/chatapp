@@ -281,7 +281,6 @@ export default function InputBox({ conversation }: Props) {
 
   return (
     <Box
-      marginTop="auto"
       boxSizing="border-box"
       position="relative"
       _dark={{

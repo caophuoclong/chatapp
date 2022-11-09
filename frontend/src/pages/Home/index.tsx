@@ -52,6 +52,7 @@ import IFriendShip from '../../interfaces/IFriendShip';
 import { IUser } from '~/interfaces/IUser';
 import moment from 'moment';
 import { updateConversation } from '~/app/slices/conversations.slice';
+import ConversationsApi from '~/services/apis/Conversations.api';
 
 type Props = {};
 
@@ -176,6 +177,7 @@ export default function Home({}: Props) {
           dispatch(initMessage(data._id));
         });
         s.on('ErrorConnection', (data: Error) => {
+          console.log(data);
           toast({
             title: t('Error'),
             description: t('Token__Expired'),
@@ -218,6 +220,16 @@ export default function Home({}: Props) {
         });
         s.on('onAcceptFriend', (data: ICreatedFriendShip) => {
           dispatch(updateAcceptFriend(data._id));
+        });
+        s.on('queryAgainConversation', async (data) => {
+          console.log(data);
+          const conversation = (
+            await ConversationsApi.getConversationById(data.conversationId)
+          ).data.data as IConversation;
+          dispatch(addConversation(conversation));
+          s.emit('joinRoom', conversation._id);
+
+          // console.log('🚀 ~ file: index.tsx ~ line 224 ~ s.on ~ data', data);
         });
       }
     }

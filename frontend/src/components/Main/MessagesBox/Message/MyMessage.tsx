@@ -181,7 +181,7 @@ export default function MyMessage({ message, time, _id, type }: Props) {
           {_id &&
             latestMessageConversation &&
             _id === latestMessageConversation._id && (
-              <Text alignSelf={'flex-end'}>
+              <Box alignSelf={'flex-end'}>
                 {ShowStatus(
                   latestMessageConversation._id,
                   messages,
@@ -190,7 +190,7 @@ export default function MyMessage({ message, time, _id, type }: Props) {
                     (participant) => participant._id !== user._id
                   )[0]
                 )}
-              </Text>
+              </Box>
             )}
         </Flex>
         <Flex

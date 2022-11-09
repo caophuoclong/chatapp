@@ -8,7 +8,7 @@ import { IEmoji } from '../../interfaces/IConversation';
 
 // Define a type for the slice state
 export const getMyConversations = createAsyncThunk("Get my conversations",()=>{
-    return ConversationsApi.getConversation();
+    return ConversationsApi.getConversations();
 })
 interface Conversations {
     conversations: Array<IConversation>,
@@ -76,6 +76,13 @@ export const conversationsSlice = createSlice({
         if(conversation){
             conversation.emoji = action.payload.emoji;
         }
+    },
+    removeConversation: (state: Conversations, action: PayloadAction<string>)=>{
+        const conversations = state.conversations.filter((con)=>con._id !== action.payload)
+        return {
+            ...state,
+            conversations
+        };
     }
   },
   extraReducers(builder) {
@@ -89,7 +96,7 @@ export const conversationsSlice = createSlice({
   },
 })
 
-export const { addConversation, updateLastestMessage, updateConversation, updateLatestUpdateConversation,updateEmoji } = conversationsSlice.actions
+export const { addConversation, updateLastestMessage, updateConversation, updateLatestUpdateConversation,updateEmoji, removeConversation } = conversationsSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 
