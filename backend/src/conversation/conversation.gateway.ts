@@ -34,4 +34,5 @@ export class ConversationGateway{
             this.server.to(socketId).emit("createConversationSuccess", response.data);
         })
     }
+
 }

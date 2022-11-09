@@ -245,16 +245,26 @@ export class ConversationService {
     }
   }
   async getOwnerConversation(conversationId: string) {}
-  async getConversationById(conversationId: string) {
+  async getConversationById(slug: string) {
+    console.log("🚀 ~ file: conversation.service.ts ~ line 249 ~ ConversationService ~ getConversationById ~ slug", slug)
     try {
       const conversation = await this.conversation.findOne({
-        where: { _id: conversationId },
+        where: { _id: slug },
+        relations: {
+          lastMessage: true,
+          owner: true,
+          friendship: true,
+        }
       });
-
+      console.log("🚀 ~ file: conversation.service.ts ~ line 257 ~ ConversationService ~ getConversationById ~ conversation", conversation)
+      const participants = await this.getUserOfConversation(conversation._id, conversation.type);
       return {
         statusCode: 200,
         message: 'success',
-        data: conversation,
+        data: {
+          ...conversation,
+          participants: participants.data
+        },
       };
     } catch (error) {
       return {
@@ -631,59 +641,7 @@ export class ConversationService {
       statusCode: 200,
       message: 'out conversation success',
       // data: conversation,
-    }
-    // check if conversation is a group then check if user is owner and remove
-    // if (conversation.type === 'group') {
-    //  if(conversation.owner._id === userId){
-    //    conversation.isDeleted = true;
-    //   conversation.deletedAt = new Date().getTime();
-    //   await this.conversation.save(conversation);
-    //   return {
-    //     statusCode: 200,
-    //     message: 'delete conversation success',
-    //     data: null,
-    //   };
-    //  }else{
-    //   // check if user is in conversation and remove user from conversation
-    //   const index = conversation.participants.findIndex((p) => p._id === userId);
-    //   if (index === -1) {
-    //     return {
-    //       statusCode: 400,
-    //       message: 'user is not in conversation',
-    //       data: null,
-    //     };
-    //   }
-    //   conversation.participants = conversation.participants.filter(
-    //     (con) => con._id !== userId,
-    //   );
-    //   await this.conversation.save(conversation);
-    //  }
-    //  return {
-    //       statusCode: 200,
-    //       message: 'out conversation success',
-    //       data: null,
-    //     };
-    // }else{
-    //   // check if user is in conversation and remove user from conversation
-    //   const index = conversation.participants.findIndex((p) => p._id === userId);
-    //   if (index === -1) {
-    //     return {
-    //       statusCode: 400,
-    //       message: 'user is not in conversation',
-    //       data: null,
-    //     };
-    //   }
-    //   conversation.participants = conversation.participants.filter(
-    //     (con) => con._id !== userId,
-    //   );
-    //   await this.conversation.save(conversation);
-    //   return {
-    //     statusCode: 200,
-    //     message: 'out conversation success',
-    //     data: null,
-    //   };
-    // }
-      
-   
+    } 
   }
+
 }

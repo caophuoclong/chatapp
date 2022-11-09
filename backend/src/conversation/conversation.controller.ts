@@ -12,6 +12,7 @@ import {
   Request,
   UseInterceptors,
   UploadedFile,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
@@ -29,7 +30,17 @@ import { UpdateConversationDto } from './dto/update-conversation.dto';
 @Controller('conversation')
 export class ConversationController {
   constructor(private readonly conversationService: ConversationService) {}
-
+  @Get("/:slug")
+    @ApiParam({
+    name: 'slug',
+    description: 'The _id of conversation need to get',
+  })
+  getConversationById(@Param("slug") slug, @Req() req){
+    
+    console.log("🚀 ~ file: conversation.controller.ts ~ line 39 ~ ConversationController ~ getConversationById ~ slug", slug)
+    console.log("🚀 ~ file: conversation.controller.ts ~ line 39 ~ ConversationController ~ getConversationById ~ req", req)
+    return this.conversationService.getConversationById(slug)
+  }
   @Post('/create/group')
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
