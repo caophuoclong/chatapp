@@ -13,6 +13,7 @@ import {
   Timestamp,
 } from 'typeorm';
 import { Emoji } from '~/entities/Emoji';
+import { Member } from '~/entities/member.entity';
 import { Message } from '~/message/entities/message.entity';
 import { User } from '~/user/entities/user.entity';
 import { FriendShip } from '../../friendship/entities/friendship.entity';
@@ -25,17 +26,8 @@ export class Conversation {
     nullable: true,
   })
   name: string;
-  @ManyToMany((type) => User, (user) => user.conversations)
-  @JoinTable({
-    name: 'isMember',
-    joinColumn: {
-      name: 'conversation_id',
-    },
-    inverseJoinColumn: {
-      name: 'user_id',
-    },
-  })
-  participants: User[];
+  @OneToMany(type => Member, member => member.conversation)
+  participants: Member[];
   @Column({
     default: 'direct',
   })

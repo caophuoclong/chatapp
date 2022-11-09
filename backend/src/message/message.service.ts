@@ -8,6 +8,7 @@ import { User } from '~/user/entities/user.entity';
 import { Conversation } from '../conversation/entities/conversation.entity';
 import { ConversationService } from '../conversation/conversation.service';
 import { UserService } from '~/user/user.service';
+import { Member } from '~/entities/member.entity';
 
 
 @Injectable()
@@ -19,7 +20,8 @@ export class MessageService {
     private readonly conversationRepository: Repository<Conversation>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-
+    @InjectRepository(Member)
+    private readonly memberRepository: Repository<Member>,
     private readonly ConversationService: ConversationService,
     private readonly UserService: UserService,
   ) {}
@@ -71,16 +73,21 @@ export class MessageService {
     skip: number,
     limit: number,
   ) {
-    console.log("🚀 ~ file: message.service.ts ~ line 70 ~ MessageService ~ conversationId", conversationId)
     try {
       // const user = await this.UserService.get(userId);
       const conversation = await this.conversationRepository.findOne({
         where: {
           _id: conversationId,
         },
-        relations: ["participants"],
+        relations: {
+          participants:{
+              user: true
+          }
+        },
       });
-      if (!conversation && !conversation.participants.find((user) => user._id === userId)) {
+      // console.log(conversation);
+      // console.log(conversation.participants.find((m) => true));
+      if (!conversation || !conversation.participants.find((user) => user.user._id === userId)) {
         return {
           statusCode: 404,
           message: 'Conversation not found',
@@ -88,10 +95,16 @@ export class MessageService {
         };
       } 
       // console.log(conversation);
-      const id = conversation._id
+      const id = conversation._id;
+      const dateJoin = (await this.memberRepository.findOne({
+        where:{
+          conversationId: id,
+          userId: userId
+        }
+      })).createdAt;
       const messages = await this.messageRepository
-      .createQueryBuilder("message", )
-      .where("message.destination_id = :conversationId", { conversationId: id })
+      .createQueryBuilder("message",)
+      .where("message.destination_id = :conversationId and message.createdAt > :dateJoin", { conversationId: id, dateJoin:dateJoin })
       .innerJoinAndSelect("message.sender", "sender", "sender._id = message.sender_id")
       .select(["message", "sender"])
       .limit(20)
@@ -161,7 +174,11 @@ export class MessageService {
         where:{
           _id: userId,
         },
-        relations: ["conversations"]
+        relations: {
+          conversations: {
+            conversation: true
+          }
+        }
       })
       if(!user){
         return {
@@ -170,13 +187,14 @@ export class MessageService {
           data: null,
         };
       }
+      //TODO: check about create conversation
       const conversations = user.conversations;
       let x = [];
       for(let i = 0; i < conversations.length; i++){
         const conversation = conversations[i];
         const messages = await this.messageRepository.find({
           where:{
-            destination: conversation,
+            destination: conversation.conversation,
             status: MessageStatusType.SENT
           },
           relations: ["sender", "destination"]
@@ -188,7 +206,7 @@ export class MessageService {
           await this.messageRepository.save(message);
           x.push({
             senderId: message.sender._id,
-            conversationId: conversation._id,
+            conversationId: conversation.conversation._id,
             messageId: message._id
           })
         }

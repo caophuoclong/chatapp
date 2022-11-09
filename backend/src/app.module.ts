@@ -8,7 +8,6 @@ import {
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { SocketGateway } from './socket.gateway';
 import { UserModule } from './user/user.module';
 import { appConfig, config, databaseConfig, mailConfig } from './configs';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -46,6 +45,9 @@ import { join } from 'path';
 import { MailModule } from './mail/mail.module';
 import { Confirmation } from './entities/confirmation.entity';
 import { Emoji } from './entities/Emoji';
+import { Member } from './entities/member.entity';
+
+
 
 @Module({
   imports: [
@@ -75,7 +77,8 @@ import { Emoji } from './entities/Emoji';
             Attachment,
             PasswordResetToken,
             Confirmation,
-            Emoji
+            Emoji,
+            Member
           ],
           autoLoadEntities: true,
           synchronize: true,

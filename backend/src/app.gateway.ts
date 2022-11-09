@@ -63,7 +63,7 @@ export class AppGateway {
           await this.userService.updateLastOnline(_id, 'ONLINE');
           const rooms = user.conversations;
           rooms.forEach((room) => {
-            this.crateRoom(client, room._id);
+            this.crateRoom(client, room.conversationId);
           });
           const readMessage = await this.messageServce.markAsReceived(_id);
           if (readMessage.statusCode === 200) {
@@ -80,6 +80,7 @@ export class AppGateway {
           }
         }
       } catch (error) {
+        console.log(error);
         client.emit("ErrorConnection", error);
         
 

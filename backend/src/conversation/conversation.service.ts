@@ -19,6 +19,7 @@ import { Conversation } from './entities/conversation.entity';
 import moment from 'moment';
 import { SocketService } from '~/socket/socket.service';
 import { Emoji } from '~/entities/Emoji';
+import { Member } from '~/entities/member.entity';
 
 @Injectable()
 export class ConversationService {
@@ -35,6 +36,8 @@ export class ConversationService {
     private readonly socketService: SocketService,
     @InjectRepository(Emoji)
     private readonly emojiRepository: Repository<Emoji>,
+    @InjectRepository(Member)
+    private readonly memberRepository: Repository<Member>,
   ) {}
   async createFromFriendship(
     createFromFriendShipDto: CreateConversationDtoFromFriendshipDto,
@@ -67,12 +70,31 @@ export class ConversationService {
             data: existConversation,
           };
         }
-        const conversation = await this.conversation.create();
-        conversation.participants = user;
+        const conversation =  this.conversation.create();
         conversation.lastMessage = null;
         conversation.friendship = friendShip;
         conversation.createdAt = new Date().getTime();
+        const promise = [];        
+        // create member
         const con = await this.conversation.save(conversation);
+        // console.log("🚀 ~ file: conversation.service.ts ~ line 83 ~ ConversationService ~ user", user)
+        user.forEach( (u) => {
+          promise.push(
+            (()=>{
+              const mem = this.memberRepository.create({
+                conversationId: con._id,
+                conversation: con,
+                userId: u._id,
+                user: u
+              })
+              return this.memberRepository.save(mem)
+            })()
+          )
+        })
+         console.log("🚀 ~ file: conversation.service.ts ~ line 78 ~ ConversationService ~ promise", promise)
+
+        await Promise.all(promise);
+        const conver = {...con, participants: user}
         const emojis = [];
         for (let i = 0; i < user.length; i++) {
           const emoji = this.emojiRepository.create();
@@ -81,20 +103,19 @@ export class ConversationService {
           emojis.push(emoji);
         }
         await this.emojiRepository.save(emojis);
-        console.log(emojis);
-        console.log(con);
+
         conversation.emoji = emojis;
         user.map((user) => {
           this.socketService.emitToUser(
             user._id,
             'createConversationSuccess',
-            con,
+            conver,
           );
         });
         return {
           statusCode: 200,
           message: 'success',
-          data: con,
+          data: conver,
         };
       } else {
         return {
@@ -104,6 +125,7 @@ export class ConversationService {
         };
       }
     } catch (error) {
+      console.log("124",error);
       return {
         statusCode: 500,
         message: 'error',
@@ -123,7 +145,7 @@ export class ConversationService {
       ).data;
       const owner = await (await this.userService.get(ownerId)).data;
       conversation.name = createConversationDto.name;
-      conversation.participants = users;
+      // conversation.participants = users;
       conversation.owner = owner;
       conversation.type = 'group';
       conversation.visible = createConversationDto.visible;
@@ -251,8 +273,8 @@ export class ConversationService {
     try {
       const participants = await this.user
         .createQueryBuilder('user')
-        .innerJoin('isMember', 'iM', 'iM.user_id = user._id')
-        .where('iM.conversation_id = :id', { id: conversationId })
+        .innerJoin('member', 'member', 'member.userId = user._id')
+        .where('member.conversationId = :id', { id: conversationId })
         .limit(type === 'group' ? perpage : 2)
         .skip(type === 'group' ? page * perpage : 0)
         .getMany();
@@ -349,7 +371,7 @@ export class ConversationService {
               },
             });
             conversation.participants = conversation.participants.filter(
-              (con) => !users.find((us) => us._id === con._id),
+              (con) => !users.find((us) => us._id === con.user._id),
             );
           }
         } else {
@@ -406,7 +428,7 @@ export class ConversationService {
       };
     }
     // check if id is in conversation
-    const index = conversation.participants.findIndex((p) => p._id === _id);
+    const index = conversation.participants.findIndex((p) => p.user._id === _id);
     if (index === -1) {
       return {
         statusCode: 400,
@@ -415,7 +437,7 @@ export class ConversationService {
       };
     }
     conversation.participants = conversation.participants.filter(
-      (con) => con._id !== _id,
+      (con) => con.user._id !== _id,
     );
     await this.conversation.save(conversation);
     return {
@@ -558,5 +580,110 @@ export class ConversationService {
       };
     }
 
+  }
+  async removeConversation(slug: string, userId: string){
+    // query conversation by id
+    // const conversation = await this.conversation.findOne({
+    //   where: {
+    //     _id: slug,
+    //   },
+    //   relations: {
+    //     owner: true,
+    //     participants: true,
+    //     blockBy: true,
+    //   },
+    // });
+    let member = await this.memberRepository.findOne({
+      where:{
+        conversationId: slug,
+        userId: userId
+      },
+      relations:{
+        conversation: {
+          owner: true,
+        },
+        user: true
+      }
+    })
+    
+    if (!member) {
+      return {
+        statusCode: 404,
+        message: 'conversation not found',
+        data: null,
+      };
+    }
+    const conversation = member.conversation;
+    if (conversation.type === 'group' && conversation.owner._id === userId) {
+      await this.conversation.delete({
+        _id: conversation._id
+      });
+      return {
+        statusCode: 200,
+        message: 'delete conversation success',
+        data: null,
+      }
+    }
+    member.isDeleted = true;
+    member.deletedAt = new Date().getTime();
+    await this.memberRepository.save(member);
+    return {
+      statusCode: 200,
+      message: 'out conversation success',
+      // data: conversation,
+    }
+    // check if conversation is a group then check if user is owner and remove
+    // if (conversation.type === 'group') {
+    //  if(conversation.owner._id === userId){
+    //    conversation.isDeleted = true;
+    //   conversation.deletedAt = new Date().getTime();
+    //   await this.conversation.save(conversation);
+    //   return {
+    //     statusCode: 200,
+    //     message: 'delete conversation success',
+    //     data: null,
+    //   };
+    //  }else{
+    //   // check if user is in conversation and remove user from conversation
+    //   const index = conversation.participants.findIndex((p) => p._id === userId);
+    //   if (index === -1) {
+    //     return {
+    //       statusCode: 400,
+    //       message: 'user is not in conversation',
+    //       data: null,
+    //     };
+    //   }
+    //   conversation.participants = conversation.participants.filter(
+    //     (con) => con._id !== userId,
+    //   );
+    //   await this.conversation.save(conversation);
+    //  }
+    //  return {
+    //       statusCode: 200,
+    //       message: 'out conversation success',
+    //       data: null,
+    //     };
+    // }else{
+    //   // check if user is in conversation and remove user from conversation
+    //   const index = conversation.participants.findIndex((p) => p._id === userId);
+    //   if (index === -1) {
+    //     return {
+    //       statusCode: 400,
+    //       message: 'user is not in conversation',
+    //       data: null,
+    //     };
+    //   }
+    //   conversation.participants = conversation.participants.filter(
+    //     (con) => con._id !== userId,
+    //   );
+    //   await this.conversation.save(conversation);
+    //   return {
+    //     statusCode: 200,
+    //     message: 'out conversation success',
+    //     data: null,
+    //   };
+    // }
+      
+   
   }
 }

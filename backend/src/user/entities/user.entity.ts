@@ -1,6 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, Table } from "typeorm";
 import { Conversation } from "~/conversation/entities/conversation.entity";
 import { Emoji } from "~/entities/Emoji";
+import { Member } from "~/entities/member.entity";
 import { FriendShip } from "~/friendship/entities/friendship.entity";
 import { Message } from "~/message/entities/message.entity";
 import { UnRead } from '../../unread/entities/unread.entity';
@@ -60,14 +61,8 @@ export class User {
     friendRequest: FriendShip[];
     @OneToMany(type => FriendShip, fri => fri.userAddress)
     friendAddress: FriendShip[];
-    @ManyToMany(type => Conversation, con => con._id)
-    @JoinTable({
-        name: "isMember",
-        joinColumn: {
-            name: "user_id",
-        }
-    })
-    conversations: Conversation[];
+    @OneToMany(type => Member, member => member.user)
+    conversations: Member[];
     @OneToMany(type => Conversation, con => con.owner)
     owner: Conversation[];
     @OneToMany(type => Message, message => message.sender)
