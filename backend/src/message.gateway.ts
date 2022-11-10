@@ -10,6 +10,9 @@ import CustomSocket from './interfaces/CustomInterface';
 import { Message } from './message/entities/message.entity';
 import  {Cache}  from 'cache-manager';
 import { RedisClientType } from 'redis';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Member } from './entities/member.entity';
+import { Repository } from 'typeorm';
 
 @WebSocketGateway({
   cors:{
@@ -22,8 +25,10 @@ export class MessageGateway {
     private readonly messageService: MessageService,
     private readonly conversationService: ConversationService,
     @Inject("REDIS_CLIENT")
-    private readonly redisClient: RedisClientType
-  ){}
+    private readonly redisClient: RedisClientType,
+    @InjectRepository(Member)
+    private readonly memberRepository : Repository<Member>
+     ){}
   @WebSocketServer()
   server: Server;
   @UseGuards(WsGuards)
@@ -33,19 +38,46 @@ export class MessageGateway {
     const tempId = payload._id;
     delete payload._id;
     const response = await this.messageService.create(_id, payload);
-    console.log(payload);
     client.emit("sentMessageSuccess", {
       tempId: tempId,
       conversationId: payload.destination,
       message: response.data,
     });
     const destinationId = payload.destination;
+    const members = await this.memberRepository.find({
+      where:{
+        conversationId: payload.destination
+      }
+    });
+    const ids = [];
+    members.forEach((m)=>{
+      return m.userId !== response.data.sender._id && m.isDeleted && !m.isBlocked ?(()=>{
+        ids.push(m.userId);
+        m.isDeleted = false;
+        m.deletedAt = 0;
+        m.createdAt = new Date().getTime() - 15 * 1000;
+      })():m
+    })
+    // Notify user to create again conversation;
+    // get socket id;
+    await this.memberRepository.save(members);
     const message = response.data;
-    message.destination = destinationId
+    message.destination = payload.destination;
+    console.log(message);
     client.broadcast.to(destinationId).emit("newMessage", {
       ...message,
       updateAt: payload.updateAt
     });
+      Promise.all(ids.map((id)=>{
+      return new Promise(async (resolve, reject)=>{
+        const socketId = await this.redisClient.get(id);
+        if(socketId){
+          this.server.to(socketId).emit("queryAgainConversation", {
+            conversationId: payload.destination
+          })
+        }
+      })
+    }))
   }
   @UseGuards(WsGuards)
   @SubscribeMessage('markReceiveMessage')
