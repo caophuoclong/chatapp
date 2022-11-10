@@ -1,6 +1,13 @@
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
   Avatar,
   Box,
+  Button,
   Flex,
   Stack,
   Text,
@@ -8,7 +15,7 @@ import {
   useColorMode,
   useMediaQuery,
 } from '@chakra-ui/react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import IConversation from '@interfaces/IConversation';
 import moment from 'moment';
@@ -20,6 +27,7 @@ import { SERVER_URL } from '~/configs';
 import { AvatarConversation } from './AvatarConversation';
 import { MessageType } from '~/interfaces/IMessage';
 import { Emoji } from 'emoji-picker-react';
+import DropDownMenu from './DropdownMenu';
 
 // export const renderDirectConversation = (participants: IUser[]) => {
 //   const myId = useAppSelector((state) => state.userSlice.info._id);
@@ -62,6 +70,7 @@ export default function Conversation({
   _id,
   updateAt,
 }: IConversation) {
+  const [openDropdown, setOpenDropdown] = useState(false);
   const { colorMode } = useColorMode();
   const { id } = useParams();
   const isLargerThanHD = useAppSelector(
@@ -89,13 +98,29 @@ export default function Conversation({
       }
     }
   }, [showContentRef, lastMessage]);
+  const handleOnRightClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    // console.log(event);
+    if (event.button === 2) {
+      setOpenDropdown(true);
+    } else {
+      console.log('left click');
+    }
+  };
+
+  const onCloseDropDown = () => {
+    setOpenDropdown(false);
+  };
+  const cancelRef = useRef(null);
   return (
     <Stack
+      onContextMenu={handleOnRightClick}
       onClick={() => {
         if (choosenConversationID === _id)
           dispatch(setChoosenConversationID(''));
         else dispatch(setChoosenConversationID(_id));
       }}
+      position={'relative'}
       padding={'5px'}
       rounded="lg"
       margin="1rem"
@@ -173,6 +198,8 @@ export default function Conversation({
           </Flex>
         )}
       </Box>
+
+      <DropDownMenu isOpen={openDropdown} onClose={onCloseDropDown} _id={_id} />
     </Stack>
   );
 }

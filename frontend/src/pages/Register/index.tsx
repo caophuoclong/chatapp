@@ -89,6 +89,7 @@ export default function Register({}: Props) {
         //   },
         // });
         setNotifyShow(true);
+        console.log(response);
       }
     } catch (error: any) {
       console.log(error);

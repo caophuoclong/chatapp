@@ -310,7 +310,6 @@ export default function InputBox({ conversation }: Props) {
   const toast = useToast();
   return (
     <Box
-      marginTop="auto"
       boxSizing="border-box"
       position="relative"
       _dark={{

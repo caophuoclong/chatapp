@@ -139,6 +139,11 @@ const resources = {
       "Emoji__Settings": "Emoji setting",
       "Emoji__Settings__Detail": "You can change the emoji for this chat",
       "Feat__Developing": "This feature under developing",
+      "Mark__Un__Read": "Mark as unread",
+      "Delete__Conversation": "Delete conversation",
+      "Alert__Sure__Delete__Conversation": "Are you sure you want to delete this conversation?",
+      "Delete__Conversation__Success": "Delete conversation success",
+      "Something__Wrong": "Something went wrong",
     }
   },
   vn: {
@@ -273,6 +278,11 @@ const resources = {
       "Emoji__Settings": "Thay đổi biểu tượng cảm xúc",
       "Emoji__Settings__Detail": "Bạn có thể thay đổi biểu tượng cảm xúc cho nhóm này",
       "Feat__Developing": "Tính năng đang được phát triển",
+      "Mark__Un__Read": "Đánh dấu chưa đọc",
+      "Delete__Conversation": "Xóa cuộc trò chuyện",
+      "Alert__Sure__Delete__Conversation": "Bạn có chắc chắn muốn xóa cuộc trò chuyện này không?",
+      "Delete__Conversation__Success": "Xóa cuộc trò chuyện thành công",
+      "Something__Wrong": "Có lỗi xảy ra",
     }
   }
 };

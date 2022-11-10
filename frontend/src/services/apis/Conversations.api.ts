@@ -1,7 +1,7 @@
 import axiosClient from '../axiosClient';
 import { IEmoji } from '../../interfaces/IConversation';
 export default class ConversationsApi{
-    static async getConversation(){
+    static async getConversations(){
         const response = await axiosClient.get("/user/conversations")
         return response;
     }
@@ -36,5 +36,11 @@ export default class ConversationsApi{
         return await axiosClient.patch(`/conversation/${conversationId}/emoji`,{
             emoji
         })
+    }
+    static async deleteConversation(conversationId: string){
+        return await axiosClient.delete(`/conversation/${conversationId}`)
+    }
+    static async getConversationById(conversationId: string){
+        return await axiosClient.get(`/conversation/${conversationId}`);
     }
 }
