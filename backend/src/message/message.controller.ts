@@ -59,7 +59,7 @@ export class MessageController {
     @Param('_id') conversationId,
     @Request() req,
   ) {
-    const { _id } = req.user._id;
+    const _id = req.user._id;
     const { skip, limit } = paginateQuery;
     return this.messageService.findByConversation(conversationId, _id, skip || 0  , limit || 20);
   }

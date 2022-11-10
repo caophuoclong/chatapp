@@ -17,9 +17,10 @@ import { RedisModule } from '~/redis.module';
 import { MailModule } from '../mail/mail.module';
 import { Confirmation } from '~/entities/confirmation.entity';
 import { Emoji } from '~/entities/Emoji';
+import { Member } from '~/entities/member.entity';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, PasswordResetToken, Confirmation, Emoji]),
+    TypeOrmModule.forFeature([User, PasswordResetToken, Confirmation, Emoji, Member]),
     FriendshipModule,
     forwardRef(() => ConversationModule),
     RedisModule,
