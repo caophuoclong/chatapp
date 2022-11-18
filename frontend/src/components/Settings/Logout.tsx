@@ -20,14 +20,13 @@ import { useTranslation } from 'react-i18next';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { Socket } from 'socket.io-client';
 import { useAppSelector } from '~/app/hooks';
+import { AppSocket } from '../../class/AppSocket';
 
 type Props = {};
-export const handleLogout = (
-  socket: Socket | null,
-  navigate: NavigateFunction
-) => {
+export const handleLogout = (navigate: NavigateFunction) => {
   window.localStorage.removeItem('access_token');
   window.localStorage.removeItem('expiredTime');
+  const socket = AppSocket.getInstance();
   if (socket) {
     socket.disconnect();
   }
@@ -58,10 +57,7 @@ export default function Logout({}: Props) {
             <Button colorScheme="blue" mr={3} onClick={onClose}>
               {t('Cancel')}
             </Button>
-            <Button
-              variant="ghost"
-              onClick={() => handleLogout(socket, navigate)}
-            >
+            <Button variant="ghost" onClick={() => handleLogout(navigate)}>
               {t('Logout')}
             </Button>
           </ModalFooter>

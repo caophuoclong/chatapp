@@ -68,6 +68,7 @@ import { useTranslation } from 'react-i18next';
 import { FiMoreHorizontal } from 'react-icons/fi';
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
 import { MdLibraryAdd } from 'react-icons/md';
+import { AppSocket } from '~/class/AppSocket';
 const TIME_SCALE = 1500;
 const EMOJI_SCALE_EVERY = 100;
 type Props = {
@@ -121,7 +122,7 @@ export default function InputBox({ conversation }: Props) {
   const messages = useAppSelector((state) => state.messageSlice.messages)[
     choosenConversationId
   ];
-  const socket = useAppSelector((state) => state.globalSlice.socket);
+  const socket = AppSocket.getInstance();
   const emojiStyle = useAppSelector((state) => state.globalSlice.emojiStyle);
   const sendMessage = async () => {
     const message: IMessage = {

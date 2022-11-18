@@ -52,7 +52,6 @@ export default function Friend({
   const [showInfo, setShowInfo] = useState(false);
   const toast = useToast();
   const dispatch = useAppDispatch();
-  const socket = useAppSelector((state) => state.globalSlice.socket);
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );

@@ -215,8 +215,6 @@ export default function FoundUser({
   const toast = useToast();
   const navigate = useNavigate();
   const myId = useAppSelector((state) => state.userSlice.info._id);
-  const socket = useAppSelector((state) => state.globalSlice.socket);
-  console.log(myId);
   const handleAddFriend = async () => {
     try {
       const response = await FriendsApi.addFriend(user._id);

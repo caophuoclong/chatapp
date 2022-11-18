@@ -20,6 +20,7 @@ import {
   removeMessageFromMessages,
 } from '~/app/slices/messages.slice';
 import { removeConversation } from '~/app/slices/conversations.slice';
+import { AppSocket } from '~/class/AppSocket';
 export type DialogType = 'delete_conversation' | '';
 type Props = {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export default function DropDownMenu({ isOpen, onClose, _id }: Props) {
   const dispatch = useAppDispatch();
   const toast = useToast();
   const { t } = useTranslation();
-  const socket = useAppSelector((state) => state.globalSlice.socket);
+  const socket = AppSocket.getInstance();
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );

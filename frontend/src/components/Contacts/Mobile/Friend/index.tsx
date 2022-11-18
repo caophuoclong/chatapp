@@ -42,10 +42,7 @@ export default function Friend({ user, isOnline, friendShipId }: Props) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [showInfo, setShowInfo] = useState(false);
-  const conversations = useAppSelector(
-    (state) => state.conversationsSlice.conversations
-  );
-  const socket = useAppSelector((state) => state.globalSlice.socket);
+
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
