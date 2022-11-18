@@ -144,6 +144,11 @@ export class AppGateway {
       });
     }
   }
+     @SubscribeMessage("leaveRoom")
+    async (@ConnectedSocket() client: CustomSocket, @MessageBody() conversationId: string){
+        console.log("🚀 ~ file: conversation.gateway.ts ~ line 39 ~ ConversationGateway ~ leaveRoom ~ conversationId", conversationId)
+        client.leave(conversationId);
+    }
   @SubscribeMessage("joinRoom")
   handleJoinRoom(@ConnectedSocket()client: CustomSocket,@MessageBody() roomId){
     client.join(roomId);

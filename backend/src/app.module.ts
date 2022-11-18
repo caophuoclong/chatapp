@@ -103,6 +103,7 @@ import { Member } from './entities/member.entity';
     MessageModule,
     SocketModule,
     MailModule,
+    TypeOrmModule.forFeature([Member])
   ],
   controllers: [AppController],
   providers: [
