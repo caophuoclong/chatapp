@@ -37,20 +37,19 @@ export default function Main({}: Props) {
   const dispatch = useAppDispatch();
   useEffect(() => {
     (async () => {
-      if (choosenConversation && !messages[choosenConversation]) {
-        try {
-          const unwrap = await dispatch(
-            getMessages({
-              conversationId: choosenConversation,
-              skip: 0,
-            })
-          );
-
-          unwrapResult(unwrap);
-        } catch (error) {
-          console.log(error);
-        }
-      }
+      // if (choosenConversation && !messages[choosenConversation]) {
+      //   try {
+      //     const unwrap = await dispatch(
+      //       getMessages({
+      //         conversationId: choosenConversation,
+      //         skip: 0,
+      //       })
+      //     );
+      //     unwrapResult(unwrap);
+      //   } catch (error) {
+      //     console.log(error);
+      //   }
+      // }
       if (choosenConversation && !conversation?.emoji) {
         try {
           const response = await ConversationsApi.getMyEmoji(

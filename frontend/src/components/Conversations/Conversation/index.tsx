@@ -28,6 +28,7 @@ import { AvatarConversation } from './AvatarConversation';
 import { MessageType } from '~/interfaces/IMessage';
 import { Emoji } from 'emoji-picker-react';
 import DropDownMenu from './DropdownMenu';
+import { useTranslation } from 'react-i18next';
 
 // export const renderDirectConversation = (participants: IUser[]) => {
 //   const myId = useAppSelector((state) => state.userSlice.info._id);
@@ -72,16 +73,14 @@ export default function Conversation({
 }: IConversation) {
   const [openDropdown, setOpenDropdown] = useState(false);
   const { colorMode } = useColorMode();
-  const { id } = useParams();
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
-  const user = useAppSelector((state) => state.userSlice.info);
   const dispatch = useAppDispatch();
   const choosenConversationID = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
-  const contentRef = useRef<HTMLParagraphElement>(null);
+  const { t } = useTranslation();
   // useEffect(() => {
   //   const p = contentRef.current;
   //   console.log(p);
@@ -93,8 +92,12 @@ export default function Conversation({
   useEffect(() => {
     const { current } = showContentRef;
     if (current) {
-      if (lastMessage.type === MessageType.TEXT) {
-        current.innerHTML = lastMessage.content;
+      if (lastMessage.isRecall) {
+        current.innerHTML = t('This__Message__HasBeen__Recalled');
+      } else {
+        if (lastMessage.type === MessageType.TEXT) {
+          current.innerHTML = lastMessage.content;
+        }
       }
     }
   }, [showContentRef, lastMessage]);

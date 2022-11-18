@@ -39,6 +39,7 @@ import {
 } from '@chakra-ui/react';
 import {
   addMessage,
+  getMessages,
   initMessage,
   recallMessage,
   updateReceivedMessage,
@@ -81,7 +82,17 @@ export default function Home({}: Props) {
         const wrap = await dispatch(getMe());
         const wrap1 = await dispatch(getFriendsList());
         const wrap2 = await dispatch(getMyConversations());
-        const result1 = unwrapResult(wrap);
+        const result2 = unwrapResult(wrap2) as Array<IConversation>;
+        const promises = result2.map(
+          async (conversation) =>
+            await dispatch(
+              getMessages({
+                conversationId: conversation._id,
+                skip: 0,
+              })
+            )
+        );
+        await Promise.all(promises);
       }
     })();
   }, []);

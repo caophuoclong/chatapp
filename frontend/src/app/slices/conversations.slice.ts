@@ -7,8 +7,9 @@ import { IMessage } from '~/interfaces/IMessage';
 import { IEmoji } from '../../interfaces/IConversation';
 
 // Define a type for the slice state
-export const getMyConversations = createAsyncThunk("Get my conversations",()=>{
-    return ConversationsApi.getConversations();
+export const getMyConversations = createAsyncThunk("Get my conversations",async ()=>{
+  const {data} = await ConversationsApi.getConversations();
+    return  data.data;
 })
 interface Conversations {
     conversations: Array<IConversation>,
@@ -90,7 +91,7 @@ export const conversationsSlice = createSlice({
         state.isLoading = true;
       })
       builder.addCase(getMyConversations.fulfilled, (state, action)=>{
-        state.conversations = action.payload.data.data;
+        state.conversations = action.payload;
         state.isLoading = false;
       })
   },
