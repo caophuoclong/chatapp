@@ -220,6 +220,31 @@ export class MessageService {
       throw new HttpException(error.message, 500);
     }
   }
+  async recallMessage(messageId: string){
+    try{
+      const message = await this.messageRepository.findOne({
+        where:{
+          _id: messageId
+        }
+      })
+      if(!message){
+        return {
+          statusCode: 404,
+          message: 'Message not found',
+          data: null,
+        };
+      }
+      message.isRecall = true;
+      const data = await this.messageRepository.save(message);
+      return {
+        statusCode: 200,
+        message: 'Message recalled successfully',
+        data: data,
+      };
+    }catch(error){
+      throw new HttpException(error.message, 500);
+    }
+  }
   findAll() {
     return `This action returns all message`;
   }

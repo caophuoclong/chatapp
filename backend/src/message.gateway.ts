@@ -89,4 +89,15 @@ export class MessageGateway {
       messageId: response.data._id,
     });
   }
+  @UseGuards(WsGuards)
+    @SubscribeMessage("recallMessage")
+    async recallMessage(client: CustomSocket, payload: {
+      conversationId: string,
+      messageId: string,
+    }){
+      const response = await this.messageService.recallMessage(payload.messageId);
+      if(response.statusCode === 200)      {
+        this.server.to(payload.conversationId).emit("messageHasBeenRecalled", {messageId: payload.messageId, conversationId: payload.conversationId});
+      }
+    }
 }

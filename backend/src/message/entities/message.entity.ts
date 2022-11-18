@@ -59,5 +59,10 @@ export class Message {
         type: "int",
         default: 1,
     })
-    scale: number
+    scale: number;
+    @Column({
+        type: "boolean",
+        default: false
+    })
+    isRecall: boolean;
 }
