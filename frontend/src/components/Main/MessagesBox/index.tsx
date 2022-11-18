@@ -65,6 +65,7 @@ export default function MessagesBox({}: Props) {
         );
     }
   };
+
   return (
     <Flex
       onScroll={handleOnScroll}
@@ -88,6 +89,7 @@ export default function MessagesBox({}: Props) {
           .map((message) =>
             message.sender._id === myId ? (
               <MyMessage
+                isRecall={message.isRecall}
                 key={message._id}
                 message={
                   message.type === MessageType.EMOJI ? (
@@ -102,10 +104,11 @@ export default function MessagesBox({}: Props) {
                 }
                 _id={message._id}
                 type={message.type}
-                time={moment(new Date(+message.createdAt)).format('HH:mm')}
+                time={message.createdAt.toString()}
               />
             ) : (
               <OtherMessage
+                isRecall={message.isRecall}
                 key={message._id}
                 type={message.type}
                 message={

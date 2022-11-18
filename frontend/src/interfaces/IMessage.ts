@@ -15,7 +15,7 @@ export enum MessageType{
     EMOJI="EMOJI"
 }
 export interface IMessage{
-    _id?: string,
+    _id: string,
     sender:IUser,
     content: string,
     createdAt: number,   
@@ -26,5 +26,6 @@ export interface IMessage{
     destination: string,
     scale?: number,
     type: MessageType
+    isRecall: boolean,
 
 }

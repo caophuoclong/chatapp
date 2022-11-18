@@ -134,6 +134,7 @@ export default function InputBox({ conversation }: Props) {
       createdAt: Date.now(),
       sender: user,
       type: MessageType.TEXT,
+      isRecall: false,
     };
     try {
       dispatch(
@@ -200,6 +201,7 @@ export default function InputBox({ conversation }: Props) {
           sender: user,
           scale: 1,
           type: MessageType.EMOJI,
+          isRecall: false,
         };
         dispatch(
           addMessage({

@@ -6,7 +6,7 @@ import {
   Text,
   useColorMode,
 } from '@chakra-ui/react';
-import React, { useEffect, useRef } from 'react';
+import React, { MouseEvent, useEffect, useRef } from 'react';
 import { useAppSelector } from '~/app/hooks';
 import {
   IMessage,
@@ -18,12 +18,15 @@ import { TFunction } from 'i18next';
 import { BsCheckLg, BsCircle } from 'react-icons/bs';
 import { AiFillEye } from 'react-icons/ai';
 import { IUser } from '../../../../interfaces/IUser';
+import OptionsMenu from './OptionsMenu';
+import moment from 'moment';
 
 type Props = {
   message: React.ReactNode | string;
   time: string;
-  _id?: string;
+  _id: string;
   type: MessageType;
+  isRecall: boolean;
 };
 const square = '16px';
 function ShowStatus(
@@ -106,10 +109,17 @@ function ShowStatus(
   }
 }
 
-export default function MyMessage({ message, time, _id, type }: Props) {
+export default function MyMessage({
+  message,
+  time,
+  _id,
+  type,
+  isRecall,
+}: Props) {
   const { colorMode } = useColorMode();
   const { t } = useTranslation();
   const user = useAppSelector((state) => state.userSlice.info);
+  const [showOptionsMenu, setShowOptionsMenu] = React.useState(false);
   const choosenConversationId = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
@@ -137,25 +147,33 @@ export default function MyMessage({ message, time, _id, type }: Props) {
         console.log(message);
       }
     }
-  }, [showMessageRef]);
+  }, [showMessageRef, message]);
+  // on mouse down
+  const handleMouseOver = (e: MouseEvent) => {
+    e.preventDefault();
+    setShowOptionsMenu(true);
+  };
+  // on mouse up
+  const handleMouseOut = (e: MouseEvent) => {
+    e.preventDefault();
+    setShowOptionsMenu(false);
+  };
   return (
     <Flex
       maxWidth="80%"
       marginLeft={'auto'}
       rounded="lg"
       direction={'row'}
-      // bg={
-      //   type === MessageType.TEXT
-      //     ? colorMode === 'light'
-      //       ? 'white'
-      //       : 'whiteAlpha.300'
-      //     : 'none'
-      // }
       justifyContent="flex-end"
       minWidth="100px"
       width="fit-content"
       className="message"
+      alignItems={'center'}
+      role="group"
+      onMouseOver={handleMouseOver}
+      onMouseOut={handleMouseOut}
     >
+      {showOptionsMenu && <OptionsMenu messageId={_id} time={time} />}
       <Box>
         <Flex gap=".2rem">
           <Box
@@ -164,19 +182,18 @@ export default function MyMessage({ message, time, _id, type }: Props) {
             padding=".5rem"
             rounded="xl"
             roundedTopRight={'none'}
+            color={
+              isRecall ? 'gray.500' : colorMode === 'light' ? 'black' : 'white'
+            }
             bg={
-              type === MessageType.TEXT
+              type === MessageType.TEXT || isRecall
                 ? colorMode === 'light'
                   ? 'blue.300'
                   : 'purple.600'
                 : 'none'
             }
           >
-            {type === MessageType.TEXT ? (
-              <Text ref={showMessageRef}></Text>
-            ) : (
-              message
-            )}
+            {isRecall ? t('This__Message__HasBeen__Recalled') : message}
           </Box>
           {_id &&
             latestMessageConversation &&
@@ -200,7 +217,7 @@ export default function MyMessage({ message, time, _id, type }: Props) {
           justifyContent={'space-between'}
           gap="1rem"
         >
-          {time}
+          {moment(new Date(+time)).format('HH:mm')}
         </Flex>
       </Box>
     </Flex>

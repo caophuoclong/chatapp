@@ -122,6 +122,29 @@ export const messageSlice = createSlice({
       const {conversationID, messageID} = action.payload;
       const index = state.messages[conversationID].data.findIndex((message)=>message._id === messageID);
       state.messages[conversationID].data.splice(index, 1);
+    },
+    recallMessage: (state: MessageState, action: PayloadAction<{
+      conversationId: string,
+      messageId: string
+    }>)=>{
+      return {
+        ...state,
+        messages: {
+          ...state.messages,
+          [action.payload.conversationId]: {
+            ...state.messages[action.payload.conversationId],
+            data: state.messages[action.payload.conversationId].data.map((message)=>{
+              if(message._id === action.payload.messageId){
+                return {
+                  ...message,
+                  isRecall: true
+                }
+              } 
+              return message;
+            })
+          }
+        }
+      }
     }
   },
   extraReducers(builder) {
@@ -150,7 +173,7 @@ export const messageSlice = createSlice({
   },
 });
 
-export const {addMessage, updateSentMessage, updateReceivedMessage, initMessage, updateMessageScale, removeMessage, removeMessageFromMessages} = messageSlice.actions;
+export const {addMessage, updateSentMessage, updateReceivedMessage, initMessage, updateMessageScale, removeMessage, removeMessageFromMessages, recallMessage} = messageSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 

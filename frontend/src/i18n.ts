@@ -144,6 +144,10 @@ const resources = {
       "Alert__Sure__Delete__Conversation": "Are you sure you want to delete this conversation?",
       "Delete__Conversation__Success": "Delete conversation success",
       "Something__Wrong": "Something went wrong",
+      "Share": "Share",
+      "Reply": "Reply",
+      "Recall__Message": "Recall message",
+      "This__Message__HasBeen__Recalled": "This message has been recalled",
     }
   },
   vn: {
@@ -283,6 +287,10 @@ const resources = {
       "Alert__Sure__Delete__Conversation": "Bạn có chắc chắn muốn xóa cuộc trò chuyện này không?",
       "Delete__Conversation__Success": "Xóa cuộc trò chuyện thành công",
       "Something__Wrong": "Có lỗi xảy ra",
+      "Share": "Chia sẻ",
+      "Reply": "Trả lời",
+      "Recall__Message": "Thu hồi tin nhắn",
+     "This__Message__HasBeen__Recalled": "Tin nhắn này đã được thu hồi",
     }
   }
 };
