@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import { recallMessage } from '~/app/slices/messages.slice';
+import { AppSocket } from '~/class/AppSocket';
 
 type Props = {
   messageId: string;
@@ -14,6 +15,8 @@ type Props = {
 
 export default function OptionsMenu({ messageId, time }: Props) {
   const { t } = useTranslation();
+  const socket = AppSocket.getInstance();
+
   const distance = new Date().getTime() - +time;
   const conversationId = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
@@ -26,6 +29,7 @@ export default function OptionsMenu({ messageId, time }: Props) {
         messageId: messageId,
       })
     );
+    socket.emit('recallMessage', { conversationId, messageId });
   };
   return (
     <Flex

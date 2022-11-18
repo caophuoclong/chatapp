@@ -40,6 +40,7 @@ import {
 import {
   addMessage,
   initMessage,
+  recallMessage,
   updateReceivedMessage,
   updateSentMessage,
 } from '~/app/slices/messages.slice';
@@ -186,6 +187,18 @@ export default function Home({}: Props) {
         });
         handleLogout(navigate);
       });
+      s.on(
+        'messageHasBeenRecalled',
+        (data: { conversationId: string; messageId: string }) => {
+          const { conversationId, messageId } = data;
+          dispatch(
+            recallMessage({
+              conversationId,
+              messageId,
+            })
+          );
+        }
+      );
       interface ICreatedFriendShip extends IFriendShip {
         userAddress: IUser;
         userRequest: IUser;

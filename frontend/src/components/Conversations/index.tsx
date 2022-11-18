@@ -11,6 +11,7 @@ export default function Conversations({}: Props) {
   const conversations = useAppSelector(
     (state) => state.conversationsSlice.conversations
   );
+  const messages = useAppSelector((state) => state.messageSlice.messages);
   const restedConversations = [...conversations];
   restedConversations.sort((a, b) => {
     return b.updateAt - a.updateAt;
@@ -27,7 +28,15 @@ export default function Conversations({}: Props) {
       boxSizing="border-box"
     >
       {restedConversations.map((item: IConversation, index) => (
-        <Conversation {...item} key={index} />
+        <Conversation
+          {...item}
+          key={index}
+          lastMessage={
+            messages[item._id] &&
+            messages[item._id].data &&
+            messages[item._id].data.find((m) => m._id === item.lastMessage._id)!
+          }
+        />
       ))}
     </Box>
   );
