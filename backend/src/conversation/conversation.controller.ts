@@ -36,9 +36,6 @@ export class ConversationController {
     description: 'The _id of conversation need to get',
   })
   getConversationById(@Param("slug") slug, @Req() req){
-    
-    console.log("🚀 ~ file: conversation.controller.ts ~ line 39 ~ ConversationController ~ getConversationById ~ slug", slug)
-    console.log("🚀 ~ file: conversation.controller.ts ~ line 39 ~ ConversationController ~ getConversationById ~ req", req)
     return this.conversationService.getConversationById(slug)
   }
   @Post('/create/group')
@@ -64,9 +61,11 @@ export class ConversationController {
   createConversationFromFriendship(
     @Body()
     createConversationDtoFromFriendshipDto: CreateConversationDtoFromFriendshipDto,
+    @Request() req,
   ) {
     return this.conversationService.createFromFriendship(
       createConversationDtoFromFriendshipDto,
+      req.user._id
     );
   }
   @Patch("/update/:slug")

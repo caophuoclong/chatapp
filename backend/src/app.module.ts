@@ -35,7 +35,6 @@ import * as redisStore from 'cache-manager-redis-store';
 import { redisConfig } from './configs/index';
 import { PasswordResetToken } from './entities/passResetToken.entity';
 import { RedisModule } from './redis.module';
-import { ConversationGateway } from './conversation/conversation.gateway';
 import { FriendShipGateway } from './friendship.gateway';
 import { SocketModule } from './socket/socket.module';
 import { AppGateway } from './app.gateway';

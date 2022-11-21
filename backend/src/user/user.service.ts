@@ -358,7 +358,6 @@ export class UserService {
         const participants =
           await this.conversationService.getUserOfConversation(
             co.conversationId,
-            co.conversation.type,
           );
         conversations[i].conversation.participants = participants.data;
       }

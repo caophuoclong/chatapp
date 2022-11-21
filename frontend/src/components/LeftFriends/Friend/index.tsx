@@ -31,6 +31,7 @@ import {
   setShowScreen,
 } from '~/app/slices/global.slice';
 import { SERVER_URL } from '~/configs';
+import { AppSocket } from '~/class/AppSocket';
 
 type Props = {
   user: IUser;
@@ -52,6 +53,7 @@ export default function Friend({
   const [showInfo, setShowInfo] = useState(false);
   const toast = useToast();
   const dispatch = useAppDispatch();
+  const socket = AppSocket.getInstance();
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
   );
@@ -60,29 +62,6 @@ export default function Friend({
   );
   console.log('🚀 ~ file: index.tsx ~ line 58 ~ conversations', conversations);
   const createConversation = (e: React.MouseEvent<HTMLDivElement>) => {
-    // let isExist = false;
-    // let tempConId = '';
-
-    // conversations.forEach((conversation) => {
-    //   if (conversation.type === 'direct') {
-    //     if (
-    //       conversation.participants.filter((item) => item._id === user._id)
-    //         .length
-    //     ) {
-    //       isExist = true;
-    //       tempConId = conversation._id;
-    //     }
-    //   }
-    // });
-    // if (!isExist) {
-    //   if (socket) {
-    //     socket.emit('createConversationFromFriendShip', friendShipId);
-    //   }
-
-    // } else {
-    //   dispatch(setChoosenConversationID(tempConId));
-    //   dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
-    // }
     ConversationsApi.createConversationByFriendShip(friendShipId).then(
       (response) => {
         if (response) {
@@ -90,6 +69,7 @@ export default function Friend({
           dispatch(addConversation(data));
           dispatch(setChoosenConversationID(data._id));
           dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
+          socket.emit('joinRoom', data._id);
         }
       }
     );

@@ -79,6 +79,7 @@ export default function Header({
   );
   const dispatch = useAppDispatch();
   const { colorMode } = useColorMode();
+  console.log('sshshshs', participants);
 
   return (
     <Flex

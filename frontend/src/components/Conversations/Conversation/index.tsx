@@ -72,6 +72,7 @@ export default function Conversation({
   updateAt,
 }: IConversation) {
   const [openDropdown, setOpenDropdown] = useState(false);
+  console.log('ssss', participants);
   const { colorMode } = useColorMode();
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
@@ -81,13 +82,6 @@ export default function Conversation({
     (state) => state.globalSlice.conversation.choosenConversationID
   );
   const { t } = useTranslation();
-  // useEffect(() => {
-  //   const p = contentRef.current;
-  //   console.log(p);
-  //   if (p) {
-  //     console.log(p.clientWidth);
-  //   }
-  // }, [contentRef]);
   const showContentRef = useRef<any>();
   useEffect(() => {
     const { current } = showContentRef;
