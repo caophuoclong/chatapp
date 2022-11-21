@@ -7,7 +7,7 @@ import { UserService } from './user/user.service';
 import { ConversationService } from './conversation/conversation.service';
 import { CreateMessageDto } from './message/dto/create-message.dto';
 import CustomSocket from './interfaces/CustomInterface';
-import { Message } from './message/entities/message.entity';
+import { Message, MessageStatusType } from './message/entities/message.entity';
 import  {Cache}  from 'cache-manager';
 import { RedisClientType } from 'redis';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -38,17 +38,35 @@ export class MessageGateway {
     const tempId = payload._id;
     delete payload._id;
     const response = await this.messageService.create(_id, payload);
-    client.emit("sentMessageSuccess", {
-      tempId: tempId,
-      conversationId: payload.destination,
-      message: response.data,
-    });
+    // check if any user online
     const destinationId = payload.destination;
     const members = await this.memberRepository.find({
       where:{
-        conversationId: payload.destination
+        conversationId: destinationId
       }
     });
+    const participants = await this.conversationService.getUserOfConversation(destinationId);
+    const participantsId = participants.data.map((participant) => participant._id);
+    // check if any participants Id have a socket in redis
+    const onlineParticipants = await this.redisClient.mGet(participantsId);
+    const mySocketId = await this.redisClient.get(_id);
+    // get diff id
+    const diff = onlineParticipants.filter((socketId) => socketId !== mySocketId);
+    // check array have any  string diff null return boolean
+    const isOnline = diff.some((socketId) => socketId !== null && socketId !== "null");
+    let me = response.data as Message;
+
+    if(isOnline){
+      me.status = MessageStatusType.RECEIVED;
+    }
+    console.log(me);
+
+    client.emit("sentMessageSuccess", {
+      tempId: tempId,
+      conversationId: destinationId,
+      message: me,
+    });
+
     const ids = [];
     members.forEach((m)=>{
       return m.userId !== response.data.sender._id && m.isDeleted && !m.isBlocked ?(()=>{
@@ -58,12 +76,9 @@ export class MessageGateway {
         m.createdAt = new Date().getTime() - 15 * 1000;
       })():m
     })
-    // Notify user to create again conversation;
-    // get socket id;
     await this.memberRepository.save(members);
     const message = response.data;
     message.destination = payload.destination;
-    console.log(message);
     client.broadcast.to(destinationId).emit("newMessage", {
       ...message,
       updateAt: payload.updateAt
@@ -73,7 +88,8 @@ export class MessageGateway {
         const socketId = await this.redisClient.get(id);
         if(socketId){
           this.server.to(socketId).emit("queryAgainConversation", {
-            conversationId: payload.destination
+            conversationId: payload.destination,
+            message: message
           })
         }
       })
