@@ -81,9 +81,6 @@ export default function DropDownMenu({ isOpen, onClose, _id }: Props) {
       } else if (bottom + 50 > window.innerHeight) {
         setOrientation('down');
       }
-      //   console.log(innerHeight);
-      //   console.log(rect);
-      //   console.log(current);
     }
   }, [isOpen, ref]);
   const onDeleteConversation = async () => {
@@ -93,23 +90,12 @@ export default function DropDownMenu({ isOpen, onClose, _id }: Props) {
       content: 'Alert__Sure__Delete__Conversation',
       type: 'delete_conversation',
     });
-    // try {
-    //   const response = await ConversationsApi.deleteConversation(_id);
-    //   toast({
-    //     title: t('Success'),
-    //     description: t('Success__Login'),
-    //     status: 'success',
-    //     position: isLargerThanHD ? 'top-right' : 'bottom',
-    //     duration: 1000,
-    //   });
-    // } catch (error) {}
   };
   const onConfirm = async (type: DialogType) => {
     try {
       switch (type) {
         case 'delete_conversation':
           const response = await ConversationsApi.deleteConversation(_id);
-          console.log(response);
           const { data } = response;
           if (data.statusCode !== 200) {
             toast({

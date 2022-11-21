@@ -162,7 +162,7 @@ export default function Home({}: Props) {
               tempId,
               value: {
                 _id: message._id,
-                status: MessageStatusType.SENT,
+                status: message.status,
               },
             })
           );
@@ -244,12 +244,17 @@ export default function Home({}: Props) {
         dispatch(updateAcceptFriend(data._id));
       });
       s.on('queryAgainConversation', async (data) => {
-        console.log(data);
         const conversation = (
           await ConversationsApi.getConversationById(data.conversationId)
         ).data.data as IConversation;
-        dispatch(addConversation(conversation));
         s.emit('joinRoom', conversation._id);
+        dispatch(addConversation(conversation));
+        dispatch(
+          addMessage({
+            message: data.message,
+            conversationId: data.conversationId,
+          })
+        );
       });
     }
   }, []);
