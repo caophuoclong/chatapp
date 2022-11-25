@@ -11,61 +11,62 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-
   ) {}
-  async validateUser(username: string, pass: string){
-    const user = await this.userService.login({username, password: pass});
-    if(user){
-      const {_id, email, username} = user.data;
-      return {
-        _id,
-        email,
-        username
-      };
-    }
-    return null;
+  async validateUser(username: string, password: string){
+    const user = await this.userService.login({username, password});
+    return {...user};
   }
   async register(user: CreateUserDto){
     return await this.userService.register(user);
   }
-  async login(user: any){
-    // const payload = { username: user.username, sub: user._id};
-    const x = await this.validateUser(user.username, user.password);
-    const time = ms(this.configService.get<string>("expireTokenTime"))
-    const refreshToken = this.jwtService.sign(x, {
-      expiresIn: "365d"
-    })
+  async login(rest: {
+    username: string,
+    password: string
+  }){
+    const user = await this.validateUser(rest.username, rest.password);
+    const accessToken = await this.generateToken({_id: user._id, username: user.username});
+    const refreshToken = await this.generateToken({_id: user._id, username: user.username},true);
     return {
-      refreshToken,
-      expiredTime:Date.now() + time,
-      access_token: this.jwtService.sign({
-        ...x
-      })
-    };
+      accessToken,
+      refreshToken
+    }
+  }
+  async generateSocketToken(param:{_id: string, username: string}){
+    // unlimited time
+    const token = this.jwtService.sign({
+      _id: param._id,
+      username: param.username
+    });
+    return token;
   }
   async generateToken({_id, username}: {
     _id: string,
     username: string
-  }){
-    const expiredTime = Date.now() + ms(this.configService.get<string>("expireTokenTime"));
-    const accessToken = this.jwtService.sign({
+  }, isRefresh=false){
+    let expiredTime: string;
+    if(isRefresh) expiredTime = this.configService.get<string>("expiredRefreshToken");
+    else expiredTime = this.configService.get<string>("expiredAccessToken");
+    const expiresIn = ms(expiredTime) / 1000;
+    const token = this.jwtService.sign({
       _id,
       username
+    },{
+      expiresIn
     })
     return {
-      access_token: accessToken,
-      expired_time: expiredTime
+      token,
+      expired_time: expiresIn + new Date().getTime()
     }
   }
   verifyJWT(bearerToken: string){
     try{
-    const response = this.jwtService.verify(bearerToken);
+      const response = this.jwtService.verify(bearerToken);
     return response as {
       _id: string,
       username: string;
     };
     }catch(error){
-      console.log(error);
+      throw new Error(error);
     }
   }
 }

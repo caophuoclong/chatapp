@@ -12,8 +12,8 @@ import {
   PrimaryGeneratedColumn,
   Timestamp,
 } from 'typeorm';
-import { Emoji } from '~/entities/Emoji';
-import { Member } from '~/entities/member.entity';
+import { Emoji } from '~/database/entities/Emoji';
+import { Member } from '~/database/entities/member.entity';
 import { Message } from '~/message/entities/message.entity';
 import { User } from '~/user/entities/user.entity';
 import { FriendShip } from '../../friendship/entities/friendship.entity';

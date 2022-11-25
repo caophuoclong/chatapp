@@ -1,7 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, Table } from "typeorm";
 import { Conversation } from "~/conversation/entities/conversation.entity";
-import { Emoji } from "~/entities/Emoji";
-import { Member } from "~/entities/member.entity";
+import { Emoji } from "~/database/entities/Emoji";
+import { Member } from "~/database/entities/member.entity";
 import { FriendShip } from "~/friendship/entities/friendship.entity";
 import { Message } from "~/message/entities/message.entity";
 import { UnRead } from '../../unread/entities/unread.entity';

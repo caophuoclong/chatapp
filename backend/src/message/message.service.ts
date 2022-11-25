@@ -8,7 +8,7 @@ import { User } from '~/user/entities/user.entity';
 import { Conversation } from '../conversation/entities/conversation.entity';
 import { ConversationService } from '../conversation/conversation.service';
 import { UserService } from '~/user/user.service';
-import { Member } from '~/entities/member.entity';
+import { Member } from '~/database/entities/member.entity';
 
 
 @Injectable()

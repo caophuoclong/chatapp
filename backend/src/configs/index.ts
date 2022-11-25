@@ -12,7 +12,8 @@ export const databaseConfig  = ()=>({
 export const config = ()=>({
     jwtSecret: process.env.JWT_SECRET,
     pepper: process.env.PEPPER,
-    expireTokenTime: process.env.EXPIRE_TOKEN_TIME,
+    expiredAccessToken: process.env.EXPIRED_ACCESS_TOKEN,
+    expiredRefreshToken: process.env.EXPIRED_REFRESH_TOKEN
 })
 export const redisConfig = ()=>({
     redis_host: process.env.REDIS_HOST,

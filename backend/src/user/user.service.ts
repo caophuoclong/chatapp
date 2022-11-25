@@ -4,6 +4,9 @@ import {
   Inject,
   Injectable,
   CACHE_MANAGER,
+  UnauthorizedException,
+  HttpStatus,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, JoinTable, In } from 'typeorm';
@@ -16,13 +19,13 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { FriendshipService } from '~/friendship/friendship.service';
 import { ConversationService } from '../conversation/conversation.service';
-import { PasswordResetToken } from '~/entities/passResetToken.entity';
+import { PasswordResetToken } from '~/database/entities/passResetToken.entity';
 import { RedisClientType } from 'redis';
 import { IListFriend } from '~/interfaces/IListFriend';
 import { MailService } from '~/mail/mail.service';
-import { Confirmation } from '~/entities/confirmation.entity';
-import { Emoji } from '~/entities/Emoji';
-import { Member } from '~/entities/member.entity';
+import { Confirmation } from '~/database/entities/confirmation.entity';
+import { Emoji } from '~/database/entities/Emoji';
+import { Member } from '~/database/entities/member.entity';
 @Injectable()
 export class UserService {
   constructor(
@@ -86,12 +89,12 @@ export class UserService {
           salt: true,
           password: true,
           username: true,
-          name: true,
           active: true,
+          email: true,
         },
       });
       if (!user) {
-        throw new HttpException('User not found', 400);
+        throw new NotFoundException("User not found");
       }
       const verified = await this.utils.verify(
         loginUserDto.password,
@@ -100,20 +103,19 @@ export class UserService {
       );
 
       if (!verified) {
-        throw new HttpException('Password does not match', 403);
+        throw new HttpException('Password does not match', HttpStatus.FORBIDDEN);
       }
-      delete user.salt;
-      delete user.password;
-      if (!user.active) {
-        throw new HttpException('User not active', 403);
+      const {_id, email, username, active} = user;
+      if (!active) {
+        throw new HttpException("INACTIVE", HttpStatus.FORBIDDEN);
       }
       return {
-        statusCode: 200,
-        message: 'Login success',
-        data: user,
-      };
+        _id,
+        username,
+        email
+      }
     } catch (error) {
-      throw new HttpException(error.message, 403);
+      throw new HttpException(error.message, error.status);
     }
   }
   async updatePassword(updatePasswordDto: UpdatePasswordDto, _id: string) {
@@ -124,7 +126,7 @@ export class UserService {
         },
       });
       if (!user) {
-        throw new HttpException('User not found', 400);
+        throw new HttpException("Something wrong", HttpStatus.INTERNAL_SERVER_ERROR);
       }
       const verified = await this.utils.verify(
         updatePasswordDto.oldPassword,
@@ -231,6 +233,7 @@ export class UserService {
       if (!user) {
         throw new HttpException('User not found', 400);
       }
+      
       const friends = user.friendRequest.filter((friend) => {
         delete friend.userAddress.salt;
         delete friend.userAddress.password;
@@ -258,7 +261,6 @@ export class UserService {
           flag: 'target',
         });
       });
-
       return new Promise<Array<IListFriend>>(async (resolve, reject) => {
         const x = [];
         for (let i = 0; i < mergeFriend.length; i++) {

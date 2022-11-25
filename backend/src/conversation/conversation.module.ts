@@ -9,8 +9,8 @@ import { FriendshipModule } from '../friendship/friendship.module';
 import { Conversation } from './entities/conversation.entity';
 import { UserService } from '~/user/user.service';
 import { SocketModule } from '~/socket/socket.module';
-import { Emoji } from '~/entities/Emoji';
-import { Member } from '~/entities/member.entity';
+import { Emoji } from '~/database/entities/Emoji';
+import { Member } from '~/database/entities/member.entity';
 
 @Module({
   imports: [

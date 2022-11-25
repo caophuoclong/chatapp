@@ -14,24 +14,22 @@ import {
   Req,
   UseInterceptors,
   UploadedFile,
+  UseFilters,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { LocalAuthGuard } from '../auth/local-auth.guard';
-import { AuthGuard } from '@nestjs/passport';
 import { JWTAuthGuard } from '../auth/jwt-auth.guard';
-import { AuthService } from '~/auth/auth.service';
 import Utils from '~/utils';
-import { ApiTags, ApiHeader, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery, ApiBody, ApiProperty } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { CatchHttpException } from '~/exceptions/HttpException';
 @ApiTags('User')
 @ApiBearerAuth()
 @UseGuards(JWTAuthGuard)
 @Controller('user')
+@UseFilters(new CatchHttpException())
 export class UserController {
   constructor(
     private readonly userService: UserService,

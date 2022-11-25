@@ -8,7 +8,6 @@ export class SocketService {
         private readonly redisClient: RedisClientType
     ){}
     private socket: Server = null;
-    // getter and setter
     get Socket(): Server {
         return this.socket;
     }

@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import * as dotenv from 'dotenv';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { CatchHttpException } from './exceptions/HttpException';
 dotenv.config()
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -19,6 +20,7 @@ async function bootstrap() {
     .setDescription('This page provide how to use chat app server API')
     .setVersion('1.0')
     .build()
+  app.useGlobalFilters(new CatchHttpException())
   app.use(cookieParser())
   app.setGlobalPrefix("/api")
   app.useGlobalPipes(new ValidationPipe())

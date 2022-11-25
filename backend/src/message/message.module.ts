@@ -9,7 +9,7 @@ import { User } from '~/user/entities/user.entity';
 import { Conversation } from '~/conversation/entities/conversation.entity';
 import { Attachment } from '../attachment/entities/attachment.entity';
 import { UserModule } from '../user/user.module';
-import { Member } from '~/entities/member.entity';
+import { Member } from '~/database/entities/member.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Message, User, Conversation, Attachment ,Member]), ConversationModule, UserModule],

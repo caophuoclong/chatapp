@@ -1,6 +1,6 @@
 import { Entity, JoinTable, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "~/user/entities/user.entity";
-import { Status } from "../../entities/status.entity";
+import { Status } from "../../database/entities/status.entity";
 @Entity()
 export class FriendShip{
     @PrimaryGeneratedColumn("uuid")

@@ -17,9 +17,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     try{
       return { _id: payload._id, username: payload.username };
-      
     }catch(error){
-      console.log(1231231)
+      console.log("🚀 ~ file: jwt.strategy.ts ~ line 21 ~ JwtStrategy ~ validate ~ error", error)
     }
     
   }

@@ -12,7 +12,7 @@ import {
   TableForeignKey,
 } from 'typeorm';
 import { Conversation } from '~/conversation/entities/conversation.entity';
-import { User } from '../user/entities/user.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Entity()
 export class Emoji {

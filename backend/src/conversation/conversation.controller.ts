@@ -18,7 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { JWTAuthGuard } from '~/auth/jwt-auth.guard';
-import { Emoji } from '~/entities/Emoji';
+import { Emoji } from '~/database/entities/Emoji';
 import { ConversationService } from './conversation.service';
 import { CreateConversationDtoFromFriendshipDto } from './dto/create-conversation-friend';
 import { CreateConversationDto } from './dto/create-conversation.dto';

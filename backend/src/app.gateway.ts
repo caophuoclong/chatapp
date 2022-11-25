@@ -7,6 +7,9 @@ import {
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -14,7 +17,7 @@ import {
 } from '@nestjs/websockets';
 import { RedisClientType } from '@redis/client';
 import { Observable } from 'rxjs';
-import { Server, Socket } from 'socket.io';
+import {  Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
 import WsGuards from './auth/ws-auth.guard';
 import CustomSocket from './interfaces/CustomInterface';
@@ -26,7 +29,7 @@ import { UserService } from './user/user.service';
     origin: '*',
   },
 })
-export class AppGateway {
+export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
@@ -38,15 +41,23 @@ export class AppGateway {
   @WebSocketServer()
   server: Server;
   afterInit(server: Server) {
-    this.socketService.Socket = server;
+    this.socketService.Socket =  server;
   }
-  async handleConnection(@ConnectedSocket() client: Socket) {
-    const token = client.handshake.headers.authorization.split(' ')[1];
-    if (token === 'null') {
-      this.disconect(client);
-    } else {
-      try {
-        console.log("Someone connected");
+  @SubscribeMessage("authenticate")
+  async authenticateSocket(client: CustomSocket){
+      console.log("some one is connecting");
+      const authorization = client.handshake.headers.authorization;
+      if(!authorization){
+        // console.log("Could not recevie authorization");
+        client.emit("invalidToken", "Token is invalid");
+        this.disconect(client);
+      }
+      const token = client.handshake.headers.authorization.split(' ')[1];
+      if(!token){
+        client.emit("invalidToken", "Token is invalid");
+        this.disconect(client);
+      }
+      try{
         const { _id } = this.authService.verifyJWT(token);
         const user = (await this.userService.get(_id)).data;
         const listFriend = (await this.userService.getListFriend(_id)).data;
@@ -79,20 +90,30 @@ export class AppGateway {
             }
           }
         }
-      } catch (error) {
-        console.log(error);
-        client.emit("ErrorConnection", error);
+        console.log("connected");
         
-
+      }catch(error){
+        client.emit("somethingWrong");
       }
-    }
+  }
+  async handleConnection(client: CustomSocket) {
+    // console.log("some one connect");
   }
 
-  @UseGuards(WsGuards)
   @SubscribeMessage('disconnect')
   async handleDisconnect(client: CustomSocket) {
+    const authorization = client.handshake.headers.authorization;
+    if(!authorization){
+      console.log("could not receive authorization");
+      return;
+    }
+    const token = authorization.split(" ")[1];
+    if(!token){
+      client.emit("invalidToken","Token is invalid!")
+    }
+    try{
     const user = this.authService.verifyJWT(
-      client.handshake.headers.authorization.split(' ')[1],
+    token
     );
     if (user) {
       const { _id } = user;
@@ -110,9 +131,12 @@ export class AppGateway {
         this.leaveRoom(client, room);
       });
     }
+    }
+    catch(error){
+      client.emit("refreshToken")
+    }
   }
   private disconect(socket: Socket) {
-    socket.emit('Error', new UnauthorizedException());
     socket.disconnect();
   }
   private crateRoom(socket: Socket, roomId: string) {

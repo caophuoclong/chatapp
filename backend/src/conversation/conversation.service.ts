@@ -18,8 +18,8 @@ import { FriendshipService } from '~/friendship/friendship.service';
 import { Conversation } from './entities/conversation.entity';
 import moment from 'moment';
 import { SocketService } from '~/socket/socket.service';
-import { Emoji } from '~/entities/Emoji';
-import { Member } from '~/entities/member.entity';
+import { Emoji } from '~/database/entities/Emoji';
+import { Member } from '~/database/entities/member.entity';
 
 @Injectable()
 export class ConversationService {
