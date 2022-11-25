@@ -1,0 +1,99 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@chakra-ui/icons": "^2.0.8",
+    "@chakra-ui/react": "^2.2.8",
+    "@emoji-mart/data": "^1.0.6",
+    "@emoji-mart/react": "^1.0.1",
+    "@emotion/react": "^11.10.0",
+    "@emotion/styled": "^11.10.0",
+    "@hookform/resolvers": "^2.9.8",
+    "@reduxjs/toolkit": "^1.8.4",
+    "@testing-library/jest-dom": "^5.16.1",
+    "@testing-library/react": "^13.0.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.4.0",
+    "@types/node": "^17.0.10",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "axios": "^0.27.2",
+    "crypto-browserify": "^3.12.0",
+    "crypto-js": "^4.1.1",
+    "date-fns": "^2.29.2",
+    "dexie": "^3.2.2",
+    "dexie-react-hooks": "^1.1.1",
+    "emoji-mart": "^5.2.2",
+    "emoji-picker-react": "^4.2.0",
+    "framer-motion": "^7.2.0",
+    "i18next": "^21.9.1",
+    "lottie-react": "^2.3.1",
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.37",
+    "query-string": "^7.1.1",
+    "react": "^18.2.0",
+    "react-contenteditable": "^3.3.6",
+    "react-datepicker": "^4.8.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.34.2",
+    "react-i18next": "^11.18.4",
+    "react-icons": "^4.4.0",
+    "react-redux": "^8.0.2",
+    "react-router-dom": "^6.3.0",
+    "react-scripts": "5.0.1",
+    "redux": "^4.2.0",
+    "sass": "^1.55.0",
+    "socket.io-client": "^4.5.1",
+    "typescript": "^4.4.2",
+    "upgrade": "^1.1.0",
+    "web-vitals": "^2.1.4",
+    "workbox-background-sync": "^6.4.2",
+    "workbox-broadcast-update": "^6.4.2",
+    "workbox-cacheable-response": "^6.4.2",
+    "workbox-core": "^6.4.2",
+    "workbox-expiration": "^6.4.2",
+    "workbox-google-analytics": "^6.4.2",
+    "workbox-navigation-preload": "^6.4.2",
+    "workbox-precaching": "^6.4.2",
+    "workbox-range-requests": "^6.4.2",
+    "workbox-routing": "^6.4.2",
+    "workbox-strategies": "^6.4.2",
+    "workbox-streams": "^6.4.2",
+    "yup": "^0.32.11"
+  },
+  "scripts": {
+    "start": "cat ./dev.env > .env && react-app-rewired start",
+    "build": "cat ./prod.env > .env && react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-app-rewired eject",
+    "start:build": "pm2 serve -s build 3000 --spa -n client"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.1.1",
+    "@types/emoji-mart": "^3.0.9",
+    "@types/react-datepicker": "^4.4.2",
+    "@types/react-icons": "^3.0.0",
+    "babel-plugin-module-resolver": "^4.1.0",
+    "customize-cra": "^1.0.0",
+    "react-app-rewired": "^2.2.1"
+  }
+}
