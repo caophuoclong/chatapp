@@ -2,7 +2,7 @@ version: "3.9"
 services:
   server:
     container_name: server
-    image: caophuoclongse/chatappserver:latest
+    image: caophuoclongse/chatappserver:1.0.0
     ports:
       - "3003:3003"
     volumes:
@@ -16,7 +16,7 @@ services:
       - redis
   client:
     container_name: client
-    image: caophuoclongse/chatappclient:latest
+    image: caophuoclongse/chatappclient:1.0.0
     ports:
       - "3000:3000"
     volumes:

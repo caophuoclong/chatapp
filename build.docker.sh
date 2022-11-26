@@ -1,5 +1,5 @@
-DOCKER_IMAGE_NAME="caophuoclongse/chatapp"
-DOCKER_TAG=latest
+DOCKER_TAG=1.0.0
+# echo $1
 docker build -t $DOCKER_SERVER ./backend
 docker build -t $DOCKER_CLIENT ./frontend
 docker tag $DOCKER_SERVER $DOCKER_SERVER:$DOCKER_TAG
