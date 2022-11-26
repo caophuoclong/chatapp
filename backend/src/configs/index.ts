@@ -29,4 +29,5 @@ export const mailConfig = ()=>({
 })
 export const appConfig = ()=>({
     client_host: process.env.CLIENT_HOST,
+    node_env: process.env.NODE_ENV,
 })

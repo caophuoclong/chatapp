@@ -1,10 +1,11 @@
 # Build nestjs app
-FROM node:14-alpine AS builder
+FROM node:latest
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
-RUN npm i -g pm2
 COPY . .
-RUN yarn build:docker
+RUN yarn build
+ENV REACT_APP_SERVER_URL=https://api.bebes.site
+ENV REACT_APP_WS_URL=wss://api.bebes.site
 EXPOSE 3000
 CMD ["yarn", "start:build"]

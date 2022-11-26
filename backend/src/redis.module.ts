@@ -8,18 +8,24 @@ import {createClient} from "redis"
     providers: [
         {
             provide: "REDIS_CLIENT",
-            useFactory: async(option:{
-                redis_host: string,
-                redis_port: number,
-                redis_password: string
-            })=>{
-                const client = createClient({
+            useFactory: async(configService: ConfigService)=>{
+                let client;
+                console.log(configService.get("node_env") );
+                
+                if(configService.get("node_env") === "production"){
+                    client  = createClient({
+                        url: "redis://"+configService.get("redis_host")+":"+configService.get("redis_port"),
+                        password: configService.get("redis_password")
+                    })
+                }else{
+                    client = createClient({
                     socket: {
-                        host: option.redis_host,
-                        port: option.redis_port,
+                        host: configService.get("redis_host"),
+                        port: configService.get("redis_port"),
                     },
-                    password: option.redis_password,
+                    password: configService.get("redis_password"),
                 })
+                }
                 await client.connect();
                 return client;
             },

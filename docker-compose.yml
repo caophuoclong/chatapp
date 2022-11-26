@@ -1,42 +1,30 @@
-version: '3.9'
+version: "3.9"
 services:
-  # server:
-  #   image: server
-  #   build: ./backend
-  #   container_name: server
-  #   ports:
-  #     - 3003:3003
-  #   volumes:
-  #     - ./test123:/app
-
-  #     # - ./env/server.env:/app/.env
-  #   environment:
-  #     - NODE_ENV=development
-  #     - DB_HOST=mysql
-  #     - DB_USER=root
-  #     - DB_PASSWORD=516489
-  #     - DB_NAME=chatapp
-  #     - JWT_SECRET=caophuoclong123123123
-  #     - PEPPER=caophuoclong26032001
-  #     - EXPIRE_TOKEN_TIME=1d
-  #     - REDIS_HOST=redis
-  #     - REDIS_PASSWORD=516489
-  #   # depends_on:
-  #   #   - mysql
-  #   #   - redis
-  # client:
-  #   image: client
-  #   build: ./frontend
-  #   container_name: client
-  #   ports:
-  #     - '3000:3000'
-  #   volumes:
-  #     - ./frontend:/app
-  #     # - ./env/client.env:/app/.env
-  #   environment:
-  #     - NODE_ENV=development
-  #   depends_on:
-  #     - server
+  server:
+    container_name: server
+    image: caophuoclongse/chatappserver:latest
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./backend:/app
+    environment:
+      - REDIS_HOST=redis
+      - DB_HOST=mysql
+      - NODE_ENV=production
+    depends_on:
+      - mysql
+      - redis
+  client:
+    container_name: client
+    image: caophuoclongse/chatappclient:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_SERVER_URL=https://api.bebes.site
+      - REACT_APP_WS_URL=ws://localhost:3003
   admin:
     container_name: phpadmin
     image: phpmyadmin/phpmyadmin
@@ -50,14 +38,14 @@ services:
       - PMA_PASSWORD=516489C@k
     depends_on:
       - mysql
-      
+      - server
   mysql:
     container_name: mysql
     user: root
     image: mysql
-    restart: 'always'
+    restart: "always"
     ports:
-      - '3306:3306'
+      - "3306:3306"
     volumes:
       - ./data:/var/lib/mysql
       - ./mysql/conf.d:/etc/mysql/conf.d/
@@ -84,8 +72,3 @@ services:
     volumes:
       - ./nginx:/etc/nginx/conf.d/
       - ./ssl:/etc/nginx/ssl
-  # certbot:
-  #   image: certbot/certbot:latest
-  #   volumes:
-  #     - ./certbot/www/:/var/www/certbot/:rw
-  #     - ./certbot/conf/:/etc/letsencrypt/:rw
