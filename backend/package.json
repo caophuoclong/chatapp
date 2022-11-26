@@ -13,7 +13,7 @@
     "start": "nest start",
     "start:dev": "cat  ./.env.dev > .env && nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main.js",
+    "start:prod": "nest start dist/main.js",
     "build:docker": "cat ./.env.docker > .env && nest build",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",

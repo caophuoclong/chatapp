@@ -2,6 +2,7 @@
 FROM node:latest
 WORKDIR /app
 COPY package.json yarn.lock ./
+RUN npm i serve -g
 RUN yarn install --frozen-lockfile
 COPY . .
 RUN yarn build
