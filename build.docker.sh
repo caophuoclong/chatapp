@@ -1,3 +1,10 @@
 DOCKER_IMAGE_NAME="caophuoclongse/chatapp"
-docker build -t $DOCKER_IMAGE_NAME:server ./backend
-docker build -t $DOCKER_IMAGE_NAME:client ./frontend
+DOCKER_TAG=latest
+docker build -t $DOCKER_SERVER ./backend
+docker build -t $DOCKER_CLIENT ./frontend
+docker tag $DOCKER_SERVER $DOCKER_SERVER:$DOCKER_TAG
+docker tag $DOCKER_CLIENT $DOCKER_CLIENT:$DOCKER_TAG
+docker push $DOCKER_SERVER:$DOCKER_TAG
+docker push $DOCKER_CLIENT:$DOCKER_TAG
+
+

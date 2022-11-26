@@ -2,7 +2,6 @@
 FROM node:latest
 WORKDIR /app
 COPY package.json yarn.lock ./
-RUN npm i -g pm2 yarn
 RUN yarn install --frozen-lockfile
 COPY . .
 RUN yarn build
