@@ -29,6 +29,7 @@ import { MessageType } from '~/interfaces/IMessage';
 import { Emoji } from 'emoji-picker-react';
 import DropDownMenu from './DropdownMenu';
 import { useTranslation } from 'react-i18next';
+import { renderAvatar } from '~/utils/renderAvatar';
 
 // export const renderDirectConversation = (participants: IUser[]) => {
 //   const myId = useAppSelector((state) => state.userSlice.info._id);
@@ -56,9 +57,9 @@ export const RenderDirectConversationAvatar = ({
   return (
     <Avatar
       size={size}
-      src={`${SERVER_URL}/images/${
+      src={renderAvatar(
         participants.filter((item) => item._id !== myId)[0].avatarUrl
-      }`}
+      )}
     />
   );
 };

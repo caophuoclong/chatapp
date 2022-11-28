@@ -40,6 +40,7 @@ import { updateInformation } from '~/app/slices/user.slice';
 import readFile from '~/utils/readFile';
 import { Blob } from 'buffer';
 import { SERVER_URL } from '~/configs';
+import { renderAvatar } from '../../../utils/renderAvatar';
 type Props = {
   user: IUser;
   id?: string;
@@ -329,7 +330,7 @@ export default function Info({ user, id }: Props) {
               width="72px"
               height="72px"
               role="group"
-              src={avatar ? avatar : `${SERVER_URL}/images/${user.avatarUrl}`}
+              src={avatar ? avatar : renderAvatar(user.avatarUrl)}
             >
               {uploadAvatarProgress > 0 && uploadAvatarProgress <= 100 && (
                 <Flex
@@ -404,7 +405,7 @@ export default function Info({ user, id }: Props) {
           <Avatar
             width="72px"
             height="72px"
-            src={`${SERVER_URL}/images/${user.avatarUrl}`}
+            src={renderAvatar(user.avatarUrl)}
           ></Avatar>
         )}
         <Tooltip

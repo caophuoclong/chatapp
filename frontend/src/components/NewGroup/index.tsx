@@ -29,6 +29,7 @@ import ConversationsApi from '~/services/apis/Conversations.api';
 import readFile from '~/utils/readFile';
 import { IoCamera } from 'react-icons/io5';
 import { SERVER_URL } from '~/configs';
+import { renderAvatar } from '../../utils/renderAvatar';
 
 type Props = {
   height?: string;
@@ -254,7 +255,7 @@ export default function NewGroup({ height }: Props) {
               fri.statusCode.code === 'a' && (
                 <Flex key={index}>
                   <Contact
-                    avatarUrl={`${SERVER_URL}/images/${fri.user.avatarUrl}`}
+                    avatarUrl={fri.user.avatarUrl}
                     name={fri.user.name}
                   />
                   <Checkbox
@@ -298,10 +299,10 @@ export default function NewGroup({ height }: Props) {
                 <Avatar
                   size="md"
                   position={'relative'}
-                  src={`${SERVER_URL}/images/${
+                  src={renderAvatar(
                     friendShip.filter((fri) => fri.user._id === v)[0].user
                       .avatarUrl
-                  }`}
+                  )}
                 >
                   <div
                     style={{

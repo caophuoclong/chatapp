@@ -25,6 +25,7 @@ import { useColorMode } from '@chakra-ui/react';
 import { ENUM_SCREEN, setShowScreen } from '~/app/slices/global.slice';
 import ModalShowInfo from '../Modals/ModalShowInfo';
 import { SERVER_URL } from '~/configs';
+import { renderAvatar } from '../../utils/renderAvatar';
 
 type Props = {};
 
@@ -58,7 +59,7 @@ export default function LeftFunction({}: Props) {
     >
       <Tooltip label={t('Show__info')} placement="right-end">
         <Avatar
-          src={`${SERVER_URL}/images/${user.avatarUrl}`}
+          src={renderAvatar(user.avatarUrl)}
           marginY="1rem"
           cursor={'pointer'}
           onClick={() => {

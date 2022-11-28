@@ -28,7 +28,7 @@ import {
   setShowScreen,
 } from '~/app/slices/global.slice';
 import { ENUM_SCREEN } from '../../../../app/slices/global.slice';
-import { SERVER_URL } from '~/configs';
+import { renderAvatar } from '../../../../utils/renderAvatar';
 
 type Props = {
   user: IUser;
@@ -105,7 +105,7 @@ export default function Friend({ user, isOnline, friendShipId }: Props) {
       role="group"
       onClick={createConversation}
     >
-      <Avatar src={`${SERVER_URL}/images/${user.avatarUrl}`}>
+      <Avatar src={renderAvatar(user.avatarUrl)}>
         <AvatarBadge
           borderColor={isOnline ? 'white' : 'papayawhip'}
           bg={isOnline ? 'green.500' : 'tomato'}

@@ -31,6 +31,7 @@ import {
   setShowScreen,
 } from '~/app/slices/global.slice';
 import { SERVER_URL } from '~/configs';
+import { renderAvatar } from '../../../utils/renderAvatar';
 
 type Props = {
   user: IUser;
@@ -59,19 +60,28 @@ export default function Friend({
   const conversations = useAppSelector(
     (state) => state.conversationsSlice.conversations
   );
-  console.log('🚀 ~ file: index.tsx ~ line 58 ~ conversations', conversations);
+  console.log(conversations);
   const createConversation = (e: React.MouseEvent<HTMLDivElement>) => {
-    ConversationsApi.createConversationByFriendShip(friendShipId).then(
-      (response) => {
-        if (response) {
-          const data = response.data.data as IConversation;
-          dispatch(addConversation(data));
-          dispatch(setChoosenConversationID(data._id));
-          dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
-          socket.emit('joinRoom', data._id);
-        }
-      }
+    // query if in conversation exist friendship
+    const isExist = conversations.find(
+      (con) => con.friendship._id === friendShipId
     );
+    if (isExist) {
+      dispatch(setChoosenConversationID(isExist._id));
+      dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
+    } else {
+      ConversationsApi.createConversationByFriendShip(friendShipId).then(
+        (response) => {
+          if (response) {
+            const data = response.data.data as IConversation;
+            dispatch(addConversation(data));
+            dispatch(setChoosenConversationID(data._id));
+            dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
+            socket.emit('joinRoom', data._id);
+          }
+        }
+      );
+    }
   };
   const onAccept = async () => {
     try {
@@ -141,7 +151,7 @@ export default function Friend({
       onClick={createConversation}
       cursor="pointer"
     >
-      <Avatar src={`${SERVER_URL}/images/${user.avatarUrl}`}>
+      <Avatar src={renderAvatar(user.avatarUrl)}>
         {!isPending && (
           <AvatarBadge
             borderColor={isOnline ? 'white' : 'papayawhip'}

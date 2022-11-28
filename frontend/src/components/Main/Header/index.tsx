@@ -30,6 +30,7 @@ import { SERVER_URL } from '~/configs';
 import GroupHeader from './GroupHeader';
 import DirectHeader from './DirectHeader';
 import HeaderBtn from './HeaderBtn';
+import { renderAvatar } from '~/utils/renderAvatar';
 type Props = {
   name: string;
   avatarUrl: string;
@@ -54,7 +55,7 @@ export const AvatarMemo = React.memo(function AvatarMemo({
         base: 'none',
         lg: 'block',
       }}
-      src={`${SERVER_URL}/images/${src}`}
+      src={renderAvatar(src)}
     >
       <AvatarBadge
         borderColor={isOnline ? 'white' : 'papayawhip'}

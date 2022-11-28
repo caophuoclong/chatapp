@@ -1,6 +1,7 @@
 import { Avatar, Box, Flex } from '@chakra-ui/react';
 import { SERVER_URL } from '~/configs';
 import { IUser } from '~/interfaces/IUser';
+import { renderAvatar } from '../../../utils/renderAvatar';
 type Props1 = {
   children: React.ReactNode[];
   width: string;
@@ -78,9 +79,7 @@ export const AvatarConversation = ({
     | 'full';
 }) => {
   if (avatarUrl) {
-    return (
-      <Avatar size={avatarSize} src={`${SERVER_URL}/images/${avatarUrl}`} />
-    );
+    return <Avatar size={avatarSize} src={renderAvatar(avatarUrl)} />;
   } else {
     return (
       <AvatarGroup width={`${size}px`} height={`${size}px`}>
@@ -90,7 +89,7 @@ export const AvatarConversation = ({
               width={`${size / 2}px`}
               height={`${size / 2}px`}
               key={index}
-              src={`${SERVER_URL}/images/${user.avatarUrl}`}
+              src={renderAvatar(user.avatarUrl)}
             />
           );
         })}

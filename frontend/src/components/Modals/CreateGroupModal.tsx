@@ -33,6 +33,7 @@ import { SERVER_URL } from '~/configs';
 import IFriendShip from '~/interfaces/IFriendShip';
 import ConversationsApi from '~/services/apis/Conversations.api';
 import readFile from '~/utils/readFile';
+import { renderAvatar } from '~/utils/renderAvatar';
 
 type Props = {
   setShow: () => void;
@@ -205,7 +206,7 @@ export default function CreateGroupModal({ setShow }: Props) {
                 fri.statusCode.code === 'a' && (
                   <Flex padding="1rem">
                     <Contact
-                      avatarUrl={`${SERVER_URL}/images/${fri.user.avatarUrl}`}
+                      avatarUrl={fri.user.avatarUrl}
                       name={fri.user.name}
                     />
                     <Checkbox
