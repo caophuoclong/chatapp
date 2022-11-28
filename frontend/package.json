@@ -64,10 +64,10 @@
   },
   "scripts": {
     "start": "cat ./dev.env > .env && react-app-rewired start",
-    "build": "cat ./prod.env > .env && react-app-rewired build",
+    "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
-    "start:build": "serve -s build"
+    "start:build": "pm2 start ecosystem.config.js"
   },
   "eslintConfig": {
     "extends": [
