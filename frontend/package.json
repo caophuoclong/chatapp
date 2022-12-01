@@ -67,7 +67,7 @@
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
-    "start:build": "pm2 serve -s build 4000 -spa -n client"
+    "start:build": "pm2 serve -s build 3000 -spa -n client"
   },
   "eslintConfig": {
     "extends": [
