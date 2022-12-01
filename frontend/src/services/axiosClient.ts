@@ -49,8 +49,7 @@ axiosClient.interceptors.request.use(
     // const isUnSecureUrl = unSecureUrl.some((url) => config.url?.includes(url));
     // if (isUnSecureUrl) return config;
     const { accessToken, expiredTokenTime } = getLocalToken();
-    if(config.headers)
-      config.headers.Authorization = `Bearer ${accessToken}`;
+    if (config.headers) config.headers.Authorization = `Bearer ${accessToken}`;
     // if (!accessToken || !expiredTokenTime) {
     //   throw new Error();
     // }
@@ -61,7 +60,7 @@ axiosClient.interceptors.request.use(
     //     const { access_token, expired_time } = response.data;
     //     setLocalToken(access_token, expired_time);
     //     if (config.headers)
-          // config.headers.Authorization = `Bearer ${access_token}`;
+    // config.headers.Authorization = `Bearer ${access_token}`;
     //     return config;
     //   } catch (error) {
     //     return Promise.reject(error);
@@ -80,19 +79,20 @@ axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const status = error.response.status;
-    switch(status){
+    switch (status) {
       case 401:
         // console.log("refresh token");
         const refreshToken = await AuthApi.refreshToken();
-        const {token, expired_time} = refreshToken.data;
-        setLocalToken(token, expired_time);
-        error.response.config.headers.Authorization = token;
-        return axiosClient(error.response.config)
+        if (refreshToken) {
+          const { token, expired_time } = refreshToken.data;
+          setLocalToken(token, expired_time);
+          error.response.config.headers.Authorization = token;
+          return axiosClient(error.response.config);
+        }
         break;
       default:
-        throw error;    
+        throw error;
     }
-
   }
 );
 export default axiosClient;

@@ -1,6 +1,7 @@
 import { IRegisterRequest } from "~/interfaces/IRegister";
 import axiosClient from "../axiosClient";
 import { ILoginRequest, ILoginResponse } from '~/interfaces/ILogin';
+import { Http2ServerResponse } from "http2";
 
 export default class Auth{
     static async login({username,password}: ILoginRequest){
@@ -20,8 +21,22 @@ export default class Auth{
     static async register(data:Omit<IRegisterRequest, "confirmPassword">){
         return axiosClient.post("/auth/register", data)
     }
-    static refreshToken(){
-        return axiosClient.get("/auth/refresh-token");
+    static async  refreshToken(){
+        try{
+            const response = await axiosClient.get("/auth/refresh-token");
+            return response;
+        }catch(error: any){
+            if(error.response.status === 404){
+                window.localStorage.clear();
+                window.location.href = "/login";
+            }
+            if(error.response.status === 401){
+                alert("Token expired. Please login again");
+                window.localStorage.clear();
+                window.location.href = "/login";
+            }
+        }
+
     }
     static async forgotPassword(email: string, lan: "en" | "vn"){
         console.log(email);

@@ -14,7 +14,6 @@ import Home from './pages/Home';
 import Register from './pages/Register';
 import { SocketContext } from './context/SocketContext';
 
-// import 'moment/locale/'
 import Setting from './components/Settings';
 import Contacts from './components/Contacts/';
 import User from './components/user';
