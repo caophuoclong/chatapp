@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Post, Req, Res, Param, BadRequestException, NotFoundException, ForbiddenException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Req, Res, Param, BadRequestException, NotFoundException, ForbiddenException, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth/auth.service';
 import { LoginUserDto } from './user/dto/login-user.dto';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
@@ -38,8 +38,13 @@ export class AppController {
       throw new NotFoundException("No token found in database");
     }
     if(refrshTokenInDatabase === "A"){
-      const response = await this.authService.generateToken(this.authService.verifyJWT(refreshToken));
-      return response;
+      try{
+
+        const response = await this.authService.generateToken(this.authService.verifyJWT(refreshToken));
+        return response;
+      }catch(error){
+        throw new UnauthorizedException("Token expired")
+      }
     }
     throw new ForbiddenException("User had been blocked")
   }

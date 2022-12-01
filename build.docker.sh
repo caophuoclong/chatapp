@@ -1,4 +1,4 @@
-DOCKER_TAG=1.0.2
+DOCKER_TAG=latest
 options="$@"
 build_backend(){
     docker build -t server ./backend
@@ -68,15 +68,15 @@ else
         if [ "$pushing" = "a" ];then
             echo "Pushing all"
             push_all
-            echo "Build completed"
+            echo "Push completed"
         elif [ "$pushing" = "b" ] ;then
             echo "Pushing backend"
             push_backend
-            echo "Build completed"
+            echo "Push completed"
         elif [ "$pushing" = "f" ] ;then
             echo "Pushing frontend"
             push_frontend
-            echo "Build completed"
+            echo "Push completed"
         else 
             echo "Please use 'a' to push all, 'b' to push backend, 'f' to push frontend"
         fi

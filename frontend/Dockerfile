@@ -3,7 +3,7 @@ FROM node:latest
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN npm i pm2 -g
-RUN yarn install --frozen-lockfile
+RUN yarn install
 COPY . .
 RUN yarn build
 EXPOSE 3000
