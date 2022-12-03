@@ -1,12 +1,11 @@
-import { BeforeInsert, Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 import { User } from "~/user/entities/user.entity";
 
 @Entity()
 export class PasswordResetToken{
-    @PrimaryColumn({
-        type: "uuid"
-    })
-    user: string;
+    @OneToOne(type => User, {onDelete: "CASCADE"})
+    @JoinColumn()
+    user: User;
     @PrimaryColumn({
         nullable: false,
     })

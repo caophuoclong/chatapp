@@ -35,6 +35,11 @@ export default class Auth{
                 window.localStorage.clear();
                 window.location.href = "/login";
             }
+            if(error.response.status === 400){
+                alert("Something wrong!");
+                window.localStorage.clear();
+                window.location.href ="/login";
+            }
         }
 
     }

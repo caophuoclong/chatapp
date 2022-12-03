@@ -19,7 +19,7 @@ interface Conversations {
 // Define the initial state using that type
 const initialState: Conversations = {
     conversations: [],
-    isLoading: false
+    isLoading: true
 }
 
 export const conversationsSlice = createSlice({

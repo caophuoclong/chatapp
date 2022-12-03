@@ -515,7 +515,7 @@ export class UserService {
     const token = this.utils.hashToken();
     const PasswordForgotToken = this.passFogotToken.create({
       token: token,
-      user: user._id,
+      user: user,
     });
     await this.passFogotToken.save(PasswordForgotToken);
     const link = `${process.env.CLIENT_HOST}/set-password?token=${token}&lan=${lan}`;
@@ -541,17 +541,17 @@ export class UserService {
         message: 'Could not reset password. Because token was expired',
       };
     }
-    const userId = tokenResult.user;
+    const User = tokenResult.user;
     const { salt, hashedPassowrd } = await this.utils.hashPassword(newPassword);
     const user = await this.userRepository.findOneBy({
-      _id: userId,
+      _id: User._id,
     });
     user.password = hashedPassowrd;
     user.salt = salt;
     await this.userRepository.save(user);
     const listToken = await this.passFogotToken.find({
       where: {
-        user: userId,
+        user: User,
       },
     });
     await this.passFogotToken.remove(listToken);
