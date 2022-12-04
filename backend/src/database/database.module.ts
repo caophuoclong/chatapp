@@ -12,6 +12,7 @@ import { FriendShip } from '~/friendship/entities/friendship.entity';
 import { Message } from '~/message/entities/message.entity';
 import { UnRead } from '~/unread/entities/unread.entity';
 import { User } from '~/user/entities/user.entity';
+import { Assets } from './entities/assets.entity';
 
 @Module({
     imports: [
@@ -32,11 +33,11 @@ import { User } from '~/user/entities/user.entity';
             Conversation,
             Message,
             UnRead,
-            Attachment,
             PasswordResetToken,
             Confirmation,
             Emoji,
-            Member
+            Member,
+            Assets
           ],
           autoLoadEntities: true,
           synchronize: true,

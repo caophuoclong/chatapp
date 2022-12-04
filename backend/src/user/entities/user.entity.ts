@@ -1,5 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, Table } from "typeorm";
 import { Conversation } from "~/conversation/entities/conversation.entity";
+import { Assets } from "~/database/entities/assets.entity";
 import { Emoji } from "~/database/entities/Emoji";
 import { Member } from "~/database/entities/member.entity";
 import { FriendShip } from "~/friendship/entities/friendship.entity";
@@ -86,4 +87,8 @@ export class User {
         cascade: true
     })
     emoji: Emoji[];
+    @OneToMany(type => Assets, a => a.owner,{
+        cascade: true
+    })
+    assets: Assets[];
 }

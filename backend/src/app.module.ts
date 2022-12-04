@@ -19,7 +19,6 @@ import { FriendShip } from './friendship/entities/friendship.entity';
 import { Conversation } from './conversation/entities/conversation.entity';
 import { Message } from './message/entities/message.entity';
 import { FriendshipModule } from './friendship/friendship.module';
-import { AttachmentModule } from './attachment/attachment.module';
 import { UnRead } from './unread/entities/unread.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './auth/jwt.strategy';
@@ -50,7 +49,6 @@ import { AppGateway } from './app.gateway';
     UserModule,
     MessageModule,
     ConversationModule,
-    AttachmentModule,
     FriendshipModule,
     MessageModule,
     SocketModule,

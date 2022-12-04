@@ -1,6 +1,7 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Attachment } from "~/attachment/entities/attachment.entity";
 import { Conversation } from "~/conversation/entities/conversation.entity";
+import { Assets } from "~/database/entities/assets.entity";
 import { User } from "~/user/entities/user.entity";
 export enum MessageStatusType{
     SENT = "SENT",
@@ -25,8 +26,6 @@ export class Message {
         onDelete: "CASCADE"
     })
     destination: Conversation;
-    @OneToMany(type => Attachment, att => att._id)
-    attachments: Attachment[];
     @OneToOne(type => Message, mes => mes._id)
     parentMessage: Message;
     @Column({
@@ -65,4 +64,9 @@ export class Message {
         default: false
     })
     isRecall: boolean;
+    @ManyToMany(type => Assets)
+    @JoinTable({
+        name: "messageAttachment",
+    })
+    attach: Assets[]
 }

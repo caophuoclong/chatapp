@@ -12,7 +12,7 @@ import { UserModule } from '../user/user.module';
 import { Member } from '~/database/entities/member.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Message, User, Conversation, Attachment ,Member]), ConversationModule, UserModule],
+  imports: [TypeOrmModule.forFeature([Message, User, Conversation ,Member]), ConversationModule, UserModule],
   controllers: [MessageController],
   providers: [MessageService],
   exports: [MessageService]
