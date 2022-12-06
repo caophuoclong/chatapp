@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
@@ -9,6 +9,7 @@ import { Conversation } from '../conversation/entities/conversation.entity';
 import { ConversationService } from '../conversation/conversation.service';
 import { UserService } from '~/user/user.service';
 import { Member } from '~/database/entities/member.entity';
+import { SocketService } from '../socket/socket.service';
 
 
 @Injectable()
@@ -24,11 +25,21 @@ export class MessageService {
     private readonly memberRepository: Repository<Member>,
     private readonly ConversationService: ConversationService,
     private readonly UserService: UserService,
+    private readonly sokcetService: SocketService
   ) {}
-  async create(senderId: string, createMessageDto: CreateMessageDto) {
+  async sendMessage(DTO: CreateMessageDto){
+    const {_id : tempId} = DTO;
+    const {message, updateAt} = await this.create(DTO);
+    console.log(message);
+    return {
+      message,
+      tempId
+    }
+  }
+  async create(createMessageDto: CreateMessageDto) {
     try {
       const message = this.messageRepository.create();
-      message.sender = (await this.UserService.get(senderId)).data;
+      message.sender = createMessageDto.sender;
       message.content = createMessageDto.content;
       message.createdAt = new Date().getTime();
       message.type = createMessageDto.type;
@@ -42,29 +53,25 @@ export class MessageService {
         message.destination = conversation;
         conversation.lastMessage = message;
         conversation.updateAt =  createMessageDto.updateAt;
+        message.createdAt = Date.now();
         const data = await this.messageRepository.save(message);
         await this.conversationRepository.save(conversation);
-        delete data.destination;
+        const destinationId = message.destination._id;
+        const senderId  = message.sender._id;
+        delete message.destination;
         return {
-          statusCode: 200,
-          message: 'Message created successfully',
-          data: data,
+          message: {
+            ...data,
+            destination: destinationId,
+          },
           updateAt: conversation.updateAt
         };
       } else {
-        return {
-          statusCode: 404,
-          message: 'Conversation not found',
-          data: null,
-        };
+        throw new NotFoundException("Could not found conversation")
       }
-
     } catch (error) {
-      return {
-        statusCode: 500,
-        message: error.message,
-        data: null,
-      };
+      console.log(error);
+      throw new InternalServerErrorException("Some thing wrong!")
     }
   }
   async findByConversation(

@@ -34,9 +34,10 @@ export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
   @Post()
-  create(@Body() createMessageDto: CreateMessageDto, @Request() req) {
+  async create(@Body() createMessageDto: CreateMessageDto, @Request() req) {
+    console.log(createMessageDto);
     const { _id } = req.user;
-    return this.messageService.create(_id, createMessageDto);
+    return this.messageService.sendMessage(createMessageDto);
   }
 
   @Get('/conversation/:_id')

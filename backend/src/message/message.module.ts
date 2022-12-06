@@ -10,9 +10,10 @@ import { Conversation } from '~/conversation/entities/conversation.entity';
 import { Attachment } from '../attachment/entities/attachment.entity';
 import { UserModule } from '../user/user.module';
 import { Member } from '~/database/entities/member.entity';
+import { SocketModule } from '../socket/socket.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Message, User, Conversation ,Member]), ConversationModule, UserModule],
+  imports: [TypeOrmModule.forFeature([Message, User, Conversation ,Member]), ConversationModule, UserModule, SocketModule],
   controllers: [MessageController],
   providers: [MessageService],
   exports: [MessageService]
