@@ -11,14 +11,12 @@ export default class MessagesApi{
         });
         return response;
     }
-    static async sendMessage(message: {
-        destination: string,
-        content: string,
-        attachment?: string[],
-        parentMessage: string | null,
+    static async sendMessage(message: IMessage & {
+        updateAt: number
     }){
         const response = await axiosClient.post<{
-            data: IMessage,            
+            message: IMessage,            
+            tempId: string
         }>("/message",message)
         return response;
     }

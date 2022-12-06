@@ -1,14 +1,10 @@
 import { Stack, Switch, Text } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactComponent as US } from '~/assets/icons/US.svg';
 import { ReactComponent as VN } from '~/assets/icons/VN.svg';
-import moment from 'moment';
 import 'moment/locale/vi';
-import { setDefaultLocale } from 'react-datepicker';
-import { registerLocale } from 'react-datepicker';
-import es from 'date-fns/locale/es';
-import vi from 'date-fns/locale/vi';
+
 import { useAppDispatch } from '~/app/hooks';
 import { handleChangeLanguage } from '~/app/slices/global.slice';
 import { useAppSelector } from '../../app/hooks';
@@ -22,7 +18,6 @@ export default function ChangeLanguage({}: Props) {
   useEffect(() => {
     i18n.changeLanguage(lan);
     window.localStorage.setItem('lan', lan);
-    moment.locale(lan === 'vn' ? 'vi' : 'es');
   }, [lan]);
   return (
     <Stack direction={'row'} zIndex={1000}>

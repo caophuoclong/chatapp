@@ -17,10 +17,10 @@ export enum MessageType{
 export interface IMessage{
     _id: string,
     sender:IUser,
-    content: string,
-    createdAt: number,   
+    content?: string,
+    createdAt?: number,   
     isDeleted?: boolean,
-    attachments: any,
+    attachments?: any,
     parentMessage: null | IMessage,
     status: MessageStatusType,
     destination: string,

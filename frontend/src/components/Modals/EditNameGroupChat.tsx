@@ -51,8 +51,14 @@ export default function EditNameGroupChat({
       const { data } = res;
       if (data.statusCode === 200) {
         if (conversation) {
-          const tempConverstaion = { ...conversation, name: groupName };
-          dispatch(updateConversation(tempConverstaion));
+          dispatch(
+            updateConversation({
+              conversationId: conversation._id,
+              conversation: {
+                name: groupName,
+              },
+            })
+          );
         }
         toast({
           title: t('Success'),

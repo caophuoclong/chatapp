@@ -39,7 +39,9 @@ import MessagesApi from '../../../services/apis/Messages.api';
 import {
   addMessage,
   removeMessage,
+  sendMessageThunk,
   updateMessageScale,
+  updateSentMessage,
 } from '~/app/slices/messages.slice';
 import {
   IMessage,
@@ -68,8 +70,9 @@ import { useTranslation } from 'react-i18next';
 import { FiMoreHorizontal } from 'react-icons/fi';
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
 import { MdLibraryAdd } from 'react-icons/md';
-const TIME_SCALE = 1500;
-const EMOJI_SCALE_EVERY = 100;
+import { unwrapResult } from '@reduxjs/toolkit';
+import { EMOJI_SCALE_EVERY, TIME_SCALE } from '~/configs';
+
 type Props = {
   conversation: IConversation;
 };
@@ -121,39 +124,61 @@ export default function InputBox({ conversation }: Props) {
   const messages = useAppSelector((state) => state.messageSlice.messages)[
     choosenConversationId
   ];
-  const socket = useAppSelector((state) => state.globalSlice.socket);
+  const createRawMessage = (
+    type: MessageType,
+    content: string,
+    createdAt?: number
+  ) => {
+    const message: IMessage = {
+      _id: (Date.now() + randomInt(0, 9999)).toString(),
+      destination: choosenConversationId,
+      parentMessage: null,
+      status: MessageStatusType.SENDING,
+      sender: user,
+      content,
+      type: type,
+      isRecall: false,
+      createdAt: createdAt || Date.now(),
+    };
+    return message;
+  };
+  // const conversations = useAppSelector(state=> state.conversationsSlice.conversations);
+  // const conversation = conversations.find((c) => c._id === choosenConversationId);
   const emojiStyle = useAppSelector((state) => state.globalSlice.emojiStyle);
   const sendMessage = async () => {
     const message: IMessage = {
       _id: (Date.now() + randomInt(0, 9999)).toString(),
       destination: choosenConversationId,
       content: content,
-      attachments: [],
       parentMessage: null,
       status: MessageStatusType.SENDING,
-      createdAt: Date.now(),
       sender: user,
       type: MessageType.TEXT,
       isRecall: false,
+      createdAt: Date.now(),
     };
     try {
-      dispatch(
-        addMessage({ message: message, conversationId: choosenConversationId })
-      );
       const updateAt = new Date().getTime();
+      const unwrap = await dispatch(sendMessageThunk({ message, updateAt }));
+      const result = unwrapResult(unwrap);
+      const { message: message1, tempId } = result;
+      dispatch(
+        updateSentMessage({
+          tempId: tempId,
+          message: message1,
+          lastMessage: conversation.lastMessage,
+        })
+      );
       if (conversation)
         dispatch(
           updateConversation({
-            ...conversation,
-            lastMessage: message,
-            updateAt,
+            conversationId: conversation._id,
+            conversation: {
+              lastMessage: message1,
+              updateAt,
+            },
           })
         );
-      socket?.emit('createMessage', {
-        ...message,
-        updateAt,
-      });
-
       setContent('');
     } catch (error) {
       console.log(error);
@@ -215,33 +240,28 @@ export default function InputBox({ conversation }: Props) {
           }
         }, EMOJI_SCALE_EVERY);
       }
-
       if (
         emojiState &&
         emojiState.state === 'up' &&
         emojiState.time < TIME_SCALE
       ) {
         const { messageId } = emojiState;
-        const message = messages.data.find(
-          (message) => message._id === messageId
-        );
-        console.log(
-          '🚀 ~ file: index.tsx ~ line 204 ~ useEffect ~ message',
-          message
+        let message: IMessage | undefined = undefined;
+        messages.data.forEach((group) =>
+          group.forEach((m) => m._id === messageId && (message = m))
         );
         const updateAt = new Date().getTime();
         if (conversation && message) {
           dispatch(
             updateConversation({
-              ...conversation,
-              lastMessage: message!,
-              updateAt,
+              conversationId: conversation._id,
+              conversation: {
+                lastMessage: message!,
+                updateAt,
+              },
             })
           );
-          socket?.emit('createMessage', {
-            ...message,
-            updateAt,
-          });
+          dispatch(sendMessageThunk({ message, updateAt }));
           emojiDispatch(setDefault());
           clearInterval(interval);
         }
@@ -261,7 +281,10 @@ export default function InputBox({ conversation }: Props) {
   }, [emojiState.state, emojiState.time]);
   useEffect(() => {
     if (messages) {
-      const message = messages.data.find((m) => m._id === emojiState.messageId);
+      let message: IMessage | undefined = undefined;
+      messages.data.forEach((group) =>
+        group.forEach((m) => m._id === emojiState.messageId && (message = m))
+      );
       if (message && emojiState.state === 'down') {
         dispatch(
           updateMessageScale({
@@ -272,9 +295,22 @@ export default function InputBox({ conversation }: Props) {
       }
     }
   }, [emojiState.time]);
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.altKey) {
+      setAltPress(true);
+    }
+    if (event.key === 'Enter') {
+      setEnterPress(true);
+      event.preventDefault();
+    }
+  };
+  const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    setAltPress(false);
+    setEnterPress(false);
+  };
   useEffect(() => {
     if (altPress && enterPress) {
-      setContent(content + '<div><br></div>');
+      setContent((prev) => prev + '<div><br></div>');
     }
   }, [altPress, enterPress]);
   useEffect(() => {
@@ -287,28 +323,32 @@ export default function InputBox({ conversation }: Props) {
       }
     }
   }, [content, enterPress]);
-  const uploadImageRef = useRef<HTMLInputElement>(null);
-  const [images, setImages] = useState<File[] | null>(null);
   const [previewImages, setPreviewImages] = useState<
     Array<{
       name: string;
       url: string;
     }>
   >([]);
-  useEffect(() => {
-    if (images) {
-      const previewImage = images.map((image) => {
-        return {
-          name: image.name,
-          url: URL.createObjectURL(image),
-        };
-      });
-      setPreviewImages(previewImage);
+  const handleUploadImages = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { files } = event.target;
+    const filesUrl = [];
+    for (let i = 0; i < files!.length || 0; i++) {
+      const url = window.URL.createObjectURL(files![i]);
+      filesUrl.push(url);
     }
-  }, [images]);
-  useEffect(() => {
-    console.log(previewImages);
-  }, [previewImages]);
+    const createdAt = Date.now();
+    const messages = filesUrl.map((url) =>
+      createRawMessage(MessageType.IMAGE, url, createdAt)
+    );
+    messages.forEach((message) => {
+      dispatch(
+        addMessage({
+          message,
+          conversationId: choosenConversationId,
+        })
+      );
+    });
+  };
   const toast = useToast();
   return (
     <Box
@@ -346,23 +386,12 @@ export default function InputBox({ conversation }: Props) {
           <IconButton
             bg="none"
             justifyContent={'center'}
-            onClick={() => {
-              toast({
-                title: t('Info'),
-                description: t('Feat__Developing'),
-                status: 'info',
-                position: isLargerThanHD ? 'top-right' : 'bottom',
-                duration: 1000,
-              });
-              // const input = uploadImageRef.current;
-              // if (input) {
-              //   input.click();
-              // }
-            }}
+            as="label"
+            cursor={'pointer'}
+            htmlFor="imagesupload"
             aria-label="Photo"
             icon={<HiPhotograph fontSize={'24px'} />}
           />
-
           <IconButton
             bg="none"
             justifyContent={'center'}
@@ -372,82 +401,14 @@ export default function InputBox({ conversation }: Props) {
         </Flex>
       )}
       <input
+        id="imagesupload"
         accept="image/png, image/jpeg, image/jpg"
         multiple
-        ref={uploadImageRef}
         type="file"
         hidden
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          const files = e.target.files;
-          if (files && images && images.length > 0) {
-            setImages([...images, ...Array.from(files)]);
-          } else if (files) {
-            setImages(Array.from(files));
-          }
-        }}
+        onChange={handleUploadImages}
       />
-      {previewImages.length > 0 && (
-        <Flex gap="1rem" padding="1rem">
-          <IconButton
-            onClick={() => {
-              console.log(123131);
-              toast({
-                title: t('Info'),
-                description: t('Feat__Developing'),
-                status: 'info',
-                position: isLargerThanHD ? 'top-right' : 'bottom',
-                duration: 1000,
-              });
 
-              // const input = uploadImageRef.current;
-              // console.log(input);
-              // if (input) {
-              //   input.click();
-              // }
-            }}
-            size="lg"
-            aria-label="add images"
-            padding=".5rem"
-            icon={<MdLibraryAdd size="lg" />}
-          />
-          <Flex
-            width="calc(100% - 48px)"
-            margin="auto"
-            overflow="auto"
-            gap="1rem"
-            flex="1"
-            flexWrap={'nowrap'}
-            justifyContent="flex-start"
-          >
-            {previewImages.map((image) => (
-              <Box rounded="lg" position={'relative'} minWidth="48px">
-                <IconButton
-                  size="xs"
-                  aria-label="remove image"
-                  position="absolute"
-                  right="0"
-                  margin="-.5rem"
-                  bg="black"
-                  rounded="full"
-                  variant={'solid'}
-                  icon={<FaTimes fill="gray" />}
-                  onClick={() => {
-                    setImages(
-                      images?.filter((i) => i.name !== image.name) || []
-                    );
-                  }}
-                />
-                <Image
-                  src={image.url}
-                  width="48px"
-                  height="48px"
-                  rounded="lg"
-                />
-              </Box>
-            ))}
-          </Flex>
-        </Flex>
-      )}
       <Flex
         gap="5px"
         paddingY=".5rem"
@@ -470,7 +431,7 @@ export default function InputBox({ conversation }: Props) {
             <ContentEditable
               className="content__editable"
               html={content}
-              placeholder={lan === 'en' ? 'Type a message' : 'Nhập tin nhắn'}
+              placeholder={t('Type__Message')}
               style={{
                 width: '100%',
                 outline: 'none',
@@ -483,45 +444,10 @@ export default function InputBox({ conversation }: Props) {
               onChange={(e: ContentEditableEvent) => {
                 setContent(e.target.value);
               }}
-              onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-                if (e.code === 'Enter') {
-                  setEnterPress(true);
-                  e.preventDefault();
-                }
-                if (e.code === 'AltLeft') {
-                  setAltPress(true);
-                }
-              }}
-              onKeyUp={(e: React.KeyboardEvent<HTMLDivElement>) => {
-                if (e.code === 'AltLeft') {
-                  setAltPress(false);
-                }
-                if (e.code === 'Enter') {
-                  setEnterPress(false);
-                }
-              }}
+              onKeyDown={handleKeyDown}
+              onKeyUp={handleKeyUp}
             />
           ) : (
-            // <Input
-            //   variant={'unstyled'}
-            //   value={content}
-            //   placeholder="Flushed"
-            //   size="md"
-            //   width="100%"
-            //   height="100%"
-            //   paddingX={{
-            //     base: '0rem',
-            //     lg: '1rem',
-            //   }}
-            //   onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-            //     if (e.key === 'Enter') {
-            //       sendMessage();
-            //     }
-            //   }}
-            //   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-            //     setContent(event.target.value);
-            //   }}
-            // />
             <></>
           )}
         </Flex>
@@ -575,7 +501,7 @@ export default function InputBox({ conversation }: Props) {
               />
             </>
           )
-        ) : content || (images && images.length > 0) ? (
+        ) : content ? (
           <IconButton
             alignSelf={'flex-end'}
             onClick={sendMessage}

@@ -62,12 +62,18 @@ export const conversationsSlice = createSlice({
             conversation.lastMessage = action.payload.message;
         }
     },
-    updateConversation: (state: Conversations, action:PayloadAction<IConversation>)=>{
+    updateConversation: (state: Conversations, action:PayloadAction<{
+        conversationId: string,
+        conversation: Partial<IConversation>
+    }>)=>{
         const index = state.conversations.findIndex(conversation=>{
-            return conversation._id === action.payload._id;
+            return conversation._id === action.payload.conversationId;
         })
         if(index !== -1){
-            state.conversations[index] = action.payload;
+            state.conversations[index] = {
+                ...state.conversations[index],
+                ...action.payload.conversation
+            };
         }
     },
     updateEmoji: (state: Conversations, action:PayloadAction<{_id: string, emoji:IEmoji}>)=>{

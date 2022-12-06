@@ -136,44 +136,44 @@ export default function Home({}: Props) {
         dispatch(setChoosenConversationID(data._id));
         dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
       });
-      socket.on(
-        'sentMessageSuccess',
-        (data: {
-          tempId: string;
-          conversationId: string;
-          message: IMessage;
-        }) => {
-          const { conversationId, tempId, message } = data;
-          dispatch(
-            updateLastestMessage({
-              message: message,
-              conversationId,
-            })
-          );
-          dispatch(
-            updateSentMessage({
-              conversationId,
-              tempId,
-              value: {
-                _id: message._id,
-                status: message.status,
-              },
-            })
-          );
-        }
-      );
-      socket.on(
-        'receivedMessage',
-        (data: { conversationId: string; messageId: string }) => {
-          const { conversationId, messageId } = data;
-          dispatch(
-            updateReceivedMessage({
-              conversationId,
-              messageId,
-            })
-          );
-        }
-      );
+      // socket.on(
+      //   'sentMessageSuccess',
+      //   (data: {
+      //     tempId: string;
+      //     conversationId: string;
+      //     message: IMessage;
+      //   }) => {
+      //     const { conversationId, tempId, message } = data;
+      //     dispatch(
+      //       updateLastestMessage({
+      //         message: message,
+      //         conversationId,
+      //       })
+      //     );
+      //     dispatch(
+      //       updateSentMessage({
+      //         conversationId,
+      //         tempId,
+      //         value: {
+      //           _id: message._id,
+      //           status: message.status,
+      //         },
+      //       })
+      //     );
+      //   }
+      // );
+      // socket.on(
+      //   'receivedMessage',
+      //   (data: { conversationId: string; messageId: string }) => {
+      //     const { conversationId, messageId } = data;
+      //     dispatch(
+      //       updateReceivedMessage({
+      //         conversationId,
+      //         messageId,
+      //       })
+      //     );
+      //   }
+      // );
       socket.on('createConversationSuccess', (data: IConversation) => {
         console.log(data);
         socket.emit('joinRoom', data._id);

@@ -148,6 +148,9 @@ const resources = {
       "Reply": "Reply",
       "Recall__Message": "Recall message",
       "This__Message__HasBeen__Recalled": "This message has been recalled",
+      "Type__Message": "Type a message...",
+      "Today": "Today",
+      "Yesterday": "Yesterday",
     }
   },
   vn: {
@@ -291,6 +294,9 @@ const resources = {
       "Reply": "Trả lời",
       "Recall__Message": "Thu hồi tin nhắn",
      "This__Message__HasBeen__Recalled": "Tin nhắn này đã được thu hồi",
+     "Type__Message" : "Nhập tin nhắn...",
+     "Today": "Hôm nay",
+      "Yesterday": "Hôm qua",
     }
   }
 };
@@ -299,10 +305,7 @@ i18n
   .use(initReactI18next) // passes i18n down to react-i18next
   .init({
     resources,
-    lng: "en", // language to use, more information here: https://www.i18next.com/overview/configuration-options#languages-namespaces-resources
-    // you can use the i18n.changeLanguage function to change the language manually: https://www.i18next.com/overview/api#changelanguage
-    // if you're using a language detector, do not define the lng option
-
+    lng: "en", 
     interpolation: {
       escapeValue: false // react already safes from xss
     }

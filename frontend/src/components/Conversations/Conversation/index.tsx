@@ -30,14 +30,8 @@ import { Emoji } from 'emoji-picker-react';
 import DropDownMenu from './DropdownMenu';
 import { useTranslation } from 'react-i18next';
 import { renderAvatar } from '~/utils/renderAvatar';
+import { IMessage } from '../../../interfaces/IMessage';
 
-// export const renderDirectConversation = (participants: IUser[]) => {
-//   const myId = useAppSelector((state) => state.userSlice.info._id);
-//   return {
-//     avatarUrl: participants.filter((item) => item._id !== myId)[0].avatarUrl,
-//     name: participants.filter((item) => item._id !== myId)[0].name,
-//   };
-// };
 export const RenderDirectConversationName = ({
   participants,
 }: {
@@ -83,21 +77,23 @@ export default function Conversation({
   );
   const { t } = useTranslation();
   const showContentRef = useRef<any>();
+  const messages = useAppSelector((state) => state.messageSlice.messages);
+  const messagesInConversation = messages[_id];
+  const [latestMessage, setLatestMessage] = useState<IMessage>();
   useEffect(() => {
-    const { current } = showContentRef;
-    if (current) {
-      if (lastMessage.isRecall) {
-        current.innerHTML = t('This__Message__HasBeen__Recalled');
-      } else {
-        if (lastMessage.type === MessageType.TEXT) {
-          current.innerHTML = lastMessage.content;
-        }
-      }
+    if (messagesInConversation) {
+      const messageGroups = messagesInConversation.data;
+      messageGroups.forEach((group) =>
+        group.forEach((message) => {
+          if (message._id === lastMessage._id) {
+            setLatestMessage(message);
+          }
+        })
+      );
     }
-  }, [showContentRef, lastMessage]);
+  }, [lastMessage, messages]);
   const handleOnRightClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
-    // console.log(event);
     if (event.button === 2) {
       setOpenDropdown(true);
     } else {
@@ -167,23 +163,33 @@ export default function Conversation({
             <RenderDirectConversationName participants={participants} />
           )}
         </Text>
-        {lastMessage ? (
-          <Flex>
-            <Flex fontSize="sm" color="gray.500" width={'80%'}>
-              {lastMessage.type === MessageType.EMOJI ? (
-                <Emoji unified={lastMessage.content} size={20} />
-              ) : (
-                <Text ref={showContentRef} noOfLines={1}></Text>
-              )}{' '}
-              <Text marginLeft="auto" fontWeight={'bold'}>
-                {' '}
-                ·{' '}
+        {latestMessage ? (
+          latestMessage.isRecall ? (
+            <Text color="gray.500" size="sm">
+              {t('This__Message__HasBeen__Recalled')}
+            </Text>
+          ) : (
+            <Flex>
+              <Flex fontSize="sm" color="gray.500" width={'80%'}>
+                {latestMessage.type === MessageType.EMOJI ? (
+                  <Emoji unified={latestMessage.content || ''} size={20} />
+                ) : (
+                  <Text ref={showContentRef} noOfLines={1}>
+                    {latestMessage.content}
+                  </Text>
+                )}{' '}
+                <Text marginLeft="auto" fontWeight={'bold'}>
+                  {' '}
+                  ·{' '}
+                </Text>
+              </Flex>
+              <Text fontSize="sm" noOfLines={1} color="gray.500">
+                {moment(new Date(+latestMessage.createdAt! || 0)).format(
+                  'HH:mm'
+                )}
               </Text>
             </Flex>
-            <Text fontSize="sm" noOfLines={1} color="gray.500">
-              {moment(new Date(+lastMessage.createdAt || 0)).format('HH:mm')}
-            </Text>
-          </Flex>
+          )
         ) : (
           <Flex>
             <Text fontSize="sm" noOfLines={1} color="gray.500" width="80%">

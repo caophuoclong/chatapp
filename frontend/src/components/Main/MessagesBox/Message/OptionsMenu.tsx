@@ -6,13 +6,15 @@ import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import { recallMessage } from '~/app/slices/messages.slice';
+import { updateConversation } from '~/app/slices/conversations.slice';
 
 type Props = {
   messageId: string;
-  time: string;
+  time: number;
+  isRecall: boolean;
 };
 
-export default function OptionsMenu({ messageId, time }: Props) {
+export default function OptionsMenu({ messageId, time, isRecall }: Props) {
   const { t } = useTranslation();
   const socket = useAppSelector((state) => state.globalSlice.socket);
 
@@ -28,14 +30,22 @@ export default function OptionsMenu({ messageId, time }: Props) {
         messageId: messageId,
       })
     );
+    const updateAt = Date.now();
+
+    dispatch(
+      updateConversation({
+        conversationId,
+        conversation: {
+          updateAt,
+        },
+      })
+    );
     socket.emit('recallMessage', { conversationId, messageId });
   };
   return (
     <Flex
       bg="gray.300"
       display={'none'}
-      marginTop="-1rem"
-      marginRight="1rem"
       height="30"
       rounded={'xl'}
       alignItems="center"
@@ -56,7 +66,7 @@ export default function OptionsMenu({ messageId, time }: Props) {
         icon={<BsReplyFill size="24px" />}
         title={t('Reply')}
       />
-      {distance <= 3600000 && (
+      {distance <= 3600000 && !isRecall && (
         <IconButton
           onClick={onRecallClick}
           variant="none"

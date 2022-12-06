@@ -1,6 +1,6 @@
-import { CACHE_MANAGER, Inject, UseFilters, UseGuards } from '@nestjs/common';
-import { ConnectedSocket, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Inject, UseFilters, UseGuards } from '@nestjs/common';
+import { SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
+import { Server } from 'socket.io';
 import WsGuards from '../auth/ws-auth.guard';
 import { MessageService } from '../message/message.service';
 import { UserService } from '../user/user.service';
@@ -8,7 +8,6 @@ import { ConversationService } from '../conversation/conversation.service';
 import { CreateMessageDto } from '../message/dto/create-message.dto';
 import CustomSocket from '../interfaces/CustomInterface';
 import { Message, MessageStatusType } from '../message/entities/message.entity';
-import  {Cache}  from 'cache-manager';
 import { RedisClientType } from 'redis';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Member } from '../database/entities/member.entity';
