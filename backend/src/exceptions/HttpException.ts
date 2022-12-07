@@ -10,13 +10,13 @@ export class CatchHttpException implements ExceptionFilter{
         // console.log("test", exception);
         switch(status){
             case 401:
-                response.status(401).json({
+                return response.status(401).json({
                     path: request.url,
                     message: "Token is invalid, please refresh token"
                 })
                 break;
             default:
-                response.status(status).json({
+                return response.status(status).json({
                     path: request.url,
                     message: exception.message
                 })

@@ -101,7 +101,7 @@ export class UserService {
         user.salt,
         user.password,
       );
-
+        console.log(verified);
       if (!verified) {
         throw new HttpException('Password does not match', HttpStatus.FORBIDDEN);
       }
@@ -513,6 +513,11 @@ export class UserService {
       throw new HttpException('User not found', 404);
     }
     const token = this.utils.hashToken();
+    // remove row with same user
+    await this.passFogotToken.delete({
+      user: user,
+    });
+
     const PasswordForgotToken = this.passFogotToken.create({
       token: token,
       user: user,
@@ -526,9 +531,12 @@ export class UserService {
     };
   }
   async resetPassword(token: string, newPassword: string) {
-    const tokenResult = await this.passFogotToken.findOneBy({
-      token: token,
-    });
+    const tokenResult = await this.passFogotToken.findOne({
+      where: {
+        token: token,
+      },
+      relations: ['user'],
+    })
     if (!tokenResult)
       return {
         statusCode: 400,
@@ -541,6 +549,7 @@ export class UserService {
         message: 'Could not reset password. Because token was expired',
       };
     }
+    console.log(tokenResult);
     const User = tokenResult.user;
     const { salt, hashedPassowrd } = await this.utils.hashPassword(newPassword);
     const user = await this.userRepository.findOneBy({
