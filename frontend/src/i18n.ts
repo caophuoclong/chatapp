@@ -151,6 +151,13 @@ const resources = {
       "Type__Message": "Type a message...",
       "Today": "Today",
       "Yesterday": "Yesterday",
+      "SENT": "Sent",
+      "RECEIVED": "Received",
+      "SEEN": "Seen",
+      "RECALL": "Recall",
+      "SENDING": "Sending",
+      "SEND__FAIL": "Send fail",
+      "You": "You"
     }
   },
   vn: {
@@ -297,6 +304,13 @@ const resources = {
      "Type__Message" : "Nhập tin nhắn...",
      "Today": "Hôm nay",
       "Yesterday": "Hôm qua",
+      "SENT": "Đã gửi",
+      "RECEIVED": "Đã nhận",
+      "RECALL": "Thu hồi",
+      "SENDING": "Đang gửi",
+      "SEEN": "Đã xem",
+      "SEND__FAIL": "Gửi lỗi",
+      "You": "Bạn",
     }
   }
 };

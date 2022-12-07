@@ -59,9 +59,7 @@ export default function Login({}: Props) {
   const onSubmit = async (data: ILoginRequest) => {
     try {
       const res = await dispatch(login(data));
-
       const response = unwrapResult(res);
-      console.log(response);
       window.localStorage.setItem('access_token', response.data.token);
       window.localStorage.setItem('expiredTime', response.data.expired_time);
       if (response.data.token) {
@@ -78,7 +76,8 @@ export default function Login({}: Props) {
         },
       });
     } catch (error: any) {
-      if (error.message === 'NotActive') {
+      console.log(error);
+      if (error.message === 'INACTIVE') {
         setShowNotActive(true);
       } else {
         toast({

@@ -15,6 +15,7 @@ import {
   useColorMode,
   useMediaQuery,
 } from '@chakra-ui/react';
+import { ImFilePicture } from 'react-icons/im';
 import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import IConversation from '@interfaces/IConversation';
@@ -76,7 +77,7 @@ export default function Conversation({
     (state) => state.globalSlice.conversation.choosenConversationID
   );
   const { t } = useTranslation();
-  const showContentRef = useRef<any>();
+  const myId = useAppSelector((state) => state.userSlice.info._id);
   const messages = useAppSelector((state) => state.messageSlice.messages);
   const messagesInConversation = messages[_id];
   const [latestMessage, setLatestMessage] = useState<IMessage>();
@@ -170,19 +171,42 @@ export default function Conversation({
             </Text>
           ) : (
             <Flex>
-              <Flex fontSize="sm" color="gray.500" width={'80%'}>
-                {latestMessage.type === MessageType.EMOJI ? (
-                  <Emoji unified={latestMessage.content || ''} size={20} />
-                ) : (
-                  <Text ref={showContentRef} noOfLines={1}>
-                    {latestMessage.content}
+              {latestMessage.sender._id === myId ? (
+                <Flex fontSize="sm" color="gray.500" width={'80%'}>
+                  <Text>{t('You')}:&nbsp;</Text>
+                  {latestMessage.type === MessageType.EMOJI ? (
+                    <Emoji unified={latestMessage.content || ''} size={20} />
+                  ) : latestMessage.type === MessageType.IMAGE ? (
+                    <Flex gap="2" alignItems={'center'}>
+                      <ImFilePicture fontSize="xs" />
+                      <Text>{t('Picture')}</Text>
+                    </Flex>
+                  ) : (
+                    <Text noOfLines={1}>{latestMessage.content}</Text>
+                  )}{' '}
+                  <Text marginLeft="auto" fontWeight={'bold'}>
+                    {' '}
+                    ·{' '}
                   </Text>
-                )}{' '}
-                <Text marginLeft="auto" fontWeight={'bold'}>
-                  {' '}
-                  ·{' '}
-                </Text>
-              </Flex>
+                </Flex>
+              ) : (
+                <Flex fontSize="sm" color="gray.500" width={'80%'}>
+                  {latestMessage.type === MessageType.EMOJI ? (
+                    <Emoji unified={latestMessage.content || ''} size={20} />
+                  ) : latestMessage.type === MessageType.IMAGE ? (
+                    <Flex gap="2" alignItems={'center'}>
+                      <ImFilePicture fontSize="xs" />
+                      <Text>{t('Picture')}</Text>
+                    </Flex>
+                  ) : (
+                    <Text noOfLines={1}>{latestMessage.content}</Text>
+                  )}{' '}
+                  <Text marginLeft="auto" fontWeight={'bold'}>
+                    {' '}
+                    ·{' '}
+                  </Text>
+                </Flex>
+              )}
               <Text fontSize="sm" noOfLines={1} color="gray.500">
                 {moment(new Date(+latestMessage.createdAt! || 0)).format(
                   'HH:mm'

@@ -12,10 +12,7 @@ export default class Auth{
             })
             return response;
         }catch(error: any){
-            if(error.response.data.statusCode === 403 && error.response.data.message === "User not active"){
-                throw new Error("NotActive")
-            }
-            throw error;
+            throw new Error(error.response.data.message)
         }
     }
     static async register(data:Omit<IRegisterRequest, "confirmPassword">){

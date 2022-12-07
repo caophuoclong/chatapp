@@ -23,6 +23,7 @@ type Props = {
   isRecall: boolean;
   isLast: boolean;
   sender: IUser;
+  status?: MessageStatusType;
 };
 const square = '16px';
 
@@ -105,6 +106,18 @@ function ShowStatus(
       );
   }
 }
+export function showStatus(status: MessageStatusType) {
+  switch (status) {
+    case MessageStatusType.SENT:
+      return 'SENT';
+    case MessageStatusType.RECEIVED:
+      return 'RECEIVED';
+    case MessageStatusType.SEEN:
+      return 'SEEN';
+    default:
+      return 'SENDING';
+  }
+}
 
 export default function Message({
   isRecall,
@@ -115,8 +128,8 @@ export default function Message({
   _id,
   time,
   sender,
+  status,
 }: Props) {
-  console.log(sender);
   const [showOptionsMenu, setShowOptionsMenu] = React.useState(false);
   // on mouse down
   const handleMouseOver = (e: MouseEvent<HTMLDivElement>) => {
@@ -145,7 +158,12 @@ export default function Message({
         marginLeft={other ? '1rem' : 'none'}
       >
         {showOptionsMenu && (
-          <OptionsMenu messageId={_id} time={time} isRecall={isRecall} />
+          <OptionsMenu
+            messageId={_id}
+            time={time}
+            isRecall={isRecall}
+            other={other}
+          />
         )}
       </Box>
       <Box
@@ -175,13 +193,22 @@ export default function Message({
       >
         {isRecall ? t('This__Message__HasBeen__Recalled') : content}
         {isLast && (
-          <Text
-            color="gray.400"
-            textAlign={other ? 'right' : 'left'}
-            fontSize="xs"
-          >
-            {moment(+time).format('HH:mm')}
-          </Text>
+          <Flex gap="1rem">
+            <Text
+              color="gray.400"
+              textAlign={other ? 'right' : 'left'}
+              fontSize="xs"
+            >
+              {moment(+time).format('HH:mm')}
+            </Text>
+            {!other && status ? (
+              <Text color="gray.400" marginLeft={'auto'} fontSize="xs">
+                {t(showStatus(status))}
+              </Text>
+            ) : (
+              <></>
+            )}
+          </Flex>
         )}
       </Box>
       {isLast && (

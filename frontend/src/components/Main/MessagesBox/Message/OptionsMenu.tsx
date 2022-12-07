@@ -12,9 +12,15 @@ type Props = {
   messageId: string;
   time: number;
   isRecall: boolean;
+  other?: boolean;
 };
 
-export default function OptionsMenu({ messageId, time, isRecall }: Props) {
+export default function OptionsMenu({
+  messageId,
+  time,
+  isRecall,
+  other,
+}: Props) {
   const { t } = useTranslation();
   const socket = useAppSelector((state) => state.globalSlice.socket);
 
@@ -66,7 +72,7 @@ export default function OptionsMenu({ messageId, time, isRecall }: Props) {
         icon={<BsReplyFill size="24px" />}
         title={t('Reply')}
       />
-      {distance <= 3600000 && !isRecall && (
+      {distance <= 3600000 && !isRecall && !other && (
         <IconButton
           onClick={onRecallClick}
           variant="none"

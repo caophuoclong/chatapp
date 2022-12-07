@@ -55,12 +55,14 @@ import {
 } from '~/app/slices/conversations.slice';
 import IConversation from '~/interfaces/IConversation';
 import {
+  clearEmojiInterval,
   EmojiAction,
   EmojiReducer,
   IinitialEmojiState,
   initialEmojiState,
   setDefault,
   setEmojiContent,
+  setEmojiInterval,
   setMessageId,
   setState,
   setTime,
@@ -72,7 +74,7 @@ import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
 import { MdLibraryAdd } from 'react-icons/md';
 import { unwrapResult } from '@reduxjs/toolkit';
 import { EMOJI_SCALE_EVERY, TIME_SCALE } from '~/configs';
-
+import { useCountUp } from 'react-countup';
 type Props = {
   conversation: IConversation;
 };
@@ -93,6 +95,8 @@ function useOutside<T extends HTMLElement>(
   }, [ref]);
 }
 export default function InputBox({ conversation }: Props) {
+  const [countUp, setCountUp] = useState(0);
+  const countUpRef = React.useRef(null);
   const { t } = useTranslation();
   const isLargerThanHD = useAppSelector(
     (state) => state.globalSlice.isLargerThanHD
@@ -105,16 +109,18 @@ export default function InputBox({ conversation }: Props) {
   const [emojiState, emojiDispatch] = useReducer<
     Reducer<IinitialEmojiState, EmojiAction>
   >(EmojiReducer, initialEmojiState);
+  useEffect(() => {
+    if (emojiState.state === 'down') {
+      emojiDispatch(setTime(countUp));
+    }
+  }, [countUp, emojiState.state]);
   const isDark = useColorMode();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.userSlice.info);
   const choosenConversationId = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
-  const lan = useAppSelector((state) => state.globalSlice.lan);
-  const contentRef = useRef<any>('');
   const onPickerClick = (emoji: EmojiClickData, event: MouseEvent) => {
-    console.log(emoji);
     setContent(content + emoji.emoji);
   };
   const pickerRef = useRef<HTMLDivElement>(null);
@@ -142,10 +148,38 @@ export default function InputBox({ conversation }: Props) {
     };
     return message;
   };
-  // const conversations = useAppSelector(state=> state.conversationsSlice.conversations);
-  // const conversation = conversations.find((c) => c._id === choosenConversationId);
+  const sendMessage = (message: IMessage) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const updateAt = new Date().getTime();
+        const unwrap = await dispatch(sendMessageThunk({ message, updateAt }));
+        const result = unwrapResult(unwrap);
+        const { message: message1, tempId } = result;
+        dispatch(
+          updateSentMessage({
+            tempId: tempId,
+            message: message1,
+            lastMessage: conversation.lastMessage,
+          })
+        );
+        if (conversation)
+          dispatch(
+            updateConversation({
+              conversationId: conversation._id,
+              conversation: {
+                lastMessage: message1,
+                updateAt,
+              },
+            })
+          );
+        resolve('success');
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
   const emojiStyle = useAppSelector((state) => state.globalSlice.emojiStyle);
-  const sendMessage = async () => {
+  const handleSendMessage = async () => {
     const message: IMessage = {
       _id: (Date.now() + randomInt(0, 9999)).toString(),
       destination: choosenConversationId,
@@ -158,28 +192,9 @@ export default function InputBox({ conversation }: Props) {
       createdAt: Date.now(),
     };
     try {
-      const updateAt = new Date().getTime();
-      const unwrap = await dispatch(sendMessageThunk({ message, updateAt }));
-      const result = unwrapResult(unwrap);
-      const { message: message1, tempId } = result;
-      dispatch(
-        updateSentMessage({
-          tempId: tempId,
-          message: message1,
-          lastMessage: conversation.lastMessage,
-        })
-      );
-      if (conversation)
-        dispatch(
-          updateConversation({
-            conversationId: conversation._id,
-            conversation: {
-              lastMessage: message1,
-              updateAt,
-            },
-          })
-        );
-      setContent('');
+      sendMessage(message).then(() => {
+        setContent('');
+      });
     } catch (error) {
       console.log(error);
     }
@@ -194,7 +209,6 @@ export default function InputBox({ conversation }: Props) {
   };
 
   const onEmojiDown = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // handleOnRightClickEmoji(e);
     const { value } = e.currentTarget;
     const time = new Date().getTime();
     const id = (Date.now() + randomInt(0, 9999)).toString();
@@ -212,73 +226,62 @@ export default function InputBox({ conversation }: Props) {
   };
 
   useEffect(() => {
-    if (emojiState) {
-      let interval: any;
-      if (emojiState.state === 'down') {
-        const message = {
-          _id: emojiState.messageId,
-          destination: choosenConversationId,
-          content: emojiState.content,
-          attachments: [],
-          parentMessage: null,
-          status: MessageStatusType.SENDING,
-          createdAt: Date.now(),
-          sender: user,
-          scale: 1,
-          type: MessageType.EMOJI,
-          isRecall: false,
-        };
-        dispatch(
-          addMessage({
-            message: message,
-            conversationId: choosenConversationId,
-          })
-        );
-        interval = setInterval(() => {
-          if (emojiState.state === 'down') {
-            emojiDispatch(setTime(emojiState.time + EMOJI_SCALE_EVERY));
-          }
-        }, EMOJI_SCALE_EVERY);
-      }
-      if (
-        emojiState &&
-        emojiState.state === 'up' &&
-        emojiState.time < TIME_SCALE
-      ) {
-        const { messageId } = emojiState;
-        let message: IMessage | undefined = undefined;
-        messages.data.forEach((group) =>
-          group.forEach((m) => m._id === messageId && (message = m))
-        );
-        const updateAt = new Date().getTime();
-        if (conversation && message) {
+    console.log(emojiState);
+    (async () => {
+      if (emojiState) {
+        if (emojiState.state === 'down') {
+          const message = {
+            _id: emojiState.messageId,
+            destination: choosenConversationId,
+            content: emojiState.content,
+            attachments: [],
+            parentMessage: null,
+            status: MessageStatusType.SENDING,
+            createdAt: Date.now(),
+            sender: user,
+            scale: 1,
+            type: MessageType.EMOJI,
+            isRecall: false,
+          };
           dispatch(
-            updateConversation({
-              conversationId: conversation._id,
-              conversation: {
-                lastMessage: message!,
-                updateAt,
-              },
+            addMessage({
+              message: message,
+              conversationId: choosenConversationId,
             })
           );
-          dispatch(sendMessageThunk({ message, updateAt }));
-          emojiDispatch(setDefault());
-          clearInterval(interval);
+          if (emojiState.interval === false) {
+            emojiDispatch(setTime(0));
+            const interval = setInterval(() => {
+              setCountUp((prev) => prev + EMOJI_SCALE_EVERY);
+            }, EMOJI_SCALE_EVERY);
+            emojiDispatch(setEmojiInterval(interval));
+          }
         }
+        if (
+          emojiState &&
+          emojiState.state === 'up' &&
+          emojiState.time < TIME_SCALE
+        ) {
+          const { messageId } = emojiState;
+          let message: IMessage = {} as IMessage;
+          messages.data.forEach((group) =>
+            group.forEach((m) => m._id === messageId && (message = m))
+          );
+          if (conversation && message) {
+            emojiDispatch(clearEmojiInterval());
+            setCountUp(0);
+            try {
+              await sendMessage(message);
+            } catch (error) {}
+          }
+        }
+        return () => emojiDispatch(clearEmojiInterval());
       }
-      if (emojiState && emojiState.time >= TIME_SCALE) {
-        clearInterval(interval);
-        dispatch(
-          removeMessage({
-            conversationID: choosenConversationId,
-            messageID: emojiState.messageId,
-          })
-        );
-        emojiDispatch(setDefault());
-      }
-      return () => clearInterval(interval);
-    }
-  }, [emojiState.state, emojiState.time]);
+    })();
+  }, [emojiState.state]);
+  useEffect(() => {
+    console.log(emojiState);
+  }, [emojiState.time]);
   useEffect(() => {
     if (messages) {
       let message: IMessage | undefined = undefined;
@@ -286,12 +289,24 @@ export default function InputBox({ conversation }: Props) {
         group.forEach((m) => m._id === emojiState.messageId && (message = m))
       );
       if (message && emojiState.state === 'down') {
-        dispatch(
-          updateMessageScale({
-            conversationId: choosenConversationId,
-            messageId: emojiState.messageId,
-          })
-        );
+        if (emojiState.time < TIME_SCALE)
+          dispatch(
+            updateMessageScale({
+              conversationId: choosenConversationId,
+              messageId: emojiState.messageId,
+            })
+          );
+        else {
+          setCountUp(0);
+          emojiDispatch(clearEmojiInterval());
+          emojiDispatch(setDefault());
+          dispatch(
+            removeMessage({
+              conversationID: choosenConversationId,
+              messageID: emojiState.messageId,
+            })
+          );
+        }
       }
     }
   }, [emojiState.time]);
@@ -317,7 +332,7 @@ export default function InputBox({ conversation }: Props) {
     if (!altPress && enterPress && content.length > 1) {
       const testContent = content.replace(/<[^>]*>?/gm, '');
       if (testContent.length >= 1) {
-        sendMessage();
+        handleSendMessage();
       } else {
         setContent('');
       }
@@ -369,6 +384,7 @@ export default function InputBox({ conversation }: Props) {
       }
       // paddingY="0.3rem"
     >
+      <div ref={countUpRef}></div>
       {isLargerThanHD && previewImages.length === 0 && (
         <Flex paddingX="1rem">
           <IconButton
@@ -457,7 +473,7 @@ export default function InputBox({ conversation }: Props) {
             <IconButton
               alignSelf={'flex-end'}
               size="sm"
-              onClick={sendMessage}
+              onClick={handleSendMessage}
               aria-label="send message"
               icon={<FaTelegramPlane fontSize={'24px'} />}
             />
@@ -504,7 +520,7 @@ export default function InputBox({ conversation }: Props) {
         ) : content ? (
           <IconButton
             alignSelf={'flex-end'}
-            onClick={sendMessage}
+            onClick={handleSendMessage}
             aria-label="send message"
             icon={<FaTelegramPlane fontSize={'24px'} />}
           />

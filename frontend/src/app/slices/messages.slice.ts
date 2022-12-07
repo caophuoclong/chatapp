@@ -21,6 +21,51 @@ const convertOneDimensionalArray = (array: Array<Array<IMessage>>) => {
   });
   return result;
 };
+type X = { index: number; jndex: number; message: IMessage };
+function getIndexAndMessage(
+  groupsMessages: Array<Array<IMessage>>,
+  temp: string
+): X;
+function getIndexAndMessage(
+  groupsMessages: Array<Array<IMessage>>,
+  temp: number
+): X;
+function getIndexAndMessage(
+  groupsMessages: Array<Array<IMessage>>,
+  temp: string | number
+): X {
+  const x: X = {} as X;
+  if (typeof temp === 'string') {
+    groupsMessages.forEach((group, index) =>
+      group.forEach((message, jndex) => {
+        if (message._id === temp) {
+          x.index = index;
+          x.jndex = jndex;
+          x.message = message;
+        }
+      })
+    );
+  }
+  if (typeof temp === 'number') {
+    groupsMessages.forEach((group, index) =>
+      group.forEach((message, jndex) => {
+        if (+(message.createdAt || 0) === temp) {
+          x.index = index;
+          x.jndex = jndex;
+          x.message = message;
+        }
+      })
+    );
+  }
+  return x;
+}
+// check is the same sender
+const isSameSender = (message: IMessage, temp: IMessage) => {
+  return message.sender._id === temp.sender._id;
+};
+const getMaxCreatedAt = (messages: IMessage[]) => {
+  return Math.max(...messages.map((item: IMessage) => item.createdAt!));
+};
 // const convertTwoDimensionalArray = (array: Array<IMessage>) => {
 interface MessageState {
   isLoading: boolean;
@@ -38,10 +83,6 @@ export const sendMessageThunk = createAsyncThunk(
     { message, updateAt }: { message: IMessage; updateAt: number },
     thunkApi
   ) => {
-    console.log(
-      '🚀 ~ file: messages.slice.ts:30 ~ thunkApi.getState()',
-      thunkApi.getState()
-    );
     thunkApi.dispatch(
       addMessage({
         message,
@@ -118,33 +159,37 @@ export const messageSlice = createSlice({
         };
       }
       const { _id } = message;
-      const lastGroup = state.messages[conversationId].data[0]
-      if(lastGroup === undefined || lastGroup.length < 1){
-        state.messages[conversationId].data.push([message]);
-        return state;
-      }
-      const lastMessage = lastGroup[lastGroup.length - 1];
-      const index = lastGroup.findIndex((item: IMessage) => item._id === _id);
+      const messagesGroups = state.messages[conversationId].data;
       // check if message is already in state
-      const messages = convertOneDimensionalArray(state.messages[conversationId].data);
-      const isMessageExist = messages.find((item: IMessage) => item._id === _id);
+      const messages = convertOneDimensionalArray(
+        state.messages[conversationId].data
+      );
+      const isMessageExist = messages.find(
+        (item: IMessage) => item._id === _id
+      );
       if (isMessageExist) {
         return state;
       }
-      const maxCreatedAt = Math.max(...messages.filter((item: IMessage) => item.sender._id === message.sender._id).map((item: IMessage) => item.createdAt!));
-      console.log(maxCreatedAt);
-      if (index === -1) {
-        if (
-          message.sender._id === lastMessage.sender._id &&
-          +message.createdAt! - +maxCreatedAt! < MAX_TIME_DISTANCE
-        ) {
-          lastGroup.push(message);
-          state.messages[conversationId].data[0] = lastGroup;
-        } else {
-          state.messages[conversationId].data.push([message]);
-        }
-        state.messages[conversationId].count += 1;
+      const maxCreatedAt = getMaxCreatedAt(messages);
+      const indexMessage = getIndexAndMessage(messagesGroups, maxCreatedAt);
+      console.log(indexMessage);
+      if (indexMessage.index === undefined) {
+        state.messages[conversationId].data.push([message]);
+        return state;
       }
+      if (
+        +message.createdAt! - +maxCreatedAt! < MAX_TIME_DISTANCE &&
+        isSameSender(indexMessage.message, message)
+      ) {
+        const lastGroup = [
+          ...state.messages[conversationId].data[indexMessage.index],
+        ];
+        lastGroup.push(message);
+        state.messages[conversationId].data[indexMessage.index] = lastGroup;
+      } else {
+        state.messages[conversationId].data.push([message]);
+      }
+      state.messages[conversationId].count += 1;
     },
 
     updateSentMessage: (
@@ -157,24 +202,12 @@ export const messageSlice = createSlice({
     ) => {
       const { message, tempId } = action.payload;
       const { destination: conversationId } = message;
-      const x: {
-        [key: number]: {
-          jndex: number;
-          message: IMessage;
-        };
-      } = {};
-      state.messages[conversationId].data.forEach((group, index) =>
-        group.forEach((message, jndex) => {
-          if (message._id === tempId) {
-            x[index] = {
-              jndex,
-              message,
-            };
-          }
-        })
+      const indexAndMessage = getIndexAndMessage(
+        state.messages[conversationId].data,
+        tempId
       );
-      state.messages[conversationId].data[+Object.keys(x)[0]][
-        x[+Object.keys(x)[0]].jndex
+      state.messages[conversationId].data[indexAndMessage.index][
+        indexAndMessage.jndex
       ] = message;
       return state;
     },
@@ -183,30 +216,19 @@ export const messageSlice = createSlice({
       action: PayloadAction<{ conversationId: string; messageId: string }>
     ) => {
       const { conversationId, messageId } = action.payload;
+
       if (state.messages[conversationId]) {
-        const x: {
-          [key: number]: {
-            jndex: number;
-            message: IMessage;
-          };
-        } = {};
-        state.messages[conversationId].data.forEach((group, index) =>
-          group.forEach((message, jndex) => {
-            if (message._id === messageId) {
-              x[index] = {
-                jndex,
-                message,
-              };
-            }
-          })
+        const indexAndMessage = getIndexAndMessage(
+          state.messages[conversationId].data,
+          messageId
         );
-        state.messages[conversationId].data[+Object.keys(x)[0]][
-          x[+Object.keys(x)[0]].jndex
+        state.messages[conversationId].data[indexAndMessage.index][
+          indexAndMessage.jndex
         ] = {
-          ...state.messages[conversationId].data[+Object.keys(x)[0]][
-            x[+Object.keys(x)[0]].jndex
+          ...state.messages[conversationId].data[indexAndMessage.index][
+            indexAndMessage.jndex
           ],
-          status: MessageStatusType.RECEIVED
+          status: MessageStatusType.RECEIVED,
         };
         return state;
       }
@@ -219,33 +241,20 @@ export const messageSlice = createSlice({
       }>
     ) => {
       const { conversationId, messageId } = action.payload;
-      const x: {
-          [key: number]: {
-            jndex: number;
-            message: IMessage;
-          };
-        } = {};
-        state.messages[conversationId].data.forEach((group, index) =>
-          group.forEach((message, jndex) => {
-            if (message._id === messageId) {
-              x[index] = {
-                jndex,
-                message,
-              };
-            }
-          })
-        );
-        const index = +Object.keys(x)[0];
-      if (x[index]) {
-        let scale1 = x[index].message.scale || 1;
+      const indexAndMessage = getIndexAndMessage(
+        state.messages[conversationId].data,
+        messageId
+      );
+      if (indexAndMessage.jndex) {
+        let scale1 = indexAndMessage.message.scale || 1;
         scale1 += 0.255555;
-        state.messages[conversationId].data[index][
-          x[index].jndex
+        state.messages[conversationId].data[indexAndMessage.index][
+          indexAndMessage.jndex
         ] = {
-          ...state.messages[conversationId].data[index][
-            x[index].jndex
+          ...state.messages[conversationId].data[indexAndMessage.index][
+            indexAndMessage.jndex
           ],
-          scale: scale1
+          scale: scale1,
         };
         return state;
       }
@@ -258,28 +267,21 @@ export const messageSlice = createSlice({
       }>
     ) => {
       const { conversationID, messageID } = action.payload;
-      const x: {
-          [key: number]: {
-            jndex: number;
-            message: IMessage;
-          };
-        } = {};
-        state.messages[conversationID].data.forEach((group, index) =>
-          group.forEach((message, jndex) => {
-            if (message._id === messageID) {
-              x[index] = {
-                jndex,
-                message,
-              };
-            }
-          })
-        );
-        console.log(x);
-        const index = +Object.keys(x)[0];
-      if (x[index]) {
-        state.messages[conversationID].data[index].splice(x[index].jndex, 1);
-        if(state.messages[conversationID].data[index].length === 0 ){
-          state.messages[conversationID].data.splice(index, 1);
+      const indexAndMessage = getIndexAndMessage(
+        state.messages[conversationID].data,
+        messageID
+      );
+      if (state.messages[conversationID].data[indexAndMessage.index]) {
+        const xxx = [
+          ...state.messages[conversationID].data[indexAndMessage.index],
+        ];
+        xxx.splice(indexAndMessage.jndex, 1);
+        state.messages[conversationID].data[indexAndMessage.index] = xxx;
+        if (
+          state.messages[conversationID].data[indexAndMessage.index].length ===
+          0
+        ) {
+          state.messages[conversationID].data.splice(indexAndMessage.index, 1);
         }
         return state;
       }
@@ -292,57 +294,16 @@ export const messageSlice = createSlice({
       }>
     ) => {
       const { conversationId, messageId } = action.payload;
-      const groupsMessage = state.messages[conversationId].data;
-      const x = {} as {
-        [key: number]: {
-          index: number;
-          message: IMessage;
-        };
-      };
-      // find message and group index in groups message
-      groupsMessage.forEach((group, index) => {
-        group.forEach((message, jndex) => {
-          if (message._id === messageId) {
-            x[index] = {
-              index: jndex,
-              message: message,
-            };
-          }
-        });
-      });
-      const index = +Object.keys(x)[0];
-      state.messages[conversationId].data[index][x[index].index] = {
-        ...x[index].message,
+      const indexAndMessage = getIndexAndMessage(
+        state.messages[conversationId].data,
+        messageId
+      );
+      state.messages[conversationId].data[indexAndMessage.index][
+        indexAndMessage.jndex
+      ] = {
+        ...indexAndMessage.message,
         isRecall: true,
       };
-      // const lastGroup = state.messages[conversationId].data[state.messages[conversationId].data.length - 1];
-      // const index = lastGroup.findIndex((message)=>message._id === messageId);
-      // const lastMessage = lastGroup[lastGroup.length - 1];
-      // if(index >= 0){
-      //   let scale1 = lastMessage.scale || 1;
-      //   scale1 +=0.255555
-      //   state.messages[conversationId].data[state.messages[conversationId].data.length - 1][lastGroup.length - 1] = {
-      //     ...lastMessage,
-      //     scale: scale1
-      //   }
-      // return {
-      //   ...state,
-      //   messages: {
-      //     ...state.messages,
-      //     [action.payload.conversationId]: {
-      //       ...state.messages[action.payload.conversationId],
-      //       data: state.messages[action.payload.conversationId].data.map((message)=>{
-      //         if(message._id === action.payload.messageId){
-      //           return {
-      //             ...message,
-      //             isRecall: true
-      //           }
-      //         }
-      //         return message;
-      //       })
-      //     }
-      //   }
-      // }
     },
   },
   extraReducers(builder) {
@@ -379,15 +340,8 @@ export const messageSlice = createSlice({
             }
           }
         });
-        console.log(groupsMessage);
         state.messages[conversationId].data.push(...groupsMessage);
         state.messages[conversationId].count = count;
-        // else{
-        //   state.messages[action.payload.data.conversationId] = {
-        //     data: [...state.messages[action.payload.data.conversationId].data, ...action.payload.data.data],
-        //     count: action.payload.data.count,
-        //   };
-        // }
       }
     );
   },

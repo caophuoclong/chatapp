@@ -1,4 +1,4 @@
-import { Divider, Flex, Text, useColorMode } from '@chakra-ui/react';
+import { Box, Divider, Flex, Text, useColorMode } from '@chakra-ui/react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useAppSelector } from '~/app/hooks';
 
@@ -11,6 +11,10 @@ import MessageImage from './MessageImage';
 import MyGroup from './Group/MyGroup';
 import OtherGroup from './Group/OtherGroup';
 import { dailyFromNow } from '~/utils/dailyFromNow';
+import { MAX_TIME_DISTANCE } from '../../../configs/index';
+const getMinCreated = (group: IMessage[]) => {
+  return Math.min(...group.map((m) => +(m.createdAt || 0)));
+};
 type Props = {};
 function useScrollToBottom<T extends HTMLElement>(ref: React.RefObject<T>) {
   useEffect(() => {
@@ -24,14 +28,14 @@ export const renderMessage = (message: IMessage, style: EmojiStyle) => {
   switch (message.type) {
     case MessageType.EMOJI:
       return (
-        <Emoji
-          unified={message.content || ''}
-          size={25 * (message.scale || 1)}
-          emojiStyle={style}
-        />
+        <Flex justifyContent={'flex-end'}>
+          <Emoji
+            unified={message.content || ''}
+            size={25 * (message.scale || 1)}
+            emojiStyle={style}
+          />
+        </Flex>
       );
-    case MessageType.IMAGE:
-      return <MessageImage attachments={message.attachments} />;
     default:
       return parser(message.content || '');
   }
@@ -115,32 +119,40 @@ export default function MessagesBox({}: Props) {
             : +a[0].createdAt - +b[0].createdAt
         )
         .map((group, index) => (
-          <>
-            <Flex
-              width="calc(100% - 1rem)"
-              marginX="auto"
-              alignItems={'center'}
-              gap="1rem"
-            >
-              <Divider orientation="horizontal" color={'black'} />
-              <Text
-                whiteSpace={'nowrap'}
-                bg={colorMode === 'dark' ? 'gray.700' : 'gray.200'}
-                rounded="lg"
-                paddingX=".5rem"
+          <React.Fragment key={index}>
+            {getMinCreated(group) -
+              (index === 0 ? 0 : getMinCreated(messagesData[index - 1])) >
+              MAX_TIME_DISTANCE && (
+              <Flex
+                width="calc(100% - 1rem)"
+                marginX="auto"
+                alignItems={'center'}
+                gap="1rem"
               >
-                {dailyFromNow(
-                  Math.min(...group.map((message) => message.createdAt!))
-                )}
-              </Text>
-              <Divider orientation="horizontal" color={'black'} />
-            </Flex>
-            {group[0].sender._id === myId ? (
-              <MyGroup group={group} key={index} />
-            ) : (
-              <OtherGroup group={group} key={index} />
+                <Divider orientation="horizontal" color={'black'} />
+                <Text
+                  whiteSpace={'nowrap'}
+                  bg={colorMode === 'dark' ? 'gray.700' : 'gray.200'}
+                  rounded="lg"
+                  paddingX=".5rem"
+                >
+                  {dailyFromNow(getMinCreated(group))}
+                </Text>
+                <Divider orientation="horizontal" color={'black'} />
+              </Flex>
             )}
-          </>
+            {group[0].sender._id === myId ? (
+              <MyGroup
+                group={group}
+                lastGroup={index === messagesData.length - 1}
+              />
+            ) : (
+              <OtherGroup
+                group={group}
+                lastGroup={index === messagesData.length - 1}
+              />
+            )}
+          </React.Fragment>
         ))}
       <div ref={divRef}></div>
     </Flex>
