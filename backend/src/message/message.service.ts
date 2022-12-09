@@ -182,7 +182,6 @@ export class MessageService {
     },{
       status: MessageStatusType.RECEIVED
     })
-    const data = await this.messageRepository.save(message);
     const key = `${message.sender._id}_${message.destination._id}`;
     // new object with key is key and data is array of data._id
     const dataToEmit: {
@@ -190,10 +189,10 @@ export class MessageService {
     } = {
       [key]: [],
     };
-    dataToEmit[key].push(data._id);
+    dataToEmit[key].push(message._id);
     this.messageSocket.markReceivedMessage(dataToEmit);
 
-    return data;
+    return message;
   }
   async markAsReceived(userId: string) {
     try {
