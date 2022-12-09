@@ -79,6 +79,7 @@ axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const status = error.response.status;
+    console.log(error.response);
     switch (status) {
       case 401:
         // console.log("refresh token");

@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, HttpException, HttpStatus, ServiceUnavailableException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { CreateConversationDtoFromFriendshipDto } from './dto/create-conversation-friend';
@@ -20,7 +20,10 @@ import moment from 'moment';
 import { SocketService } from '~/socket/socket.service';
 import { Emoji } from '~/database/entities/Emoji';
 import { Member } from '~/database/entities/member.entity';
-
+import { roomConversation } from '../socket/socket.service';
+interface MemberDetails {
+  
+}
 @Injectable()
 export class ConversationService {
   constructor(
@@ -40,52 +43,47 @@ export class ConversationService {
     private readonly memberRepository: Repository<Member>,
   ) {}
   async getConversationFromMember(...userId: Array<string>){
+    const users = await this.userService.getUsers(userId);
     try {
       const members = await this.memberRepository.find({
         where: {
-          userId: In(userId)
+          user: In(users.data)
         },
+        relations:{
+          conversation: true,
+          user: true,
+        }
       })
-      console.log(members.length);
-      const xyz : {
-        [key : string]: Array<{
-    _id: string;
-    createdAt: number;
-    isBlocked: boolean;
-    isDeleted: boolean;
-    deletedAt: number;
-}>
+      const membersConversations: {
+        [key: string]: Array<{
+          userId: string,
+          createdAt: number,
+          isBlocked: boolean,
+          isDeleted: boolean,
+          deletedAt: number,
+        }>
       } = {}
-      members.forEach(m => {
-        if(!xyz[m.conversationId]){
-          xyz[m.conversationId] = []
+      members.forEach(member => {
+        if(!membersConversations[member.conversation._id]){
+          membersConversations[member.conversation._id] = []
         }
         const memberDetail = {
-          _id: m.userId,
-          createdAt: m.createdAt,
-          isBlocked: m.isBlocked,
-          isDeleted: m.isDeleted,
-          deletedAt: m.deletedAt,
+          userId: member.user._id,
+          createdAt: member.createdAt,
+          isBlocked: member.isBlocked,
+          isDeleted: member.isDeleted,
+          deletedAt: member.deletedAt,
         }
-        xyz[m.conversationId].push(memberDetail);
+        membersConversations[member.conversation._id].push(memberDetail)
       })
       // find object with larger than 2 members
-      const conversations = Object.keys(xyz).filter(key => xyz[key].length > 1)
-      console.log(conversations);
-      // return a many row of member;
-      // find a row with same conversationId
-      // const conversations = members.map((member) => member.conversation)
-      // return {
-      //   statusCode: 200,
-      //   message: 'success',
-      //   data: conversations
-      // }
-    } catch (error) {
-      return {
-        statusCode: 500,
-        message: error.message,
-        data: null
+      const conversations = Object.keys(membersConversations).filter(key => membersConversations[key].length > 1)
+      return{
+        data: conversations
       }
+      console.log(conversations);
+    } catch (error) {
+      throw new InternalServerErrorException(error.message)
     }
   }
   async createFromFriendship(
@@ -96,12 +94,14 @@ export class ConversationService {
     try {
       const friendShip = await this.friendshipService.getOne(friendShipId);
       if (friendShip) {
-        const user = [friendShip.userAddress, friendShip.userRequest];
-        const userId = user.map((user) => user._id);
-        // await this.getConversationFromMember(...userId);
+        const users = [friendShip.userAddress, friendShip.userRequest];
+        const userId = users.map((user) => user._id);
         const existConversation = await this.conversation.findOne({
           relations: {
-            participants: true,
+            participants: {
+              user: true,
+              conversation: true
+            },
             lastMessage: true,
             friendship: {
               userAddress: true,
@@ -113,81 +113,70 @@ export class ConversationService {
             friendship: friendShip,
           },
         });
-        const xyzt = existConversation.participants;
-        // get my member row
-        const myMemberRow = xyzt.find((member) => member.userId === myId);
-        if(myMemberRow.isDeleted)
+        
+        const members = existConversation.participants;
+        const participants = members.map(m => m.user);
+        const member = members.find((member) => member.user._id === myId);
+        
+        if(member.isDeleted)
         this.memberRepository.save({
-          ...myMemberRow,
+          ...member,
           isDeleted: false,
           deletedAt: 0,
           createdAt: new Date().getTime() - 15 * 1000
         })
-        const memberIds = xyzt.map((member) => member.userId);
-        const participants = await this.userService.getUsers(memberIds);
         if (existConversation) {
+          const socketId = await this.socketService.getUserOnline(myId);
+          if (socketId) {
+            await this.socketService.joinRoom(socketId, roomConversation(existConversation._id));
+          }
           return {
-            statusCode: 200,
-            message: 'success',
             data: {
               ...existConversation,
-              participants: participants.data,
+              participants: participants,
             },
           };
         }
-        const conversation =  this.conversation.create();
-        conversation.lastMessage = null;
-        conversation.friendship = friendShip;
-        conversation.createdAt = new Date().getTime();
+        const newConversation =  this.conversation.create();
+        newConversation.lastMessage = null;
+        newConversation.friendship = friendShip;
+        newConversation.createdAt = Date.now();
         const promise = [];        
-        // create member
-        const con = await this.conversation.save(conversation);
-        // console.log("🚀 ~ file: conversation.service.ts ~ line 83 ~ ConversationService ~ user", user)
-        user.forEach( (u) => {
+        const conversation = await this.conversation.save(newConversation);
+        users.forEach( (u) => {
           promise.push(
             (()=>{
               const mem = this.memberRepository.create({
-                conversationId: con._id,
-                conversation: con,
-                userId: u._id,
+                conversation: conversation,
                 user: u
               })
               return this.memberRepository.save(mem)
             })()
           )
         })
-         console.log("🚀 ~ file: conversation.service.ts ~ line 78 ~ ConversationService ~ promise", promise)
-
         await Promise.all(promise);
-        const conver = {...con, participants: user}
+        const tmpConversation = {...conversation, participants: users};
         const emojis = [];
-        for (let i = 0; i < user.length; i++) {
+        users.forEach((user)=>{
           const emoji = this.emojiRepository.create();
           emoji.conversationId = conversation._id;
-          emoji.userId = user[i]._id;
+          emoji.userId = user._id;
           emojis.push(emoji);
-        }
+        })
         await this.emojiRepository.save(emojis);
-
-        conversation.emoji = emojis;
-        user.map((user) => {
+        tmpConversation.emoji = emojis;
+        users.map((user) => {
           this.socketService.emitToUser(
             user._id,
             'createConversationSuccess',
-            conver,
+            tmpConversation,
           );
         });
         return {
-          statusCode: 200,
-          message: 'success',
-          data: conver,
+          data: tmpConversation,
         };
       } else {
-        return {
-          statusCode: 404,
-          message: 'friendship not found',
-          data: null,
-        };
+        throw new NotFoundException('friendship not found');
       }
     } catch (error) {
       console.log("124",error);
@@ -203,14 +192,13 @@ export class ConversationService {
       // console.log(ownerId);
       // console.log(createConversationDto.participants);
       const conversation = this.conversation.create();
-      const users = await (
+      const users =  (
         await this.userService.getUsers(
           JSON.parse(createConversationDto.participants),
         )
       ).data;
-      const owner = await (await this.userService.get(ownerId)).data;
+      const owner =  (await this.userService.get(ownerId)).data;
       conversation.name = createConversationDto.name;
-      // conversation.participants = users;
       conversation.owner = owner;
       conversation.type = 'group';
       conversation.visible = createConversationDto.visible;
@@ -327,7 +315,7 @@ export class ConversationService {
         message: 'success',
         data: {
           ...conversation,
-          participants: participants.data
+          participants: participants
         },
       };
     } catch (error) {
@@ -368,16 +356,9 @@ export class ConversationService {
         .limit(type === 'group' ? perpage : 2)
         .skip(type === 'group' ? page * perpage : 0)
         .getMany();
-      return {
-        data: participants,
-      };
+      return  participants;
     } catch (error) {
-      console.log(error.message);
-      return {
-        statusCode: 500,
-        message: error.message,
-        data: null,
-      };
+      throw new InternalServerErrorException(error.message);
     }
   }
   async updateConversation(
@@ -461,7 +442,7 @@ export class ConversationService {
               },
             });
             conversation.participants = conversation.participants.filter(
-              (con) => !users.find((us) => us._id === con.user._id),
+              (member) => !users.find((us) => us._id === member.user._id),
             );
           }
         } else {
@@ -518,7 +499,7 @@ export class ConversationService {
       };
     }
     // check if id is in conversation
-    const index = conversation.participants.findIndex((p) => p.user._id === _id);
+    const index = conversation.participants.findIndex((member) => member.user._id === _id);
     if (index === -1) {
       return {
         statusCode: 400,
@@ -527,7 +508,7 @@ export class ConversationService {
       };
     }
     conversation.participants = conversation.participants.filter(
-      (con) => con.user._id !== _id,
+      (member) => member.user._id !== _id,
     );
     await this.conversation.save(conversation);
     return {
@@ -575,18 +556,19 @@ export class ConversationService {
           _id: In(id),
         },
         relations: {
-          participants: true,
           owner: true,
           blockBy: true,
+          lastMessage: true,
+          friendship: true,
+          participants: {
+            user: true,
+          },
         },
+        
       });
       return response;
     } catch (error) {
-      return {
-        statusCode: 500,
-        message: error.message,
-        data: null,
-      };
+     throw new InternalServerErrorException(error.message);
     }
   }
   async getEmoji(slug: string, userId: string){
@@ -672,21 +654,14 @@ export class ConversationService {
 
   }
   async removeConversation(slug: string, userId: string){
-    // query conversation by id
-    // const conversation = await this.conversation.findOne({
-    //   where: {
-    //     _id: slug,
-    //   },
-    //   relations: {
-    //     owner: true,
-    //     participants: true,
-    //     blockBy: true,
-    //   },
-    // });
     let member = await this.memberRepository.findOne({
       where:{
-        conversationId: slug,
-        userId: userId
+        conversation: {
+          _id: slug
+        },
+        user:{
+          _id: userId
+        }
       },
       relations:{
         conversation: {
@@ -723,5 +698,19 @@ export class ConversationService {
       // data: conversation,
     } 
   }
-
+  async getAgainConversation(slug: string, _id: string){
+    await this.memberRepository.update({
+      conversation: {
+        _id: slug
+      },user:{
+        _id: _id
+      }
+    }, {
+      isDeleted: false,
+      deletedAt: 0
+    })
+    
+    const conversation = await this.getConversationById(slug);
+    return conversation.data;
+  }
 }

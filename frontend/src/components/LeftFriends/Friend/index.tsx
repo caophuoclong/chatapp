@@ -32,6 +32,7 @@ import {
 } from '~/app/slices/global.slice';
 import { SERVER_URL } from '~/configs';
 import { renderAvatar } from '../../../utils/renderAvatar';
+import { SocketEvent } from '~/constants/socketEvent';
 
 type Props = {
   user: IUser;
@@ -77,7 +78,7 @@ export default function Friend({
             dispatch(addConversation(data));
             dispatch(setChoosenConversationID(data._id));
             dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
-            socket.emit('joinRoom', data._id);
+            if (socket) socket.emit(SocketEvent.JOIN_CONVERSATION, data._id);
           }
         }
       );

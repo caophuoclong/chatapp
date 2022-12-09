@@ -7,6 +7,8 @@ enum EmojiReducerType {
   SET_CONTENT,
   SET_SCALE,
   SET_DEFAULT,
+  SET_INTERVAL,
+  CLEAR_INTERVAL,
 }
 export interface IinitialEmojiState {
   messageId: string;
@@ -14,6 +16,7 @@ export interface IinitialEmojiState {
   scale: number;
   state: 'up' | 'down' | '';
   content: string;
+  interval: false | NodeJS.Timer;
 }
 export const initialEmojiState: IinitialEmojiState = {
   messageId: '',
@@ -21,6 +24,7 @@ export const initialEmojiState: IinitialEmojiState = {
   scale: 1,
   state: '',
   content: '',
+  interval: false,
 };
 export interface EmojiAction {
   type: EmojiReducerType;
@@ -31,6 +35,7 @@ export const EmojiReducer: Reducer<IinitialEmojiState, EmojiAction> = (
   action: EmojiAction
 ): IinitialEmojiState => {
   const { type, payload } = action;
+  console.log(payload);
   switch (type) {
     case EmojiReducerType.SET_TIME: {
       return {
@@ -63,13 +68,43 @@ export const EmojiReducer: Reducer<IinitialEmojiState, EmojiAction> = (
       };
     }
     case EmojiReducerType.SET_DEFAULT: {
-      return initialEmojiState;
+      return {
+        messageId: '',
+        time: 0,
+        scale: 1,
+        state: '',
+        content: '',
+        interval: false,
+      };
+    }
+    case EmojiReducerType.SET_INTERVAL: {
+      return {
+        ...state,
+        interval: payload,
+      };
+    }
+    case EmojiReducerType.CLEAR_INTERVAL: {
+      clearInterval(state.interval as NodeJS.Timer);
+      return {
+        ...state,
+        interval: false,
+      };
     }
     default:
       return state;
   }
 };
-
+function setEmojiInterval(interval: false | NodeJS.Timer): EmojiAction {
+  return {
+    type: EmojiReducerType.SET_INTERVAL,
+    payload: interval,
+  };
+}
+function clearEmojiInterval(): EmojiAction {
+  return {
+    type: EmojiReducerType.CLEAR_INTERVAL,
+  };
+}
 function setTime(payload: any): EmojiAction {
   return {
     type: EmojiReducerType.SET_TIME,
@@ -113,4 +148,6 @@ export {
   setState,
   setMessageId,
   setDefault,
+  setEmojiInterval,
+  clearEmojiInterval,
 };

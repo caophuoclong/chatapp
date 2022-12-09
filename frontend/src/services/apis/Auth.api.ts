@@ -1,7 +1,6 @@
 import { IRegisterRequest } from "~/interfaces/IRegister";
 import axiosClient from "../axiosClient";
 import { ILoginRequest, ILoginResponse } from '~/interfaces/ILogin';
-import { Http2ServerResponse } from "http2";
 
 export default class Auth{
     static async login({username,password}: ILoginRequest){
@@ -12,10 +11,7 @@ export default class Auth{
             })
             return response;
         }catch(error: any){
-            if(error.response.data.statusCode === 403 && error.response.data.message === "User not active"){
-                throw new Error("NotActive")
-            }
-            throw error;
+            throw new Error(error.response.data.message)
         }
     }
     static async register(data:Omit<IRegisterRequest, "confirmPassword">){
@@ -60,7 +56,7 @@ export default class Auth{
             token
         })
     }
-    static async getSokcetToken(){
+    static async getSocketToken(){
         return await axiosClient.get("/auth/socket")
     }
 }

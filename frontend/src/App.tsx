@@ -52,11 +52,8 @@ function App() {
   useEffect(() => {
     const lan = (window.localStorage.getItem('lan') || 'vn') as 'en' | 'vn';
     dispatch(handleChangeLanguage(lan));
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     i18n.changeLanguage(lan);
     window.localStorage.setItem('lan', lan);
-    moment.locale(lan === 'vn' ? 'vi' : 'es');
-    moment.tz.setDefault('Asia/Ho_Chi_Minh');
   }, []);
   const [isLargerThanHD] = useMediaQuery('(min-width: 1024px)');
   useEffect(() => {

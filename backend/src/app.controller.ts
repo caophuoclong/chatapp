@@ -20,8 +20,9 @@ export class AppController {
   ) {}
   @Post('/auth/login')
   async login(@Body() loginUserDto: LoginUserDto, @Res({passthrough: true }) res) {
-    const {refreshToken, accessToken} = await this.authService.login(loginUserDto);
-    this.redisClient.set(refreshToken.token, "A");
+    const {refreshToken, accessToken, _id} = await this.authService.login(loginUserDto);
+    this.redisClient.hSet("refreshToken", refreshToken.token, "A");
+    this.redisClient.hSet("user_refreshToken", _id, refreshToken.token)
     res.cookie('refreshToken', refreshToken.token, {httpOnly: true});
     res.json(accessToken);
   }
@@ -33,13 +34,12 @@ export class AppController {
   async refreshToken(@Req() req: Request) {
     const refreshToken = req.cookies.refreshToken;
     if(!refreshToken) throw new BadRequestException("No refresh token provided")
-    const refrshTokenInDatabase = await this.redisClient.get(refreshToken);
+    const refrshTokenInDatabase = await this.redisClient.hGet("refreshToken", refreshToken);
     if(refrshTokenInDatabase === null){
       throw new NotFoundException("No token found in database");
     }
     if(refrshTokenInDatabase === "A"){
       try{
-
         const response = await this.authService.generateToken(this.authService.verifyJWT(refreshToken));
         return response;
       }catch(error){

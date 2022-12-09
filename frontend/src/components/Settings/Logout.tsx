@@ -26,15 +26,15 @@ type Props = {};
 export default function Logout({}: Props) {
   const { t } = useTranslation();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const navigate = useNavigate();
+  const navigate: NavigateFunction = useNavigate();
   const socket = useAppSelector((state) => state.globalSlice.socket);
   const handleLogout = () => {
-    window.localStorage.removeItem('access_token');
-    window.localStorage.removeItem('expiredTime');
+    console.log('Logout');
+    window.localStorage.clear();
     if (socket) {
       socket.disconnect();
     }
-    window.location.reload();
+    navigate('/login', { replace: true });
   };
   return (
     <>

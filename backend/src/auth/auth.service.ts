@@ -28,7 +28,8 @@ export class AuthService {
     const refreshToken = await this.generateToken({_id: user._id, username: user.username},true);
     return {
       accessToken,
-      refreshToken
+      refreshToken,
+      _id: user._id
     }
   }
   async generateSocketToken(param:{_id: string, username: string}){

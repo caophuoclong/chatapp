@@ -11,6 +11,7 @@ import { UserService } from '~/user/user.service';
 import { SocketModule } from '~/socket/socket.module';
 import { Emoji } from '~/database/entities/Emoji';
 import { Member } from '~/database/entities/member.entity';
+import { ConversationSocket } from './conversation.socket';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { Member } from '~/database/entities/member.entity';
     SocketModule
   ],
   controllers: [ConversationController],
-  providers: [ConversationService],
+  providers: [ConversationService, ConversationSocket],
   exports: [ConversationService]
 })
 export class ConversationModule {}

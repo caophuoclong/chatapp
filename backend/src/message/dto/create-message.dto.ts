@@ -1,6 +1,7 @@
 import { Optional } from "@nestjs/common";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsNotEmpty, IsUUID } from "class-validator";
+import { User } from "~/user/entities/user.entity";
 import { MessageType } from "../entities/message.entity";
 
 export class CreateMessageDto {
@@ -35,4 +36,5 @@ export class CreateMessageDto {
     type: MessageType;
     @Optional()
     scale: number;
+    sender: User
 }

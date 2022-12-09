@@ -21,7 +21,7 @@ interface Friends {
   //   friends: Array<IFriendShip>,
   //   friendsRequest: Array<IFriendShip>,
   // };
-  friendShips: Array<IFriendShip>
+  friendShips: Array<IFriendShip>;
   isLoading: boolean;
 }
 
@@ -40,48 +40,56 @@ export const friendsSlice = createSlice({
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
-    addNewFriend: (state: Friends, action: PayloadAction<IFriendShip>)=>{
+    addNewFriend: (state: Friends, action: PayloadAction<IFriendShip>) => {
       state.friendShips.push(action.payload);
     },
-    changeStatusCode: (state: Friends, action: PayloadAction<{
-      friendShipId: string,
-      statusCode: StatusCode 
-    }>) =>{
-      state.friendShips.forEach((friendShip)=>{
-        if(action.payload.friendShipId === friendShip._id){
+    changeStatusCode: (
+      state: Friends,
+      action: PayloadAction<{
+        friendShipId: string;
+        statusCode: StatusCode;
+      }>
+    ) => {
+      state.friendShips.forEach((friendShip) => {
+        if (action.payload.friendShipId === friendShip._id) {
           friendShip.statusCode = action.payload.statusCode;
         }
-      })
+      });
     },
-    rejectFriendShip: (state: Friends, action: PayloadAction<string>)=>{
+    rejectFriendShip: (state: Friends, action: PayloadAction<string>) => {
       console.log(action.payload);
-      const xxx = state.friendShips.filter((friendShip)=> friendShip._id !== action.payload);
+      const xxx = state.friendShips.filter(
+        (friendShip) => friendShip._id !== action.payload
+      );
       state.friendShips = xxx;
     },
-    changeOnlineStatus: (state: Friends, action: PayloadAction<{
-      _id: string,
-      isOnline: boolean,
-      lastOnline?: number
-    }>)=>{
-      state.friendShips.forEach((friendShip)=>{
-        if(friendShip.user._id === action.payload._id){
+    changeOnlineStatus: (
+      state: Friends,
+      action: PayloadAction<{
+        _id: string;
+        isOnline: boolean;
+        lastOnline?: number;
+      }>
+    ) => {
+      state.friendShips.forEach((friendShip) => {
+        if (friendShip.user._id === action.payload._id) {
           friendShip.user.isOnline = action.payload.isOnline;
-          if(action.payload.lastOnline){
+          if (action.payload.lastOnline) {
             friendShip.user.lastOnline = action.payload.lastOnline;
           }
         }
-      })
+      });
     },
-    updateAcceptFriend: (state: Friends, action:PayloadAction<string>)=>{
-      state.friendShips.forEach((friendShip)=>{
-        if(friendShip._id === action.payload){
+    updateAcceptFriend: (state: Friends, action: PayloadAction<string>) => {
+      state.friendShips.forEach((friendShip) => {
+        if (friendShip._id === action.payload) {
           friendShip.statusCode = {
-            code: "a",
-            name: 'Accept'
+            code: 'a',
+            name: 'Accept',
           };
         }
-      })
-    }
+      });
+    },
   },
   extraReducers(builder) {
     builder.addCase(
@@ -104,8 +112,19 @@ export const friendsSlice = createSlice({
         //     state.friendShips.friendsRequest.push(item);
         //   }
         // })
-        state.friendShips = friends;
-
+        const x = friends.map((friend) => {
+          if (+friend.user.lastOnline === 0 ) {
+            return {
+              ...friend,
+              user: {
+                ...friend.user,
+                isOnline: true
+              }
+            };
+          }
+          return friend;
+        });
+        state.friendShips = x;
       }
     );
     builder.addCase(
@@ -117,7 +136,13 @@ export const friendsSlice = createSlice({
   },
 });
 
-export const {changeStatusCode, rejectFriendShip, changeOnlineStatus, addNewFriend, updateAcceptFriend} = friendsSlice.actions;
+export const {
+  changeStatusCode,
+  rejectFriendShip,
+  changeOnlineStatus,
+  addNewFriend,
+  updateAcceptFriend,
+} = friendsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 

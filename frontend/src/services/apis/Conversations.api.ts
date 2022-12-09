@@ -37,8 +37,12 @@ export default class ConversationsApi{
             emoji
         })
     }
+    static async getAgainConversation(conversationId: string){
+        const response = await axiosClient.patch(`/conversation/get-again/${conversationId}`)
+        return response
+    }
     static async deleteConversation(conversationId: string){
-        return await axiosClient.delete(`/conversation/${conversationId}`)
+        return await axiosClient.delete(`/conversation/delete/${conversationId}`)
     }
     static async getConversationById(conversationId: string){
         return await axiosClient.get(`/conversation/${conversationId}`);

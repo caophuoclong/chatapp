@@ -1,21 +1,18 @@
-import React from 'react'
+import React from 'react';
 import { Stack, Switch, Text, useColorMode } from '@chakra-ui/react';
-import {MdDarkMode, MdWbSunny} from "react-icons/md"
+import { MdDarkMode, MdWbSunny } from 'react-icons/md';
 import { useTranslation } from 'react-i18next';
-type Props = {}
+type Props = {};
 
 export default function ToggleTheme({}: Props) {
-    const {colorMode, toggleColorMode} = useColorMode();
-    const {t} = useTranslation();
-    console.log(colorMode === "dark");
+  const { colorMode, toggleColorMode } = useColorMode();
+  const { t } = useTranslation();
   return (
-    <Stack direction={"row"}>
-        <Text>
-            {t("Theme")}
-        </Text>
-        <MdWbSunny/>
-        <Switch isChecked={colorMode === "dark"} onChange={toggleColorMode}/>
-        <MdDarkMode/>
+    <Stack direction={'row'}>
+      <Text>{t('Theme')}</Text>
+      <MdWbSunny />
+      <Switch isChecked={colorMode === 'dark'} onChange={toggleColorMode} />
+      <MdDarkMode />
     </Stack>
-  )
+  );
 }

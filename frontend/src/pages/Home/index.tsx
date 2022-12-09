@@ -55,6 +55,9 @@ import { unwrapResult } from '@reduxjs/toolkit';
 import { connectSocket } from '~/utils/connectSocket';
 import AuthApi from '~/services/apis/Auth.api';
 import { setLocalToken } from '../../services/axiosClient';
+import { SocketEvent } from '~/constants/socketEvent';
+import { MarkReceiveMessage } from '../../interfaces/SocketDTO';
+import MessagesApi from '~/services/apis/Messages.api';
 type Props = {};
 
 export default function Home({}: Props) {
@@ -70,6 +73,7 @@ export default function Home({}: Props) {
   const toast = useToast();
   const { t } = useTranslation();
   const socket = useAppSelector((state) => state.globalSlice.socket);
+  const state = useAppSelector((state) => state);
   useEffect(() => {
     (async () => {
       const access_token = localStorage.getItem('access_token');
@@ -94,32 +98,73 @@ export default function Home({}: Props) {
       }
     })();
   }, []);
+  const conversations = useAppSelector(
+    (state) => state.conversationsSlice.conversations
+  );
   useEffect(() => {
     if (socket) {
-      socket.on('newMessage', (data) => {
-        const { destination, updateAt, ...message } = data;
+      socket.on(SocketEvent.NEW_MESSAGE, async (data: IMessage) => {
+        const { destination, createdAt } = data;
         dispatch(
           addMessage({
-            message: message,
+            message: data,
             conversationId: destination,
           })
         );
-        dispatch(
-          updateLatestUpdateConversation({
-            conversationId: destination,
-            updateAt,
-            message,
-          })
+        // check if exist conversation
+        const conversation = conversations.find(
+          (conversation) => conversation._id === destination
         );
-        socket.emit('markReceiveMessage', message._id);
+        if (conversation) {
+          dispatch(
+            updateLatestUpdateConversation({
+              conversationId: destination,
+              updateAt: +(createdAt || 0),
+              message: data,
+            })
+          );
+        } else {
+          const conversation = await ConversationsApi.getAgainConversation(
+            destination
+          );
+          dispatch(addConversation(conversation.data));
+        }
+        MessagesApi.markReceivedMessage({
+          ...data,
+          destination: {
+            _id: data.destination,
+          },
+        });
       });
-      socket.on('MY_FRIEND_ONLINE', (_id: string) => {
+    }
+    return () => {
+      socket?.off(SocketEvent.NEW_MESSAGE);
+    };
+  }, [socket, state.conversationsSlice.conversations]);
+  useEffect(() => {
+    if (socket) {
+      socket.on(
+        SocketEvent.MARK_RECEIVED_MESSAGE,
+        (data: MarkReceiveMessage) => {
+          console.log(data);
+          const { conversationId, messagesId } = data;
+          console.log(
+            '🚀 ~ file: index.tsx:148 ~ useEffect ~ messagesId',
+            messagesId
+          );
+          messagesId.forEach((messageId) => {
+            dispatch(updateReceivedMessage({ conversationId, messageId }));
+          });
+        }
+      );
+      socket.on(SocketEvent.ONLINE, (_id: string) => {
+        console.log(_id);
         dispatch(changeOnlineStatus({ _id, isOnline: true }));
       });
       socket.on(
-        'MY_FRIEND_OFFLINE',
+        SocketEvent.OFFLINE,
         (data: { _id: string; lastOnline: number }) => {
-          // console.log(data);
+          console.log(data);
           dispatch(
             changeOnlineStatus({
               _id: data._id,
@@ -130,53 +175,52 @@ export default function Home({}: Props) {
         }
       );
       socket.on('u_created_conversation', (data: IConversation) => {
-        socket.emit('joinRoom', data._id);
+        socket.emit(SocketEvent.JOIN_CONVERSATION, data._id);
         dispatch(addConversation(data));
         dispatch(initMessage(data._id));
         dispatch(setChoosenConversationID(data._id));
         dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
       });
-      socket.on(
-        'sentMessageSuccess',
-        (data: {
-          tempId: string;
-          conversationId: string;
-          message: IMessage;
-        }) => {
-          const { conversationId, tempId, message } = data;
-          dispatch(
-            updateLastestMessage({
-              message: message,
-              conversationId,
-            })
-          );
-          dispatch(
-            updateSentMessage({
-              conversationId,
-              tempId,
-              value: {
-                _id: message._id,
-                status: message.status,
-              },
-            })
-          );
-        }
-      );
-      socket.on(
-        'receivedMessage',
-        (data: { conversationId: string; messageId: string }) => {
-          const { conversationId, messageId } = data;
-          dispatch(
-            updateReceivedMessage({
-              conversationId,
-              messageId,
-            })
-          );
-        }
-      );
+      // socket.on(
+      //   'sentMessageSuccess',
+      //   (data: {
+      //     tempId: string;
+      //     conversationId: string;
+      //     message: IMessage;
+      //   }) => {
+      //     const { conversationId, tempId, message } = data;
+      //     dispatch(
+      //       updateLastestMessage({
+      //         message: message,
+      //         conversationId,
+      //       })
+      //     );
+      //     dispatch(
+      //       updateSentMessage({
+      //         conversationId,
+      //         tempId,
+      //         value: {
+      //           _id: message._id,
+      //           status: message.status,
+      //         },
+      //       })
+      //     );
+      //   }
+      // );
+      // socket.on(
+      //   'receivedMessage',
+      //   (data: { conversationId: string; messageId: string }) => {
+      //     const { conversationId, messageId } = data;
+      //     dispatch(
+      //       updateReceivedMessage({
+      //         conversationId,
+      //         messageId,
+      //       })
+      //     );
+      //   }
+      // );
       socket.on('createConversationSuccess', (data: IConversation) => {
-        console.log(data);
-        socket.emit('joinRoom', data._id);
+        socket.emit(SocketEvent.JOIN_CONVERSATION, data._id);
         dispatch(addConversation(data));
         dispatch(initMessage(data._id));
       });
@@ -191,7 +235,7 @@ export default function Home({}: Props) {
         });
       });
       socket.on(
-        'messageHasBeenRecalled',
+        SocketEvent.RECALL_MESSAGE,
         (data: { conversationId: string; messageId: string }) => {
           const { conversationId, messageId } = data;
           dispatch(
@@ -242,7 +286,7 @@ export default function Home({}: Props) {
         const conversation = (
           await ConversationsApi.getConversationById(data.conversationId)
         ).data.data as IConversation;
-        socket.emit('joinRoom', conversation._id);
+        socket.emit(SocketEvent.JOIN_CONVERSATION, conversation._id);
         dispatch(addConversation(conversation));
         dispatch(
           addMessage({
@@ -251,19 +295,26 @@ export default function Home({}: Props) {
           })
         );
       });
-      // socket.on('refreshToken', async (data) => {
-      //   const result = await AuthApi.refreshToken();
-      //   const { token, expired_time } = result.data;
-      //   setLocalToken(token, expired_time);
-      //   dispatch(setSocket(connectSocket(token)));
-      // });
     }
+    return () => {
+      socket?.off(SocketEvent.MARK_RECEIVED_MESSAGE);
+      socket?.off(SocketEvent.ONLINE);
+      socket?.off(SocketEvent.OFFLINE);
+      socket?.off(SocketEvent.RECALL_MESSAGE);
+      socket?.off('u_created_conversation');
+      socket?.off('createConversationSuccess');
+      socket?.off('ErrorConnection');
+      socket?.off('createFriendShipSuccess_sender');
+      socket?.off('createFriendShipSuccess');
+      socket?.off('onAcceptFriend');
+      socket?.off('queryAgainConversation');
+    };
   }, [socket]);
   useEffect(() => {
     (async () => {
-      const token = (await AuthApi.getSokcetToken()).data;
+      const token = (await AuthApi.getSocketToken()).data;
       const socket = connectSocket(token);
-      socket.emit('authenticate');
+      socket.emit(SocketEvent.AUTHENTICATE);
       dispatch(setSocket(socket));
     })();
   }, []);

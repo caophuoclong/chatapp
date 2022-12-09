@@ -1,14 +1,13 @@
-import { CACHE_MANAGER, Inject, UseFilters, UseGuards } from '@nestjs/common';
-import { ConnectedSocket, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Inject, UseFilters, UseGuards } from '@nestjs/common';
+import { SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
+import { Server } from 'socket.io';
 import WsGuards from '../auth/ws-auth.guard';
 import { MessageService } from '../message/message.service';
 import { UserService } from '../user/user.service';
 import { ConversationService } from '../conversation/conversation.service';
 import { CreateMessageDto } from '../message/dto/create-message.dto';
 import CustomSocket from '../interfaces/CustomInterface';
-import { Message, MessageStatusType } from '../message/entities/message.entity';
-import  {Cache}  from 'cache-manager';
+import {  MessageStatusType } from '../message/entities/message.entity';
 import { RedisClientType } from 'redis';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Member } from '../database/entities/member.entity';
@@ -36,66 +35,66 @@ export class MessageGateway {
   @UseGuards(WsGuards)
   @SubscribeMessage('createMessage')
   async handleMessage(client: CustomSocket, payload: CreateMessageDto) {
-    const {_id} = client.user;
-    const tempId = payload._id;
-    delete payload._id;
-    const response = await this.messageService.create(_id, payload);
-    // check if any user online
-    const destinationId = payload.destination;
-    const members = await this.memberRepository.find({
-      where:{
-        conversationId: destinationId
-      }
-    });
-    const participants = await this.conversationService.getUserOfConversation(destinationId);
-    const participantsId = participants.data.map((participant) => participant._id);
-    // check if any participants Id have a socket in redis
-    const onlineParticipants = await this.redisClient.mGet(participantsId);
-    const mySocketId = await this.redisClient.get(_id);
-    // get diff id
-    const diff = onlineParticipants.filter((socketId) => socketId !== mySocketId);
-    // check array have any  string diff null return boolean
-    const isOnline = diff.some((socketId) => socketId !== null && socketId !== "null");
-    let me = response.data as Message;
+    // const {_id} = client.user;
+    // const tempId = payload._id;
+    // delete payload._id;
+    // const response = await this.messageService.create( payload);
+    // // check if any user online
+    // const destinationId = payload.destination;
+    // const members = await this.memberRepository.find({
+    //   where:{
+    //     conversation: {_id: destinationId}
+    //   }
+    // });
+    // const participants = await this.conversationService.getUserOfConversation(destinationId);
+    // const participantsId = participants.data.map((participant) => participant._id);
+    // // check if any participants Id have a socket in redis
+    // const onlineParticipants = await this.redisClient.mGet(participantsId);
+    // const mySocketId = await this.redisClient.get(_id);
+    // // get diff id
+    // const diff = onlineParticipants.filter((socketId) => socketId !== mySocketId);
+    // // check array have any  string diff null return boolean
+    // const isOnline = diff./* `some` is a function of array, it will return true if any element of array
+    // is true. */
+    // some((socketId) => socketId !== null && socketId !== "null");
+    // let me = response.message ;
 
-    if(isOnline){
-      me.status = MessageStatusType.RECEIVED;
-    }
-    console.log(me);
+    // if(isOnline){
+    //   me.status = MessageStatusType.RECEIVED;
+    // }
+    // client.emit("sentMessageSuccess", {
+    //   tempId: tempId,
+    //   conversationId: destinationId,
+    //   message: me,
+    // });
 
-    client.emit("sentMessageSuccess", {
-      tempId: tempId,
-      conversationId: destinationId,
-      message: me,
-    });
-
-    const ids = [];
-    members.forEach((m)=>{
-      return m.userId !== response.data.sender._id && m.isDeleted && !m.isBlocked ?(()=>{
-        ids.push(m.userId);
-        m.isDeleted = false;
-        m.deletedAt = 0;
-        m.createdAt = new Date().getTime() - 15 * 1000;
-      })():m
-    })
-    await this.memberRepository.save(members);
-    const message = response.data;
-    message.destination = payload.destination;
-    client.broadcast.to(destinationId).emit("newMessage", {
-      ...message,
-      updateAt: payload.updateAt
-    });
-      Promise.all(ids.map((id)=>{
-      return new Promise(async (resolve, reject)=>{
-        const socketId = await this.redisClient.get(id);
-        if(socketId){
-          this.server.to(socketId).emit("queryAgainConversation", {
-            conversationId: payload.destination,
-            message: message
-          })
-        }
-      })
-    }))
+    // const ids = [];
+    // members.forEach((m)=>{
+    //   return m.userId !== response.message.sender._id && m.isDeleted && !m.isBlocked ?(()=>{
+    //     ids.push(m.userId);
+    //     m.isDeleted = false;
+    //     m.deletedAt = 0;
+    //     m.createdAt = new Date().getTime() - 15 * 1000;
+    //   })():m
+    // })
+    // await this.memberRepository.save(members);
+    // const message = response.message;
+    // message.destination = payload.destination;
+    // client.broadcast.to(destinationId).emit("newMessage", {
+    //   ...message,
+    //   updateAt: payload.updateAt
+    // });
+    //   Promise.all(ids.map((id)=>{
+    //   return new Promise(async (resolve, reject)=>{
+    //     const socketId = await this.redisClient.get(id);
+    //     if(socketId){
+    //       this.server.to(socketId).emit("queryAgainConversation", {
+    //         conversationId: payload.destination,
+    //         message: message
+    //       })
+    //     }
+    //   })
+    // }))
   }
   @UseGuards(WsGuards)
   @SubscribeMessage('markReceiveMessage')
@@ -107,15 +106,15 @@ export class MessageGateway {
       messageId: response.data._id,
     });
   }
-  @UseGuards(WsGuards)
-    @SubscribeMessage("recallMessage")
-    async recallMessage(client: CustomSocket, payload: {
-      conversationId: string,
-      messageId: string,
-    }){
-      const response = await this.messageService.recallMessage(payload.messageId);
-      if(response.statusCode === 200)      {
-        this.server.to(payload.conversationId).emit("messageHasBeenRecalled", {messageId: payload.messageId, conversationId: payload.conversationId});
-      }
-    }
+  // @UseGuards(WsGuards)
+  //   @SubscribeMessage("recallMessage")
+  //   async recallMessage(client: CustomSocket, payload: {
+  //     conversationId: string,
+  //     messageId: string,
+  //   }){
+  //     const response = await this.messageService.recallMessage(payload.messageId);
+  //     if(response.statusCode === 200)      {
+  //       this.server.to(payload.conversationId).emit("messageHasBeenRecalled", {messageId: payload.messageId, conversationId: payload.conversationId});
+  //     }
+  //   }
 }

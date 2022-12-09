@@ -47,7 +47,7 @@ interface GlobalState {
     isLargerThanHD: boolean,
     lan: "vn" | "en",
     showScreen: ENUM_SCREEN,
-    socket: Socket,
+    socket?: Socket,
     loading: {
       login: boolean,
       register: boolean,
@@ -65,7 +65,6 @@ const initialState: GlobalState = {
    lan: "vn",
    isLargerThanHD: false,
    showScreen: ENUM_SCREEN.CONVERSATIONS,
-   socket: connectSocket(),
    loading:{
     login: false,
     register: false,
