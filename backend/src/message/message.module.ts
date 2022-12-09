@@ -11,11 +11,12 @@ import { Attachment } from '../attachment/entities/attachment.entity';
 import { UserModule } from '../user/user.module';
 import { Member } from '~/database/entities/member.entity';
 import { SocketModule } from '../socket/socket.module';
+import { MessageSocket } from './message.socket';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Message, User, Conversation ,Member]), ConversationModule, UserModule, SocketModule],
   controllers: [MessageController],
-  providers: [MessageService],
+  providers: [MessageService,MessageSocket],
   exports: [MessageService]
 })
 export class MessageModule {}

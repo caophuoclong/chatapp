@@ -75,6 +75,9 @@ interface MessageState {
       data: Array<Array<IMessage>>;
     };
   };
+  progressUploadFile: {
+    [key: string]: number;
+  }
   value: number;
 }
 export const sendMessageThunk = createAsyncThunk(
@@ -113,6 +116,7 @@ const initialState: MessageState = {
   isLoading: false,
   value: 0,
   messages: {},
+  progressUploadFile: {},
 };
 
 export const messageSlice = createSlice({
@@ -175,6 +179,7 @@ export const messageSlice = createSlice({
       console.log(indexMessage);
       if (indexMessage.index === undefined) {
         state.messages[conversationId].data.push([message]);
+        state.messages[conversationId].count += 1;
         return state;
       }
       if (

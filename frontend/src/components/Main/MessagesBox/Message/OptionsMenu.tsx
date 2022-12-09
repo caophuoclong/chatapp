@@ -7,6 +7,8 @@ import moment from 'moment';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import { recallMessage } from '~/app/slices/messages.slice';
 import { updateConversation } from '~/app/slices/conversations.slice';
+import { SocketEvent } from '~/constants/socketEvent';
+import MessagesApi from '../../../../services/apis/Messages.api';
 
 type Props = {
   messageId: string;
@@ -29,24 +31,25 @@ export default function OptionsMenu({
     (state) => state.globalSlice.conversation.choosenConversationID
   );
   const dispatch = useAppDispatch();
-  const onRecallClick = () => {
-    dispatch(
-      recallMessage({
-        conversationId: conversationId,
-        messageId: messageId,
-      })
-    );
-    const updateAt = Date.now();
-
-    dispatch(
-      updateConversation({
-        conversationId,
-        conversation: {
-          updateAt,
-        },
-      })
-    );
-    socket.emit('recallMessage', { conversationId, messageId });
+  const onRecallClick = async () => {
+    try {
+      await MessagesApi.recallMessage(messageId);
+      dispatch(
+        recallMessage({
+          conversationId: conversationId,
+          messageId: messageId,
+        })
+      );
+      const updateAt = Date.now();
+      dispatch(
+        updateConversation({
+          conversationId,
+          conversation: {
+            updateAt,
+          },
+        })
+      );
+    } catch (error) {}
   };
   return (
     <Flex

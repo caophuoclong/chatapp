@@ -11,6 +11,7 @@ import {
   Query,
   ParseUUIDPipe,
   ParseIntPipe,
+  Req,
 } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { CreateMessageDto } from './dto/create-message.dto';
@@ -25,6 +26,7 @@ import {
 import { JWTAuthGuard } from '~/auth/jwt-auth.guard';
 import { isNotEmpty } from 'class-validator';
 import { PaginateDto } from './dto/paginate.dto';
+import { Message } from './entities/message.entity';
 
 @ApiTags('Messages')
 @ApiBearerAuth()
@@ -35,7 +37,6 @@ export class MessageController {
 
   @Post()
   async create(@Body() createMessageDto: CreateMessageDto, @Request() req) {
-    console.log(createMessageDto);
     const { _id } = req.user;
     return this.messageService.sendMessage(createMessageDto);
   }
@@ -64,7 +65,16 @@ export class MessageController {
     const { skip, limit } = paginateQuery;
     return this.messageService.findByConversation(conversationId, _id, skip || 0  , limit || 20);
   }
-
+  @Post("/received")
+  async received(@Body() body: {message: Message}, @Request() req){
+    const { _id } = req.user;
+    this.messageService.markMessageReceived(body.message);
+    return {};
+  }
+  @Patch("/recallmessage")
+  async recallMessage(@Body() body: {messageId: string}){
+    return this.messageService.recallMessage(body.messageId)
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.messageService.findOne(+id);

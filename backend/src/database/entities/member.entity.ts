@@ -1,18 +1,23 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { Conversation } from "~/conversation/entities/conversation.entity";
 import { User } from "~/user/entities/user.entity";
 
 @Entity()
 export class Member{
-    @PrimaryColumn()
+
+    @PrimaryColumn("uuid")
     userId: string;
-    @ManyToOne(type => User)
-    @JoinColumn({name: "userId"})
-    user: User;
-    @PrimaryColumn()
+    @PrimaryColumn("uuid")
     conversationId: string;
-    @ManyToOne(type => Conversation, {onDelete: "CASCADE"})
-    @JoinColumn({name: "conversationId"})
+    @ManyToOne(type => User, user => user._id,{onDelete: "CASCADE"})
+    @JoinColumn({
+        name: "userId"
+    })
+    user: User;
+    @ManyToOne(type => Conversation,conversation => conversation._id, {onDelete: "CASCADE"})
+    @JoinColumn({
+        name: "conversationId"
+    })
     conversation: Conversation;
     @Column({default: false})
     isBlocked: boolean;

@@ -7,6 +7,9 @@ import {
   UnauthorizedException,
   HttpStatus,
   NotFoundException,
+  BadGatewayException,
+  ForbiddenException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, JoinTable, In } from 'typeorm';
@@ -94,26 +97,28 @@ export class UserService {
         },
       });
       if (!user) {
-        throw new NotFoundException("User not found");
+        throw new NotFoundException('User not found');
       }
       const verified = await this.utils.verify(
         loginUserDto.password,
         user.salt,
         user.password,
       );
-        console.log(verified);
       if (!verified) {
-        throw new HttpException('Password does not match', HttpStatus.FORBIDDEN);
+        throw new HttpException(
+          'Password does not match',
+          HttpStatus.FORBIDDEN,
+        );
       }
-      const {_id, email, username, active} = user;
+      const { _id, email, username, active } = user;
       if (!active) {
-        throw new HttpException("INACTIVE", HttpStatus.FORBIDDEN);
+        throw new HttpException('INACTIVE', HttpStatus.FORBIDDEN);
       }
       return {
         _id,
         username,
-        email
-      }
+        email,
+      };
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }
@@ -126,7 +131,10 @@ export class UserService {
         },
       });
       if (!user) {
-        throw new HttpException("Something wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new HttpException(
+          'Something wrong',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
       const verified = await this.utils.verify(
         updatePasswordDto.oldPassword,
@@ -154,33 +162,23 @@ export class UserService {
     try {
       const users = await this.userRepository.find({
         where: {
-          _id: In(usersId.map((us) => us)),
+          _id: In(usersId),
         },
       });
       return {
-        statusCode: 200,
-        message: 'Users found',
         data: users,
       };
     } catch (error) {
-      throw new HttpException(error.message, 400);
+      throw new BadGatewayException(error.message);
     }
   }
   async get(_id: string) {
     try {
       const user = await this.userRepository.findOne({
-        where: {
-          _id: _id,
-        },
-        relations: {
-          conversations: true,
-        },
-        select: {
-          _id: true,
-        },
+        where: { _id },
       });
       if (!user) {
-        throw new HttpException('User not found', 400);
+        throw new NotFoundException('User not found');
       }
       return {
         statusCode: 200,
@@ -188,7 +186,7 @@ export class UserService {
         data: user,
       };
     } catch (error) {
-      throw new HttpException(error.message, 403);
+      throw new ForbiddenException(error.message);
     }
   }
   async getMe(_id: string) {
@@ -233,7 +231,7 @@ export class UserService {
       if (!user) {
         throw new HttpException('User not found', 400);
       }
-      
+
       const friends = user.friendRequest.filter((friend) => {
         delete friend.userAddress.salt;
         delete friend.userAddress.password;
@@ -285,94 +283,38 @@ export class UserService {
       throw new HttpException(error.message, 400);
     }
   }
-  async getListConversations(_id: string) {
+  async getListConversations(userId: string) {
+    
     try {
-      // const user = await this.userRepository.findOne({
-      //   where: {
-      //     _id,
-      //   },
-      //   relations: {
-      //     conversations: {
-      //       conversation: {
-      //       owner: true,
-      //       blockBy: true,
-      //       lastMessage: true,
-      //       friendship:{
-      //         userAddress: true,
-      //         userRequest: true,
-      //         statusCode: true
-      //       },
-      //       }
-
-      //     },
-      //   },
-
-      //   order:{
-      //     conversations: {
-      //       conversation: {
-      //         lastMessage:{
-      //           createdAt: 'DESC'
-      //         }
-      //       }
-      //     }
-      //   },
-      // });
-      // console.log("🚀 ~ file: user.service.ts ~ line 322 ~ UserService ~ getListConversations ~ user", user)
-      const user = await this.userRepository.findOne({
-        where: {
-          _id: _id,
-        },
-      });
-      // console.log(
-      //   '🚀 ~ file: user.service.ts ~ line 325 ~ UserService ~ getListConversations ~ user',
-      //   user,
-      // );
-      if (!user) {
-        throw new HttpException('User not found', 400);
+      if (!userId) {
+        throw new NotFoundException('User not found');
       }
-      const conversations = await this.memberRepository.find({
+      const members = await this.memberRepository.find({
         where: {
-          userId: user._id,
+          user: {
+            _id: userId,
+          },
           isDeleted: false,
         },
         relations: {
-          conversation: {
-            owner: true,
-            blockBy: true,
-            lastMessage: true,
-            friendship: {
-              userAddress: true,
-              userRequest: true,
-              statusCode: true,
-            },
-          },
+          conversation: true,
         },
-        order:{
-          conversation: {
-            lastMessage:{
-              createdAt: 'DESC'
-            }
-          }
-        }
       });
-      for (let i = 0; i < conversations.length; i++) {
-        const co = conversations[i];
-        const participants =
-          await this.conversationService.getUserOfConversation(
-            co.conversationId,
-          );
-        conversations[i].conversation.participants = participants.data;
-      }
+      const conversationsId = members.map((member) => member.conversation._id);
+      const conversations =
+        await this.conversationService.getListConversationsById(
+          conversationsId,
+        );
+      
       return {
-        statusCode: 200,
-        message: 'User found',
-        data: [
-          ...conversations.map((conversation) => conversation.conversation),
-        ],
+        data: conversations.map((conversation)=>({
+          ...conversation,
+          participants: conversation.participants.map(par => par.user)
+        }))
       };
     } catch (error) {
       console.log('hi', error);
-      throw new HttpException(error.message, 400);
+      throw new InternalServerErrorException(error.message);
     }
   }
   async updateInfo(updateUserDto: UpdateUserDto, _id: string) {
@@ -536,7 +478,7 @@ export class UserService {
         token: token,
       },
       relations: ['user'],
-    })
+    });
     if (!tokenResult)
       return {
         statusCode: 400,
@@ -574,10 +516,7 @@ export class UserService {
       _id: _id,
     });
     if (!user)
-      return {
-        statusCode: 404,
-        message: 'User not found',
-      };
+      throw new NotFoundException('User not found');
     if (status === 'ONLINE') user.lastOnline = 0;
     else user.lastOnline = Date.now();
     await this.userRepository.save(user);

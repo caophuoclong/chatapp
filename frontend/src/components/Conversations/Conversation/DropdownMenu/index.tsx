@@ -20,6 +20,7 @@ import {
   removeMessageFromMessages,
 } from '~/app/slices/messages.slice';
 import { removeConversation } from '~/app/slices/conversations.slice';
+import { SocketEvent } from '~/constants/socketEvent';
 export type DialogType = 'delete_conversation' | '';
 type Props = {
   isOpen: boolean;
@@ -105,9 +106,8 @@ export default function DropDownMenu({ isOpen, onClose, _id }: Props) {
               duration: 1000,
             });
           } else {
-            if (socket) {
-              socket.emit('leaveRoom', _id);
-            }
+            const response = await ConversationsApi.deleteConversation(_id);
+            console.log(response);
             dispatch(removeMessageFromMessages(_id));
             dispatch(removeConversation(_id));
             toast({

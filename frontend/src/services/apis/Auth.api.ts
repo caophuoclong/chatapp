@@ -1,7 +1,6 @@
 import { IRegisterRequest } from "~/interfaces/IRegister";
 import axiosClient from "../axiosClient";
 import { ILoginRequest, ILoginResponse } from '~/interfaces/ILogin';
-import { Http2ServerResponse } from "http2";
 
 export default class Auth{
     static async login({username,password}: ILoginRequest){
@@ -57,7 +56,7 @@ export default class Auth{
             token
         })
     }
-    static async getSokcetToken(){
+    static async getSocketToken(){
         return await axiosClient.get("/auth/socket")
     }
 }

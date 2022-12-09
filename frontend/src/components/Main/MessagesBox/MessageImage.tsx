@@ -23,6 +23,7 @@ export default function MessageImage({ isLast, messages, other }: Props) {
       <Box>
         {messages.length === 1 && (
           <Image
+            loading="lazy"
             marginRight={0}
             width={'270.1px'}
             height={'370px'}
@@ -35,6 +36,7 @@ export default function MessageImage({ isLast, messages, other }: Props) {
           <Flex width={'400px'} gap=".5rem" justifyContent={'right'}>
             {messages.map((message, index) => (
               <Image
+                loading="lazy"
                 border={'0.5px solid white'}
                 maxWidth={'50%'}
                 width="182.5px"
@@ -55,6 +57,7 @@ export default function MessageImage({ isLast, messages, other }: Props) {
           >
             {messages.map((message, index) => (
               <Image
+                loading="lazy"
                 border={'0.5px solid white'}
                 width={index > 0 && index % 3 === 0 ? '100%' : '32%'}
                 height={'170px'}
