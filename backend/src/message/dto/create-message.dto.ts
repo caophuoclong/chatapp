@@ -23,15 +23,11 @@ export class CreateMessageDto {
     @ApiPropertyOptional({
         description: "Message can attach something"
     })
-    @Optional()
-    attachment: Array<string>;
     @ApiPropertyOptional({
         description: "When reply message"
     })
     @Optional()
     parentMessage: string;
-    @Optional()
-    updateAt: number;
     @Optional()
     type: MessageType;
     @Optional()

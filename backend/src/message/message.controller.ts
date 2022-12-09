@@ -12,6 +12,7 @@ import {
   ParseUUIDPipe,
   ParseIntPipe,
   Req,
+  UseInterceptors,
 } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { CreateMessageDto } from './dto/create-message.dto';
@@ -27,6 +28,8 @@ import { JWTAuthGuard } from '~/auth/jwt-auth.guard';
 import { isNotEmpty } from 'class-validator';
 import { PaginateDto } from './dto/paginate.dto';
 import { Message } from './entities/message.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @ApiTags('Messages')
 @ApiBearerAuth()
@@ -75,18 +78,26 @@ export class MessageController {
   async recallMessage(@Body() body: {messageId: string}){
     return this.messageService.recallMessage(body.messageId)
   }
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.messageService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMessageDto: UpdateMessageDto) {
-    return this.messageService.update(+id, updateMessageDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.messageService.remove(+id);
+  @Post("/file")
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: "./images",
+      filename: (req, file, cb) => {
+        if(file){
+          const fileName = `${Date.now()}-${file.originalname}`;
+          cb(null, fileName)
+          req.body.fileName = fileName;
+        }
+      }
+    })
+  }))
+  async uploadFile(@Body() body: {file: Express.Multer.File, message: string, fileName: string}){
+    const {file, message} = body;
+    const newMessage =JSON.parse(message)
+    return this.messageService.sendMessage({
+      ...newMessage,
+      content: body.fileName,
+      destination: newMessage.destination,
+    })
   }
 }
