@@ -23,10 +23,9 @@ export default function OptionsMenu({
   isRecall,
   other,
 }: Props) {
+  console.log(time, isRecall);
   const { t } = useTranslation();
-  const socket = useAppSelector((state) => state.globalSlice.socket);
-
-  const distance = new Date().getTime() - +time;
+  const distance = Date.now() - +time;
   const conversationId = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );

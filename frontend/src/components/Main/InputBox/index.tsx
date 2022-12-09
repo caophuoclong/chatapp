@@ -75,6 +75,7 @@ import { MdLibraryAdd } from 'react-icons/md';
 import { unwrapResult } from '@reduxjs/toolkit';
 import { EMOJI_SCALE_EVERY, TIME_SCALE } from '~/configs';
 import { useCountUp } from 'react-countup';
+import { sendMessageAsFile } from '~/utils/sendMessageAsFile';
 type Props = {
   conversation: IConversation;
 };
@@ -344,25 +345,18 @@ export default function InputBox({ conversation }: Props) {
       url: string;
     }>
   >([]);
-  const handleUploadImages = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadImages = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const { files } = event.target;
-    const filesUrl = [];
-    for (let i = 0; i < files!.length || 0; i++) {
-      const url = window.URL.createObjectURL(files![i]);
-      filesUrl.push(url);
-    }
-    const createdAt = Date.now();
-    const messages = filesUrl.map((url) =>
-      createRawMessage(MessageType.IMAGE, url, createdAt)
+    await sendMessageAsFile(
+      files,
+      user,
+      choosenConversationId,
+      MessageType.IMAGE,
+      conversation.lastMessage,
+      dispatch
     );
-    messages.forEach((message) => {
-      dispatch(
-        addMessage({
-          message,
-          conversationId: choosenConversationId,
-        })
-      );
-    });
   };
   const toast = useToast();
   return (

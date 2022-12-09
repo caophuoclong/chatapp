@@ -31,4 +31,20 @@ export default class MessagesApi{
         }>("/message",message)
         return response;
     }
+    static async sendFileMessage(data: FormData, func: (e: ProgressEvent)=>void){
+        return new Promise<{
+            message: IMessage,
+            tempId: string
+        }>(async(resolve, reject)=>{
+            try{
+                const response = await axiosClient.post("/message/file", data, {
+                    onUploadProgress: func
+                }
+                );
+                resolve(response.data);
+            }catch(error){
+                reject(error);
+            }
+        })
+    }
 }

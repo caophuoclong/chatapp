@@ -129,7 +129,7 @@ export default function Home({}: Props) {
           );
           dispatch(addConversation(conversation.data));
         }
-        MessagesApi.markReceivedMessage({
+        await MessagesApi.markReceivedMessage({
           ...data,
           destination: {
             _id: data.destination,
@@ -146,12 +146,7 @@ export default function Home({}: Props) {
       socket.on(
         SocketEvent.MARK_RECEIVED_MESSAGE,
         (data: MarkReceiveMessage) => {
-          console.log(data);
           const { conversationId, messagesId } = data;
-          console.log(
-            '🚀 ~ file: index.tsx:148 ~ useEffect ~ messagesId',
-            messagesId
-          );
           messagesId.forEach((messageId) => {
             dispatch(updateReceivedMessage({ conversationId, messageId }));
           });
