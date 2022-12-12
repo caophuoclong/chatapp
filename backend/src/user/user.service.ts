@@ -296,11 +296,12 @@ export class UserService {
           },
           isDeleted: false,
         },
-        relations: {
-          conversation: true,
-        },
+        select: {
+          conversationId: true,
+        }
       });
-      const conversationsId = members.map((member) => member.conversation._id);
+      
+      const conversationsId = members.map((member) => member.conversationId);
       const conversations =
         await this.conversationService.getListConversationsById(
           conversationsId,

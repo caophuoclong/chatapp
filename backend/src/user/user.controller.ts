@@ -49,9 +49,11 @@ export class UserController {
     return this.userService.getListFriend(_id);
   }
   @Get("conversations")
-  getConversations(@Request() req) {
+  async getConversations(@Request() req) {
     const _id = req.user._id;
-    return this.userService.getListConversations(_id);
+    const response = await this.userService.getListConversations(_id);
+    console.log("🚀 ~ file: user.controller.ts:55 ~ UserController ~ getConversations ~ response", response.data[0].lastMessage)
+    return response;
   }
   @Get('/:_id')
   getOther(@Param('_id') id) {

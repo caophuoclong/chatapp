@@ -9,6 +9,7 @@ import {
   Box,
   Button,
   Flex,
+  SkeletonText,
   Stack,
   Text,
   useBreakpoint,
@@ -78,7 +79,9 @@ export default function Conversation({
   );
   const { t } = useTranslation();
   const myId = useAppSelector((state) => state.userSlice.info._id);
-  const messages = useAppSelector((state) => state.messageSlice.messages);
+  const messagesSlice = useAppSelector((state) => state.messageSlice);
+  const messages = messagesSlice.messages;
+
   const messagesInConversation = messages[_id];
   const [latestMessage, setLatestMessage] = useState<IMessage>();
   useEffect(() => {
@@ -164,7 +167,15 @@ export default function Conversation({
             <RenderDirectConversationName participants={participants} />
           )}
         </Text>
-        {latestMessage ? (
+        {messagesSlice.isLoading ? (
+          <SkeletonText
+            mt="4"
+            noOfLines={1}
+            spacing="4"
+            skeletonHeight="2"
+            width={'90%'}
+          />
+        ) : latestMessage ? (
           latestMessage.isRecall ? (
             <Text color="gray.500" size="sm">
               {t('This__Message__HasBeen__Recalled')}

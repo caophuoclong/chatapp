@@ -57,7 +57,7 @@ export default function Main({ choosenConversation }: Props) {
     <Flex
       width={{
         base: '100%',
-        lg: '75%',
+        lg: 'calc(100% - 420px)',
       }}
       boxSizing="border-box"
       direction={'column'}

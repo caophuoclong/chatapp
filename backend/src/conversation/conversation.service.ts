@@ -564,6 +564,11 @@ export class ConversationService {
             user: true,
           },
         },
+        select:{
+          lastMessage: {
+            _id: true
+          }
+        }
         
       });
       return response;

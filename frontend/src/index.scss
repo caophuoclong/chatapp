@@ -140,4 +140,9 @@ $check-color: $brand-success;
     background-color: #000;
   }
 }
-// Chcek is dark mode
+.capitalize::first-letter{
+  text-transform: capitalize;
+}
+// if first letter is a number, make it  lowercase
+
+

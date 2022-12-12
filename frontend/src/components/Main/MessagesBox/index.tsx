@@ -135,6 +135,7 @@ export default function MessagesBox({}: Props) {
                   bg={colorMode === 'dark' ? 'gray.700' : 'gray.200'}
                   rounded="lg"
                   paddingX=".5rem"
+                  className="capitalize"
                 >
                   {dailyFromNow(getMinCreated(group))}
                 </Text>
