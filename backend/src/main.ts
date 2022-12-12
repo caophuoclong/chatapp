@@ -10,8 +10,9 @@ import { CatchHttpException } from './exceptions/HttpException';
 dotenv.config()
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const whiteList = process.env.CORS.split(",").map(item => item.trim());
   app.enableCors({
-    origin: ["http://192.168.193.194:3000", "http://localhost:3000", "https://6325fb1041b1717377238ccc--sparkling-gaufre-774277.netlify.app", "https://bebes.site", "http://bebes.site", "http://www.bebes.site", "https://www.bebes.site", "http://192.168.183.194:3000"],
+    origin: whiteList,
     credentials: true
   });
   const config = new DocumentBuilder()
