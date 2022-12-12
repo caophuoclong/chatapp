@@ -52,8 +52,8 @@ export class MessageService {
       if (conversation) {
         message.destination = conversation;
         conversation.lastMessage = message;
-        conversation.updateAt = Date.now();
-        message.createdAt = Date.now();
+        conversation.updateAt = createMessageDto.createdAt
+        message.createdAt = createMessageDto.createdAt
         const data = await this.messageRepository.save(message);
         await this.conversationRepository.save(conversation);
         const destinationId = message.destination._id;

@@ -33,4 +33,6 @@ export class CreateMessageDto {
     @Optional()
     scale: number;
     sender: User
+    @Optional()
+    createdAt: number;
 }
