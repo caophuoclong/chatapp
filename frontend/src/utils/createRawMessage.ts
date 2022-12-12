@@ -8,7 +8,6 @@ import { IUser } from '../interfaces/IUser';
     sender: IUser,
     destination: string,
     createdAt?: number,
-
   ) => {
     const message: IMessage = {
       _id: (Date.now() + randomInt(0, 9999)).toString(),

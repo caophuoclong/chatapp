@@ -1,4 +1,4 @@
-import { Flex, useColorMode } from '@chakra-ui/react';
+import { Box, Flex, useColorMode } from '@chakra-ui/react';
 import React from 'react';
 
 import Conversations from '~/components/Conversations';
@@ -19,10 +19,10 @@ export default function LeftBar({}: Props) {
   const location = useLocation();
   const showScreen = useAppSelector((state) => state.globalSlice.showScreen);
   return (
-    <Flex
+    <Box
       width={{
         base: '100%',
-        lg: '21%',
+        lg: '350px',
       }}
       borderRight={
         colorMode === 'dark'
@@ -31,31 +31,23 @@ export default function LeftBar({}: Props) {
       }
     >
       <Flex
-        width={{
-          base: '100%',
-        }}
+        height="85px"
+        padding="1rem"
         boxSizing="border-box"
-        direction="column"
+        zIndex={50}
+        justifyContent="center"
+        alignItems="center"
+        direction={{
+          lg: 'column',
+        }}
+        gap=".3rem"
       >
-        <Flex
-          height="10%"
-          paddingX="1rem"
-          boxSizing="border-box"
-          zIndex={50}
-          justifyContent="center"
-          alignItems="center"
-          direction={{
-            lg: 'column',
-          }}
-          gap=".3rem"
-        >
-          <FunctionBar />
-          <SearchBar />
-        </Flex>
-        {showScreen === ENUM_SCREEN.CONVERSATIONS && <Conversations />}
-        {showScreen === ENUM_SCREEN.CONTACTS && <LeftFriends />}
-        <Footer />
+        <FunctionBar />
+        <SearchBar />
       </Flex>
-    </Flex>
+      {showScreen === ENUM_SCREEN.CONVERSATIONS && <Conversations />}
+      {showScreen === ENUM_SCREEN.CONTACTS && <LeftFriends />}
+      <Footer />
+    </Box>
   );
 }

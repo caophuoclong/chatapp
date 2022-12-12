@@ -47,8 +47,6 @@ function App() {
     xl: '1200px',
     '2xl': '1536px',
   };
-
-  const theme = extendTheme({ breakpoints: brakePoints });
   useEffect(() => {
     const lan = (window.localStorage.getItem('lan') || 'vn') as 'en' | 'vn';
     dispatch(handleChangeLanguage(lan));

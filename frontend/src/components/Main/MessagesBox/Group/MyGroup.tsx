@@ -46,12 +46,7 @@ export default function MyGroup({ group, lastGroup }: Props) {
   }
   return (
     <Group right>
-      <Flex
-        flexDirection={'column'}
-        gap=".25rem"
-        maxWidth="40%"
-        alignItems="flex-end"
-      >
+      <Flex flexDirection={'column'} gap=".25rem" alignItems="flex-end">
         {messages.map((group, index) =>
           group[0].type === MessageType.IMAGE ? (
             <MessageImage

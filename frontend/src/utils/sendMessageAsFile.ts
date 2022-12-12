@@ -13,10 +13,11 @@ export const sendMessageAsFile = async (
   dispatch: AppDispatch
 ) => {
   const filesUrl = [];
+  const createdAt = Date.now();
   for (let i = 0; i < files!.length || 0; i++) {
     const url = window.URL.createObjectURL(files![i]);
     filesUrl.push(url);
-    const newMessage = createRawMessage(type, url, sender, destination);
+    const newMessage = createRawMessage(type, url, sender, destination, createdAt);
     dispatch(
       addMessage({
         message: newMessage,

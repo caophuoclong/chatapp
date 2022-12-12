@@ -40,6 +40,8 @@ export default function MessageImage({ isLast, messages, other }: Props) {
   };
   return (
     <Flex
+      width="100%"
+      justifyContent={'flex-end'}
       marginRight={!other && !isLast ? '1rem' : '0'}
       marginLeft={other && !isLast ? '1rem' : '0'}
       flexDirection={other ? 'row-reverse' : 'row'}
@@ -65,30 +67,70 @@ export default function MessageImage({ isLast, messages, other }: Props) {
           />
         ) : (
           messages.length === 1 && (
-            <Image
-              loading="lazy"
-              marginRight={0}
-              width={'270.1px'}
-              height={'370px'}
-              key={messages[0]._id}
-              src={parseUrl(messages[0].content)}
-              rounded="lg"
-            />
+            <Box position={'relative'} role="group" cursor={'pointer'}>
+              <Image
+                fallbackSrc="https://via.placeholder.com/270x370"
+                loading="lazy"
+                marginRight={0}
+                width={'270.1px'}
+                height={'370px'}
+                key={messages[0]._id}
+                src={parseUrl(messages[0].content)}
+                rounded="lg"
+              />
+              <Box
+                position={'absolute'}
+                top="0"
+                left="0"
+                right={0}
+                bottom={0}
+                width="100%"
+                height="100%"
+                bgColor={'black'}
+                opacity={0}
+                _groupHover={{
+                  opacity: 0.5,
+                }}
+              ></Box>
+            </Box>
           )
         )}
         {messages.length > 1 && messages.length <= 2 && (
           <Flex width={'400px'} gap=".5rem" justifyContent={'right'}>
             {messages.map((message, index) => (
-              <Image
-                loading="lazy"
-                border={'0.5px solid white'}
-                maxWidth={'50%'}
-                width="182.5px"
-                height={'250px'}
-                key={message._id}
-                src={parseUrl(message.content)}
-                rounded="lg"
-              />
+              <Box
+                position={'relative'}
+                role="group"
+                cursor={'pointer'}
+                _hover={{
+                  '&>div': {
+                    opacity: 0.5,
+                  },
+                }}
+              >
+                <Image
+                  loading="lazy"
+                  border={'0.5px solid white'}
+                  maxWidth={'50%'}
+                  fallbackSrc="https://via.placeholder.com/182x250"
+                  width="182.5px"
+                  height={'250px'}
+                  key={message._id}
+                  src={parseUrl(message.content)}
+                  rounded="lg"
+                />
+                <Box
+                  position={'absolute'}
+                  top="0"
+                  left="0"
+                  right={0}
+                  bottom={0}
+                  width="100%"
+                  height="100%"
+                  bgColor={'black'}
+                  opacity={0}
+                ></Box>
+              </Box>
             ))}
           </Flex>
         )}
@@ -100,15 +142,41 @@ export default function MessageImage({ isLast, messages, other }: Props) {
             justifyContent={'flex-end'}
           >
             {messages.map((message, index) => (
-              <Image
-                loading="lazy"
-                border={'0.5px solid white'}
+              <Box
+                position={'relative'}
                 width={index > 0 && index % 3 === 0 ? '100%' : '32%'}
                 height={'170px'}
-                key={message._id}
-                src={parseUrl(message.content)}
-                rounded="lg"
-              />
+                cursor={'pointer'}
+                _hover={{
+                  '&>div': {
+                    opacity: 0.5,
+                  },
+                }}
+              >
+                <Image
+                  loading="lazy"
+                  border={'0.5px solid white'}
+                  fallbackSrc={`https://via.placeholder.com/${
+                    index > 0 && index % 3 === 0 ? '100%' : '32%'
+                  }x170`}
+                  width="100%"
+                  height="100%"
+                  key={message._id}
+                  src={parseUrl(message.content)}
+                  rounded="lg"
+                />
+                <Box
+                  position={'absolute'}
+                  top="0"
+                  left="0"
+                  right={0}
+                  bottom={0}
+                  width="100%"
+                  height="100%"
+                  bgColor={'black'}
+                  opacity={0}
+                ></Box>
+              </Box>
             ))}
           </Flex>
         )}

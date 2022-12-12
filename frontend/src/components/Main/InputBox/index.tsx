@@ -107,6 +107,7 @@ export default function InputBox({ conversation }: Props) {
   const [content, setContent] = useState('');
   const [isPickerShow, setIsPickerShow] = useState(false);
   const { colorMode } = useColorMode();
+  const inputFileRef = useRef<HTMLInputElement>(null);
   const [emojiState, emojiDispatch] = useReducer<
     Reducer<IinitialEmojiState, EmojiAction>
   >(EmojiReducer, initialEmojiState);
@@ -357,6 +358,9 @@ export default function InputBox({ conversation }: Props) {
       conversation.lastMessage,
       dispatch
     );
+    if (inputFileRef.current) {
+      inputFileRef.current.value = '';
+    }
   };
   const toast = useToast();
   return (
@@ -404,13 +408,16 @@ export default function InputBox({ conversation }: Props) {
           />
           <IconButton
             bg="none"
+            as="label"
             justifyContent={'center'}
+            htmlFor="attachUpload"
             aria-label="File"
             icon={<GrAttachment fontSize={'24px'} />}
           />
         </Flex>
       )}
       <input
+        ref={inputFileRef}
         id="imagesupload"
         accept="image/png, image/jpeg, image/jpg"
         multiple
@@ -418,7 +425,7 @@ export default function InputBox({ conversation }: Props) {
         hidden
         onChange={handleUploadImages}
       />
-
+      <input ref={inputFileRef} id="attachUpload" multiple type="file" hidden />
       <Flex
         gap="5px"
         paddingY=".5rem"

@@ -83,10 +83,7 @@ export default function Header({
   return (
     <Flex
       boxSizing="border-box"
-      minHeight={{
-        base: '6%',
-        lg: '6%',
-      }}
+      minHeight="55px"
       alignItems="center"
       justifyContent={'flex-start'}
       paddingX="1rem"

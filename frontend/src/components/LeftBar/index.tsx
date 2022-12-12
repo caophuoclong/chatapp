@@ -1,4 +1,4 @@
-import { Flex, useColorMode } from '@chakra-ui/react';
+import { Box, Flex, useColorMode } from '@chakra-ui/react';
 import React from 'react';
 
 import Conversations from '../Conversations';
@@ -26,9 +26,6 @@ export default function LeftBar({}: Props) {
       }}
     >
       <Flex
-        width={{
-          base: '100%',
-        }}
         boxSizing="border-box"
         borderRight={
           colorMode === 'dark'
@@ -37,21 +34,16 @@ export default function LeftBar({}: Props) {
         }
         direction="column"
       >
-        <Flex
+        <Box
           height="10%"
           paddingX="1rem"
           boxSizing="border-box"
           zIndex={50}
-          justifyContent="center"
-          alignItems="center"
-          direction={{
-            lg: 'column',
-          }}
           gap=".3rem"
         >
           <FunctionBar />
           <SearchBar />
-        </Flex>
+        </Box>
         {showScreen === ENUM_SCREEN.CONVERSATIONS && <Conversations />}
         {showScreen === ENUM_SCREEN.CONTACTS && <LeftFriends />}
         <Footer />

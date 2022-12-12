@@ -145,6 +145,7 @@ export default function Message({
   const { t } = useTranslation();
   return (
     <Flex
+      width="100%"
       onMouseOver={handleMouseOver}
       onMouseOut={handleMouseOut}
       role="group"
@@ -152,8 +153,10 @@ export default function Message({
       marginRight={!other && !isLast ? '1rem' : '0'}
       marginLeft={other && !isLast ? '1rem' : '0'}
       flexDirection={other ? 'row-reverse' : 'row'}
+      justifyContent={'flex-end'}
     >
       <Box
+        minW={'120px'}
         marginRight={other ? 'none' : '1rem'}
         marginLeft={other ? '1rem' : 'none'}
       >
@@ -167,6 +170,7 @@ export default function Message({
         )}
       </Box>
       <Box
+        minW={'32px'}
         marginRight={other ? 'none' : '.5rem'}
         marginLeft={other ? '.5rem' : 'none'}
         fontSize={'16px'}
