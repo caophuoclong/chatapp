@@ -68,18 +68,34 @@ const getMaxCreatedAt = (messages: IMessage[]) => {
 };
 // const convertTwoDimensionalArray = (array: Array<IMessage>) => {
 interface MessageState {
-  isLoading: boolean;
+  isLoading: {
+    messages: boolean;
+    messagesImages: boolean;
+  };
   messages: {
     [key: string]: {
       count: number;
       data: Array<Array<IMessage>>;
     };
   };
+  messagesImages: {
+    [key: string]: {
+      data: Array<IMessage>;
+    },
+  }
   progressUploadFile: {
     [key: string]: number;
   }
   value: number;
 }
+export const getMessageTypeImage = createAsyncThunk("get image messages",async (conversationId: string)=>{
+  const response = await MessagesApi.getMessageImage(conversationId);
+  const data = response.data as {
+      conversationId: string;
+      messages: IMessage[];
+    }
+  return data;
+})
 export const sendMessageThunk = createAsyncThunk(
   'send message',
   async (
@@ -113,9 +129,14 @@ export const getMessages = createAsyncThunk(
 );
 // Define the initial state using that type
 const initialState: MessageState = {
-  isLoading: false,
+  isLoading: {
+    messages: false,
+    messagesImages: false,
+
+  },
   value: 0,
   messages: {},
+  messagesImages: {},
   progressUploadFile: {},
 };
 
@@ -313,12 +334,12 @@ export const messageSlice = createSlice({
   },
   extraReducers(builder) {
     builder.addCase(getMessages.pending, (state: MessageState) => {
-      state.isLoading = true;
+      state.isLoading.messages = true;
     });
     builder.addCase(
       getMessages.fulfilled,
       (state: MessageState, action: PayloadAction<any>) => {
-        state.isLoading = false;
+        state.isLoading.messages = false;
         const { conversationId, data: messages, count } = action.payload.data;
         if (state.messages[action.payload.data.conversationId] === undefined) {
           state.messages[action.payload.data.conversationId] = {
@@ -349,6 +370,23 @@ export const messageSlice = createSlice({
         state.messages[conversationId].count = count;
       }
     );
+    builder.addCase(getMessageTypeImage.pending, (state)=>{
+      state.isLoading.messagesImages = true;
+    })
+    builder.addCase(getMessageTypeImage.fulfilled, (state, action: PayloadAction<{
+      conversationId: string;
+      messages: IMessage[];
+    }>)=>{
+      const {conversationId, messages} = action.payload;
+      if(state.messagesImages[conversationId] === undefined){
+        state.messagesImages[conversationId] = {
+          data: [],
+        };
+      }
+      state.messagesImages[conversationId].data = messages;
+      state.isLoading.messagesImages = false;
+      return state;
+    })
   },
 });
 

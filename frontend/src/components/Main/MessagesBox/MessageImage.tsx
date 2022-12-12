@@ -1,4 +1,12 @@
-import { Avatar, Box, Flex, Image, Text, useColorMode } from '@chakra-ui/react';
+import {
+  Avatar,
+  Box,
+  Flex,
+  Image,
+  Text,
+  useColorMode,
+  useDisclosure,
+} from '@chakra-ui/react';
 import moment from 'moment';
 import React, { MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +16,9 @@ import { showStatus } from './Message';
 import { SERVER_URL } from '~/configs';
 import OptionsMenu from './Message/OptionsMenu';
 import RecallMessage from './Message/RecallMessage';
+import ViewImages from './ViewImages';
+import { useAppDispatch, useAppSelector } from '~/app/hooks';
+import { getMessageTypeImage } from '~/app/slices/messages.slice';
 type Props = {
   messages: IMessage[];
   isLast?: boolean;
@@ -17,18 +28,15 @@ type Props = {
 export default function MessageImage({ isLast, messages, other }: Props) {
   const { t } = useTranslation();
   const [showOptionsMenu, setShowOptionsMenu] = React.useState(false);
-  const parseUrl = (content?: string) => {
-    // check if content is a url
-    if (!content) return '';
-    if (
-      content.startsWith('http:') ||
-      content.startsWith('data:image') ||
-      content.startsWith('blob:')
-    ) {
-      return content;
-    }
-    return `${SERVER_URL}/images/${content}`;
-  };
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [imagesClicked, setImagesClicked] = React.useState<string>('');
+  const messagesImages = useAppSelector(
+    (state) => state.messageSlice.messagesImages
+  );
+  const choosendConversation = useAppSelector(
+    (state) => state.globalSlice.conversation.choosenConversationID
+  );
+  const dispatch = useAppDispatch();
   const handleMouseOver = (e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     setShowOptionsMenu(true);
@@ -37,6 +45,13 @@ export default function MessageImage({ isLast, messages, other }: Props) {
   const handleMouseOut = (e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     setShowOptionsMenu(false);
+  };
+  const handleOnClick = (imagesClicked?: string) => {
+    if (!messagesImages[choosendConversation]) {
+      dispatch(getMessageTypeImage(choosendConversation));
+    }
+    setImagesClicked(imagesClicked || '');
+    onOpen();
   };
   return (
     <Flex
@@ -50,6 +65,14 @@ export default function MessageImage({ isLast, messages, other }: Props) {
       onMouseOut={handleMouseOut}
       alignItems={'center'}
     >
+      {isOpen && (
+        <ViewImages
+          isOpen={isOpen}
+          onClose={onClose}
+          imagesClicked={imagesClicked}
+        />
+      )}
+
       {showOptionsMenu && messages.length === 1 && (
         <OptionsMenu
           messageId={messages[0]._id}
@@ -67,7 +90,14 @@ export default function MessageImage({ isLast, messages, other }: Props) {
           />
         ) : (
           messages.length === 1 && (
-            <Box position={'relative'} role="group" cursor={'pointer'}>
+            <Box
+              position={'relative'}
+              role="group"
+              cursor={'pointer'}
+              onClick={() => {
+                handleOnClick(messages[0]._id);
+              }}
+            >
               <Image
                 fallbackSrc="https://via.placeholder.com/270x370"
                 loading="lazy"
@@ -75,7 +105,7 @@ export default function MessageImage({ isLast, messages, other }: Props) {
                 width={'270.1px'}
                 height={'370px'}
                 key={messages[0]._id}
-                src={parseUrl(messages[0].content)}
+                src={renderAvatar(messages[0].content)}
                 rounded="lg"
               />
               <Box
@@ -99,6 +129,7 @@ export default function MessageImage({ isLast, messages, other }: Props) {
           <Flex width={'400px'} gap=".5rem" justifyContent={'right'}>
             {messages.map((message, index) => (
               <Box
+                key={message._id}
                 position={'relative'}
                 role="group"
                 cursor={'pointer'}
@@ -106,6 +137,9 @@ export default function MessageImage({ isLast, messages, other }: Props) {
                   '&>div': {
                     opacity: 0.5,
                   },
+                }}
+                onClick={() => {
+                  handleOnClick(message._id);
                 }}
               >
                 <Image
@@ -116,7 +150,7 @@ export default function MessageImage({ isLast, messages, other }: Props) {
                   width="182.5px"
                   height={'250px'}
                   key={message._id}
-                  src={parseUrl(message.content)}
+                  src={renderAvatar(message.content)}
                   rounded="lg"
                 />
                 <Box
@@ -143,6 +177,7 @@ export default function MessageImage({ isLast, messages, other }: Props) {
           >
             {messages.map((message, index) => (
               <Box
+                key={message._id}
                 position={'relative'}
                 width={index > 0 && index % 3 === 0 ? '100%' : '32%'}
                 height={'170px'}
@@ -151,6 +186,9 @@ export default function MessageImage({ isLast, messages, other }: Props) {
                   '&>div': {
                     opacity: 0.5,
                   },
+                }}
+                onClick={() => {
+                  handleOnClick(message._id);
                 }}
               >
                 <Image
@@ -161,8 +199,7 @@ export default function MessageImage({ isLast, messages, other }: Props) {
                   }x170`}
                   width="100%"
                   height="100%"
-                  key={message._id}
-                  src={parseUrl(message.content)}
+                  src={renderAvatar(message.content)}
                   rounded="lg"
                 />
                 <Box

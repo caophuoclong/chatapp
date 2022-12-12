@@ -370,7 +370,7 @@ export default function InputBox({ conversation }: Props) {
       _dark={{
         bg: 'gray.800',
       }}
-      bg="gray.100"
+      bg="white"
       paddingX={{
         base: '0rem',
         lg: '0rem',

@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@chakra-ui/icons": "^2.0.8",
-    "@chakra-ui/react": "^2.2.8",
+    "@chakra-ui/icons": "^2.0.13",
+    "@chakra-ui/react": "^2.4.3",
     "@emoji-mart/data": "^1.0.6",
     "@emoji-mart/react": "^1.0.1",
-    "@emotion/react": "^11.10.0",
-    "@emotion/styled": "^11.10.0",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
     "@hookform/resolvers": "^2.9.8",
     "@reduxjs/toolkit": "^1.8.4",
     "@testing-library/jest-dom": "^5.16.1",
@@ -26,7 +26,7 @@
     "dexie-react-hooks": "^1.1.1",
     "emoji-mart": "^5.2.2",
     "emoji-picker-react": "^4.2.0",
-    "framer-motion": "^7.2.0",
+    "framer-motion": "^7.6.19",
     "html-react-parser": "^3.0.4",
     "i18next": "^21.9.1",
     "lottie-react": "^2.3.1",
@@ -90,6 +90,7 @@
     ]
   },
   "devDependencies": {
+    "@faker-js/faker": "^7.6.0",
     "@types/crypto-js": "^4.1.1",
     "@types/emoji-mart": "^3.0.9",
     "@types/react-datepicker": "^4.4.2",

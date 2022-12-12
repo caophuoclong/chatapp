@@ -1,4 +1,11 @@
-import { Avatar, Box, Flex, Text, useColorMode } from '@chakra-ui/react';
+import {
+  Avatar,
+  Box,
+  Flex,
+  Text,
+  useColorMode,
+  useDisclosure,
+} from '@chakra-ui/react';
 import { TFunction } from 'i18next';
 import React, { MouseEvent, MouseEventHandler } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +20,7 @@ import { IUser } from '~/interfaces/IUser';
 import moment from 'moment';
 import OptionsMenu from './OptionsMenu';
 import { renderAvatar } from '../../../../utils/renderAvatar';
+import ViewImages from '../ViewImages';
 
 type Props = {
   content: React.ReactNode;
@@ -143,6 +151,7 @@ export default function Message({
   };
   const { colorMode } = useColorMode();
   const { t } = useTranslation();
+
   return (
     <Flex
       width="100%"
@@ -197,16 +206,18 @@ export default function Message({
       >
         {isRecall ? t('This__Message__HasBeen__Recalled') : content}
         {isLast && (
-          <Flex gap="1rem">
-            <Text
-              color="gray.400"
-              textAlign={other ? 'right' : 'left'}
-              fontSize="xs"
-            >
+          <Flex
+            gap="1rem"
+            _dark={{
+              color: 'gray.400',
+            }}
+            color="gray.500"
+          >
+            <Text textAlign={other ? 'right' : 'left'} fontSize="xs">
               {moment(+time).format('HH:mm')}
             </Text>
             {!other && status ? (
-              <Text color="gray.400" marginLeft={'auto'} fontSize="xs">
+              <Text marginLeft={'auto'} fontSize="xs">
                 {t(showStatus(status))}
               </Text>
             ) : (

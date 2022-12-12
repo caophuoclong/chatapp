@@ -167,7 +167,7 @@ export default function Conversation({
             <RenderDirectConversationName participants={participants} />
           )}
         </Text>
-        {messagesSlice.isLoading ? (
+        {messagesSlice.isLoading.messages ? (
           <SkeletonText
             mt="4"
             noOfLines={1}

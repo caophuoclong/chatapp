@@ -2,7 +2,7 @@ import { HttpException, Injectable, InternalServerErrorException, NotFoundExcept
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
-import { Message, MessageStatusType } from './entities/message.entity';
+import { Message, MessageStatusType, MessageType } from './entities/message.entity';
 import { In, Not, Repository } from 'typeorm';
 import { User } from '~/user/entities/user.entity';
 import { Conversation } from '../conversation/entities/conversation.entity';
@@ -37,6 +37,28 @@ export class MessageService {
       tempId,
     };
   }
+  async getImageMessages(conversationId: string) {
+    const messages = await this.messageRepository.find({
+      where: {
+        destination: {
+          _id: conversationId,
+        },
+        type: MessageType.IMAGE,
+        isRecall: false,
+      },
+      relations: {
+        sender: true,
+      },
+    order: {
+      createdAt: 'ASC',
+    }
+    });
+    return {
+      conversationId,
+      messages
+    }
+  }
+
   async create(createMessageDto: CreateMessageDto) {
     try {
       const message = this.messageRepository.create();
@@ -52,8 +74,8 @@ export class MessageService {
       if (conversation) {
         message.destination = conversation;
         conversation.lastMessage = message;
-        conversation.updateAt = createMessageDto.createdAt
-        message.createdAt = createMessageDto.createdAt
+        conversation.updateAt = createMessageDto.createdAt;
+        message.createdAt = createMessageDto.createdAt;
         const data = await this.messageRepository.save(message);
         await this.conversationRepository.save(conversation);
         const destinationId = message.destination._id;
@@ -177,11 +199,14 @@ export class MessageService {
     }
   }
   async markMessageReceived(message: Message) {
-    await this.messageRepository.update({
-      _id: message._id
-    },{
-      status: MessageStatusType.RECEIVED
-    })
+    await this.messageRepository.update(
+      {
+        _id: message._id,
+      },
+      {
+        status: MessageStatusType.RECEIVED,
+      },
+    );
     const key = `${message.sender._id}_${message.destination._id}`;
     // new object with key is key and data is array of data._id
     const dataToEmit: {
@@ -253,21 +278,21 @@ export class MessageService {
         where: {
           _id: messageId,
         },
-        relations:{
+        relations: {
           destination: true,
-          sender: true
+          sender: true,
         },
-        select:{
+        select: {
           destination: {
-            _id: true
+            _id: true,
           },
-          sender:{
-            _id: true
-          }
-        }
+          sender: {
+            _id: true,
+          },
+        },
       });
       if (!message) {
-       throw new NotFoundException('Message not found');
+        throw new NotFoundException('Message not found');
       }
       message.isRecall = true;
       const data = await this.messageRepository.save(message);

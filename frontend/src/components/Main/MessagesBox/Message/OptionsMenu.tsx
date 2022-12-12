@@ -23,7 +23,6 @@ export default function OptionsMenu({
   isRecall,
   other,
 }: Props) {
-  console.log(time, isRecall);
   const { t } = useTranslation();
   const distance = Date.now() - +time;
   const conversationId = useAppSelector(

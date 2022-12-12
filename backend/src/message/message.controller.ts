@@ -17,13 +17,7 @@ import {
 import { MessageService } from './message.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
-import {
-  ApiBearerAuth,
-  ApiParam,
-  ApiPropertyOptional,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiPropertyOptional, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JWTAuthGuard } from '~/auth/jwt-auth.guard';
 import { isNotEmpty } from 'class-validator';
 import { PaginateDto } from './dto/paginate.dto';
@@ -59,45 +53,47 @@ export class MessageController {
     required: false,
   })
   @ApiPropertyOptional()
-  findAll(
-    @Query() paginateQuery: PaginateDto,
-    @Param('_id') conversationId,
-    @Request() req,
-  ) {
+  findAll(@Query() paginateQuery: PaginateDto, @Param('_id') conversationId, @Request() req) {
     const _id = req.user._id;
     const { skip, limit } = paginateQuery;
-    return this.messageService.findByConversation(conversationId, _id, skip || 0  , limit || 20);
+    return this.messageService.findByConversation(conversationId, _id, skip || 0, limit || 20);
   }
-  @Post("/received")
-  async received(@Body() body: {message: Message}, @Request() req){
+  @Get('/images')
+  async getImageMessages(@Query() { conversationId }: { conversationId: string }) {
+    return this.messageService.getImageMessages(conversationId);
+  }
+  @Post('/received')
+  async received(@Body() body: { message: Message }, @Request() req) {
     const { _id } = req.user;
     this.messageService.markMessageReceived(body.message);
     return {};
   }
-  @Patch("/recallmessage")
-  async recallMessage(@Body() body: {messageId: string}){
-    return this.messageService.recallMessage(body.messageId)
+  @Patch('/recallmessage')
+  async recallMessage(@Body() body: { messageId: string }) {
+    return this.messageService.recallMessage(body.messageId);
   }
-  @Post("/file")
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: "./images",
-      filename: (req, file, cb) => {
-        if(file){
-          const fileName = `${Date.now()}-${file.originalname}`;
-          cb(null, fileName)
-          req.body.fileName = fileName;
-        }
-      }
-    })
-  }))
-  async uploadFile(@Body() body: {file: Express.Multer.File, message: string, fileName: string}){
-    const {file, message} = body;
-    const newMessage =JSON.parse(message)
+  @Post('/file')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './images',
+        filename: (req, file, cb) => {
+          if (file) {
+            const fileName = `${Date.now()}-${file.originalname}`;
+            cb(null, fileName);
+            req.body.fileName = fileName;
+          }
+        },
+      }),
+    }),
+  )
+  async uploadFile(@Body() body: { file: Express.Multer.File; message: string; fileName: string }) {
+    const { file, message } = body;
+    const newMessage = JSON.parse(message);
     return this.messageService.sendMessage({
       ...newMessage,
       content: body.fileName,
       destination: newMessage.destination,
-    })
+    });
   }
 }

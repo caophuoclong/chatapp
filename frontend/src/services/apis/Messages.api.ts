@@ -22,6 +22,13 @@ export default class MessagesApi{
             messageId
         })
     }
+    static async getMessageImage(conversationId: string){
+        return await axiosClient.get("/message/images", {
+            params: {
+                conversationId
+            }
+        })
+    }
     static async sendMessage(message: IMessage & {
         updateAt: number
     }){
