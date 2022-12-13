@@ -29,8 +29,8 @@ import { setInterval } from 'timers/promises';
 import { SERVER_URL } from '~/configs';
 import GroupHeader from './GroupHeader';
 import DirectHeader from './DirectHeader';
-import HeaderBtn from './HeaderBtn';
 import { renderAvatar } from '~/utils/renderAvatar';
+import HeaderFuntions from './Functions';
 type Props = {
   name: string;
   avatarUrl: string;
@@ -117,7 +117,7 @@ export default function Header({
       {type === 'direct' && friendShip && (
         <DirectHeader friendShip={friendShip} />
       )}
-      <HeaderBtn />
+      <HeaderFuntions />
     </Flex>
   );
 }
