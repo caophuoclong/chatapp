@@ -53,7 +53,7 @@ interface GlobalState {
       register: boolean,
     }
     autoChangeColorMode: boolean,
-    emojiStyle: EmojiStyle
+    emojiStyle: EmojiStyle,
 }
 
 // Define the initial state using that type
@@ -70,7 +70,7 @@ const initialState: GlobalState = {
     register: false,
    },
    autoChangeColorMode: false,
-   emojiStyle: EmojiStyle.FACEBOOK
+   emojiStyle: EmojiStyle.FACEBOOK,
 }
 
 export const global = createSlice({

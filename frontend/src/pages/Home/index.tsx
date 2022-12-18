@@ -74,30 +74,7 @@ export default function Home({}: Props) {
   const { t } = useTranslation();
   const socket = useAppSelector((state) => state.globalSlice.socket);
   const state = useAppSelector((state) => state);
-  useEffect(() => {
-    (async () => {
-      const access_token = localStorage.getItem('access_token');
-      if (!access_token || access_token === 'undefined') {
-        window.localStorage.clear();
-        navigate('/login');
-      } else {
-        const wrap = await dispatch(getMe());
-        const wrap1 = await dispatch(getFriendsList());
-        const wrap2 = await dispatch(getMyConversations());
-        const result2 = unwrapResult(wrap2) as Array<IConversation>;
-        const promises = result2.map(
-          async (conversation) =>
-            await dispatch(
-              getMessages({
-                conversationId: conversation._id,
-                skip: 0,
-              })
-            )
-        );
-        await Promise.all(promises);
-      }
-    })();
-  }, []);
+
   const conversations = useAppSelector(
     (state) => state.conversationsSlice.conversations
   );

@@ -36,6 +36,11 @@ import moment from 'moment-timezone';
 import ForgetPassword from './pages/ForgetPassword';
 import SetPassword from './pages/SetPassword/index';
 import Confirm from './pages/Confirm/index';
+import Call from './pages/Call/index';
+import { getMyConversations } from './app/slices/conversations.slice';
+import { unwrapResult } from '@reduxjs/toolkit';
+import IConversation from './interfaces/IConversation';
+import { getMessages } from './app/slices/messages.slice';
 function App() {
   const { setColorMode } = useColorMode();
   const dispatch = useAppDispatch();
@@ -81,6 +86,30 @@ function App() {
     };
     isAutoChangeColorMode();
   }, []);
+  useEffect(() => {
+    (async () => {
+      const access_token = localStorage.getItem('access_token');
+      if (!access_token || access_token === 'undefined') {
+        window.localStorage.clear();
+        navigate('/login');
+      } else {
+        const wrap = await dispatch(getMe());
+        const wrap1 = await dispatch(getFriendsList());
+        const wrap2 = await dispatch(getMyConversations());
+        const result2 = unwrapResult(wrap2) as Array<IConversation>;
+        const promises = result2.map(
+          async (conversation) =>
+            await dispatch(
+              getMessages({
+                conversationId: conversation._id,
+                skip: 0,
+              })
+            )
+        );
+        await Promise.all(promises);
+      }
+    })();
+  }, []);
   return (
     <Routes>
       <Route path={'/'} element={<Home />} />
@@ -95,6 +124,7 @@ function App() {
       <Route path="/forgot-password" element={<ForgetPassword />} />
       <Route path="/set-password" element={<SetPassword />} />
       <Route path="/auth/confirm" element={<Confirm />} />
+      <Route path="/makecall" element={<Call />} />
     </Routes>
   );
 }

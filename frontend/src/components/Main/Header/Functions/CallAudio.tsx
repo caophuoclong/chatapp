@@ -1,10 +1,14 @@
 import { IconButton } from '@chakra-ui/react';
 import React from 'react';
 import { IoCallSharp } from 'react-icons/io5';
+import { mediaOnlyAudio } from '~/constants/media';
+import { IMediaConstraints } from '~/interfaces/IMediaContraints';
 
-type Props = {};
+type Props = {
+  openMediaDevices: (contraints: IMediaConstraints) => void;
+};
 
-export default function CallAudio({}: Props) {
+export default function CallAudio({ openMediaDevices }: Props) {
   return (
     <React.Fragment>
       <IconButton
@@ -12,6 +16,7 @@ export default function CallAudio({}: Props) {
         rounded="full"
         aria-label="Call"
         icon={<IoCallSharp />}
+        onClick={() => openMediaDevices(mediaOnlyAudio)}
       />
     </React.Fragment>
   );
