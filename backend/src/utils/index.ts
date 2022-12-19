@@ -10,6 +10,13 @@ export default class Utils implements IUtils{
     constructor(
         private readonly configService: ConfigService
     ){}
+    async updatePassword(password: string, salt: string): Promise<{ hashedPassowrd: string; }> {
+        const encrypt = promisify(scrypt);
+        const hashedPassowrd = await encrypt(password, salt, 64) as Buffer;
+        return {
+            hashedPassowrd: hashedPassowrd.toString("hex")
+        };
+    }
     async hashPassword(password: string): Promise<{
         salt: string,
         hashedPassowrd: string;
