@@ -54,14 +54,10 @@ export default function ChangePassword({}: Props) {
     const atLeastNum = regAtLeastNum.test(value);
     const atLeastSpecial = regAtLeastSpecial.test(value);
     let sliderValue = 0;
-    if (atLeast4) {
-      sliderValue += 5;
-    }
-    if (atLeast8) {
-      sliderValue += 10;
-    }
-    if (atLeast12) {
-      sliderValue += 10;
+    if (value.length <= 20) {
+      sliderValue = value.length;
+    } else {
+      sliderValue = 20;
     }
     if (atLeastUpper) {
       sliderValue += 10;
@@ -91,9 +87,9 @@ export default function ChangePassword({}: Props) {
       setSliderColor('red');
     } else if (sliderValue >= 25 && sliderValue < 50) {
       setSliderColor('orange');
-    } else if (sliderValue >= 50 && sliderValue < 75) {
+    } else if (sliderValue >= 50 && sliderValue < 60) {
       setSliderColor('yellow');
-    } else if (sliderValue >= 75 && sliderValue < 90) {
+    } else if (sliderValue >= 60 && sliderValue < 90) {
       setSliderColor('green');
     } else {
       setSliderColor('blue');
