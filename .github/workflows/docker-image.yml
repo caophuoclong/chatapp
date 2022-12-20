@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file ./backend/Dockerfile --tag caophuoclongse/chatapp:latest
+      run: docker build ./backend --tag caophuoclongse/chatapp:latest
