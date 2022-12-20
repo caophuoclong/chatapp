@@ -14,5 +14,22 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build ./backend --tag caophuoclongse/chatapp:latest
+    -
+      name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    -
+      name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    - 
+      name: Login to Docker
+      uses: docker/login-action@v2
+      with:
+        username: ${{ bebes.DOCKER_USERNAME }}
+        password: ${{ bebes.DOCKER_PASSWORD }}
+    -
+      name: Build and Push image
+      uses: docker/build-push-action@v3
+      with:
+        context: ./backend
+        push: true
+        tags: caophuoclongse/chatappserver:latest
