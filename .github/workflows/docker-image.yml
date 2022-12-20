@@ -48,4 +48,7 @@ jobs:
     - 
       name: Deploy
       run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/private_env/bebes; docker-compose pull server; docker-compose up server'
+    - 
+      name: Turn off redis slave
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST}} 'docker exec redis bash -c "redis-cli slaveof no one"'
         
