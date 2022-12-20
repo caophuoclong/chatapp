@@ -13,7 +13,7 @@ jobs:
 
   build:
 
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -37,7 +37,7 @@ jobs:
         push: true
         tags: caophuoclongse/chatappserver:latest
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
     - 
       name: Install SSH-KEY
