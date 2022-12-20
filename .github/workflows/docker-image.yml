@@ -40,6 +40,7 @@ jobs:
       uses: shimataro/ssh-key-action@v2
       with:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 # This action do: copy your know hosts to their know_hosts ex: to runners
     -
       name: Adding known_hosts
