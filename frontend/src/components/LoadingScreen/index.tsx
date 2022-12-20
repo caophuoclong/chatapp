@@ -19,7 +19,7 @@ export default function LoadingScreen({}: Props) {
       position={'fixed'}
       top={0}
       left={0}
-      zIndex={9999}
+      zIndex={1000000}
       bg={colorMode === 'dark' ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.7)'}
     >
       <Spinner

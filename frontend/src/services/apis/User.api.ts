@@ -19,6 +19,14 @@ export default class UserApi{
             ...data
         })
     }
+    static async updatePassword(data: {
+        oldPassword: string,
+        newPassword: string
+    }){
+        return await axiosClient.patch("/user/update-password", {
+            ...data
+        })
+    }
     static updateAvatar(data: FormData, func: (e: ProgressEvent)=>void){
         return new Promise<{
             fileName: string

@@ -129,33 +129,37 @@ export class UserService {
         where: {
           _id: _id,
         },
+        select:{
+          _id: true,
+          password: true,
+          salt: true
+        }
       });
       if (!user) {
-        throw new HttpException(
-          'Something wrong',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+        throw new NotFoundException("user not found")
       }
+      console.log(user);
       const verified = await this.utils.verify(
         updatePasswordDto.oldPassword,
         user.salt,
         user.password,
       );
       if (!verified) {
-        throw new HttpException('Old password does not match', 403);
+        throw new ForbiddenException('Old password does not match');
       }
-      const { salt, hashedPassowrd } = await this.utils.hashPassword(
+      const { hashedPassowrd } = await this.utils.updatePassword(
         updatePasswordDto.newPassword,
+        user.salt
       );
+      
       user.password = hashedPassowrd;
-      user.salt = salt;
       await this.userRepository.save(user);
       return {
         statusCode: 200,
         message: 'Password updated successfully',
       };
     } catch (error) {
-      throw new HttpException(error.message, 403);
+      throw new ForbiddenException(error.message);
     }
   }
   async getUsers(usersId: Array<string>) {

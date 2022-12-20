@@ -1,9 +1,6 @@
 import React, { MouseEvent, useEffect, useState } from 'react';
 import {
   AvatarBadge,
-  AvatarGroup,
-  Box,
-  Button,
   CircularProgress,
   HStack,
   IconButton,
@@ -14,14 +11,7 @@ import {
   useToast,
   VStack,
 } from '@chakra-ui/react';
-import {
-  Avatar,
-  Flex,
-  Text,
-  InputGroup,
-  Input,
-  InputRightAddon,
-} from '@chakra-ui/react';
+import { Avatar, Flex, Text, Input } from '@chakra-ui/react';
 import { AiFillCamera, AiOutlineEdit } from 'react-icons/ai';
 import { useTranslation } from 'react-i18next';
 import DatePicker from 'react-datepicker';
@@ -31,118 +21,53 @@ import { BsCheckLg } from 'react-icons/bs';
 import { FaCheck, FaTimes } from 'react-icons/fa';
 import { useColorMode } from '@chakra-ui/react';
 import { IUser } from '../../../interfaces/IUser';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, FormProvider } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import moment from 'moment';
 import UserApi from '~/services/apis/User.api';
 import { updateInformation } from '~/app/slices/user.slice';
 import readFile from '~/utils/readFile';
-import { Blob } from 'buffer';
-import { SERVER_URL } from '~/configs';
 import { renderAvatar } from '../../../utils/renderAvatar';
+import { schema } from './schema';
+import Gender from './gender';
+import DOB from './dob';
+import Email from './email';
+import PhoneNumber from './phoneNumber';
+import Name from './name';
+import ChangePassword from './changePassword';
 type Props = {
   user: IUser;
   id?: string;
 };
 
 export default function Info({ user, id }: Props) {
+  // TODO: init
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const schema = yup.object().shape({
-    email: yup
-      .string()
-      .email(t('Invalid__Email'))
-      .required(t('Email__Required')),
-    name: yup.string().required(t('Name__Required')),
-    date: yup
-      .number()
-      .typeError(t('Date__Required'))
-      .required(t('Date__Required'))
-      .test('is-date', t('Date__29'), function (value) {
-        const month = this.parent.month;
-        const year = this.parent.year;
-        const isLeapYear = moment(year).isLeapYear();
-        if (month < 1 || month > 12) return true;
-        if (month === 2 && value) {
-          if (isLeapYear) {
-            return value <= 29;
-          }
-          return value <= 28;
-        }
-        return true;
-      })
-      .test('is-31', t('Date__31'), function (value) {
-        const month = this.parent.month;
-        if (
-          (month === 1 ||
-            month === 3 ||
-            month === 5 ||
-            month === 7 ||
-            month === 8 ||
-            month === 10 ||
-            month === 12) &&
-          value
-        ) {
-          return value <= 31;
-        }
-        return true;
-      })
-      .test('is-30', t('Date__30'), function (value) {
-        const month = this.parent.month;
-        if (
-          (month === 4 || month === 6 || month === 9 || month === 11) &&
-          value
-        ) {
-          return value <= 30;
-        }
-        return true;
-      }),
-    month: yup
-      .number()
-      .typeError(t('Month__Required'))
-      .required(t('Month__Required'))
-      .max(12)
-      .min(1),
-    year: yup
-      .number()
-      .typeError(t('Year__Required'))
-      .required(t('Year__Required'))
-      .max(new Date().getFullYear() - 1, t('Year__Max'))
-      .min(1900, t('Year__Min')),
-    phone: yup
-      .string()
-      .test('is-phone', t('Phone__Invalid'), function (value) {
-        const reg = new RegExp(/(84|0[3|5|7|8|9])+([0-9]{8})\b/);
-        if (value) {
-          return reg.test(value);
-        }
-        return true;
-      })
-      .nullable(),
-  });
+  const [isEnableInput, setIsEnabledInput] = useState(false);
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [isChangeAvatar, setIsChangeAvatar] = useState(false);
+  const [fileAvatar, setFileAvatar] = useState<{
+    file: File;
+    name: string;
+  }>();
   const [birthday, setBirtday] = useState<{
     date: number;
     month: number;
     year: number;
   }>({
-    date: 15,
+    date: 1,
     month: 1,
-    year: 2000,
+    year: 1,
   });
-  const {
-    register,
-    handleSubmit,
-    control,
-    setValue,
-    formState: { errors },
-  } = useForm({
+  const method = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       name: user.name,
       gender: user.gender,
-      date: +('0' + birthday.date).slice(-2),
-      month: +('0' + birthday.month).slice(-2),
+      date: birthday.date,
+      month: birthday.month,
       year: birthday.year,
       phone: user.phone,
       email: user.email,
@@ -150,7 +75,7 @@ export default function Info({ user, id }: Props) {
     mode: 'onChange',
   });
   const toast = useToast();
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = method.handleSubmit(async (data) => {
     try {
       const birthday = `${data.date}/${data.month}/${data.year}`;
       const data1: Partial<typeof data> & {
@@ -185,18 +110,7 @@ export default function Info({ user, id }: Props) {
     }
     setIsEnabledInput(false);
   });
-  const { colorMode } = useColorMode();
-  const [isEnalbeInput, setIsEnabledInput] = useState(false);
-  const lan = useAppSelector((state) => state.globalSlice.lan);
   const myId = useAppSelector((state) => state.userSlice.info._id);
-  const [fileAvatar, setFileAvatar] = useState<{
-    file: File;
-    name: string;
-  }>();
-  const [avatar, setAvatar] = useState<string | null>(null);
-  const [isChangeAvatar, setIsChangeAvatar] = useState(false);
-  const [cover, setCover] = useState<string | null>(null);
-  const [isChangeCover, setIsChangeCover] = useState(false);
   const [uploadAvatarProgress, setUploadAvatarProgress] = useState(0);
   const handleOnInputAvatarChange = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -220,33 +134,15 @@ export default function Info({ user, id }: Props) {
       setAvatar(null);
     }
   }, [fileAvatar]);
-  const handleEnalbeInput = () => {
-    const inputArray = document.querySelectorAll('.input__info');
-    if (!isEnalbeInput) {
-      inputArray.forEach((value) => {
-        (value as HTMLInputElement | HTMLButtonElement).removeAttribute(
-          'disabled'
-        );
-      });
-      setIsEnabledInput(true);
-    } else {
-      inputArray.forEach((value) => {
-        (value as HTMLInputElement | HTMLButtonElement).setAttribute(
-          'disabled',
-          'true'
-        );
-      });
-      setIsEnabledInput(false);
-    }
-  };
+  const handleEnalbeInput = () => setIsEnabledInput(!isEnableInput);
   const handleCancle = () => {
-    setValue('name', user.name);
-    setValue('email', user.email);
-    setValue('phone', user.phone);
-    setValue('date', birthday.date);
-    setValue('month', birthday.month);
-    setValue('year', birthday.year);
-    setValue('gender', user.gender);
+    method.setValue('name', user.name);
+    method.setValue('email', user.email);
+    method.setValue('phone', user.phone);
+    method.setValue('date', birthday.date);
+    method.setValue('month', birthday.month);
+    method.setValue('year', birthday.year);
+    method.setValue('gender', user.gender);
   };
   const handleRemoveAvatar = () => {
     setAvatar(null);
@@ -279,34 +175,19 @@ export default function Info({ user, id }: Props) {
     }
   };
   useEffect(() => {
-    console.log(user);
-    const birthday1 = user.birthday;
-    if (birthday1)
-      if (birthday1.includes('-')) {
-        setBirtday({
-          date: +birthday1.split('-')[0],
-          month: +birthday1.split('-')[1],
-          year: +birthday1.split('-')[2],
-        });
-      } else if (birthday1.includes('/')) {
-        setBirtday({
-          date: +birthday1.split('/')[0],
-          month: +birthday1.split('/')[1],
-          year: +birthday1.split('/')[2],
-        });
-      } else if (birthday1.includes('.')) {
-        setBirtday({
-          date: +birthday1.split('.')[0],
-          month: +birthday1.split('.')[1],
-          year: +birthday1.split('.')[2],
-        });
-      }
+    if (user.birthday) {
+      const [date, month, year] = user.birthday.split(/[-/.]/).map(Number);
+      setBirtday({
+        date,
+        month,
+        year,
+      });
+      method.setValue('date', date);
+      method.setValue('month', month);
+      method.setValue('year', year);
+    }
   }, [user]);
-  useEffect(() => {
-    setValue('date', birthday.date);
-    setValue('month', birthday.month);
-    setValue('year', birthday.year);
-  }, [birthday]);
+
   useEffect(() => {
     if (uploadAvatarProgress === 100) {
       setTimeout(() => {
@@ -316,290 +197,181 @@ export default function Info({ user, id }: Props) {
     }
   }, [uploadAvatarProgress]);
   return (
-    <form onSubmit={onSubmit}>
-      <Flex
-        justifyContent={'center'}
-        alignItems="center"
-        direction={'column'}
-        gap="5px"
-      >
-        {user._id === myId ? (
-          <div>
+    <FormProvider {...method}>
+      <form onSubmit={onSubmit}>
+        <Flex
+          justifyContent={'center'}
+          alignItems="center"
+          direction={'column'}
+          gap="5px"
+        >
+          {user._id === myId ? (
+            <React.Fragment>
+              <Avatar
+                position={'relative'}
+                width="72px"
+                height="72px"
+                role="group"
+                src={avatar ? avatar : renderAvatar(user.avatarUrl)}
+              >
+                {uploadAvatarProgress > 0 && uploadAvatarProgress <= 100 && (
+                  <Flex
+                    width={'72px'}
+                    height={'72px'}
+                    backdropFilter="auto"
+                    backdropContrast="60%"
+                    position={'absolute'}
+                    rounded="full"
+                    justifyContent={'center'}
+                    alignItems={'center'}
+                  >
+                    <CircularProgress
+                      value={uploadAvatarProgress}
+                      opacity={1}
+                    />
+                  </Flex>
+                )}
+                {isChangeAvatar && (
+                  <IconButton
+                    position={'absolute'}
+                    size="xs"
+                    textAlign={'center'}
+                    rounded="full"
+                    top="0"
+                    right="0"
+                    visibility={'hidden'}
+                    aria-label="remove avatar upload"
+                    onClick={handleRemoveAvatar}
+                    icon={<FaTimes />}
+                    _groupHover={{
+                      visibility: 'visible',
+                    }}
+                  />
+                )}
+                {isChangeAvatar ? (
+                  <IconButton
+                    position={'absolute'}
+                    size="xs"
+                    textAlign={'center'}
+                    rounded="full"
+                    bottom="0"
+                    right="0"
+                    visibility={'visible'}
+                    aria-label="accept change avatar"
+                    onClick={onAcceptChangeAvatar}
+                    color="green.300"
+                    icon={<FaCheck />}
+                  />
+                ) : (
+                  <label
+                    htmlFor="upload-avatar"
+                    style={{
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <AvatarBadge
+                      borderColor="papayawhip"
+                      bg="gray"
+                      boxSize="1.25em"
+                      children={<AiFillCamera color="#f5f5f5" />}
+                    />
+                  </label>
+                )}
+              </Avatar>
+              <Input
+                type="file"
+                hidden
+                id="upload-avatar"
+                accept="image/png, image/gif, image/jpeg"
+                onChange={handleOnInputAvatarChange}
+              />
+            </React.Fragment>
+          ) : (
             <Avatar
-              position={'relative'}
               width="72px"
               height="72px"
-              role="group"
-              src={avatar ? avatar : renderAvatar(user.avatarUrl)}
-            >
-              {uploadAvatarProgress > 0 && uploadAvatarProgress <= 100 && (
-                <Flex
-                  width={'72px'}
-                  height={'72px'}
-                  backdropFilter="auto"
-                  backdropContrast="60%"
-                  position={'absolute'}
-                  rounded="full"
-                  justifyContent={'center'}
-                  alignItems={'center'}
-                >
-                  <CircularProgress value={uploadAvatarProgress} opacity={1} />
-                </Flex>
-              )}
-              {isChangeAvatar && (
-                <IconButton
-                  position={'absolute'}
-                  size="xs"
-                  textAlign={'center'}
-                  rounded="full"
-                  top="0"
-                  right="0"
-                  visibility={'hidden'}
-                  aria-label="remove avatar upload"
-                  onClick={handleRemoveAvatar}
-                  icon={<FaTimes />}
-                  _groupHover={{
-                    visibility: 'visible',
-                  }}
-                />
-              )}
-              {isChangeAvatar ? (
-                <IconButton
-                  position={'absolute'}
-                  size="xs"
-                  textAlign={'center'}
-                  rounded="full"
-                  bottom="0"
-                  right="0"
-                  visibility={'visible'}
-                  aria-label="accept change avatar"
-                  onClick={onAcceptChangeAvatar}
-                  color="green.300"
-                  icon={<FaCheck />}
-                />
-              ) : (
-                <label
-                  htmlFor="upload-avatar"
-                  style={{
-                    cursor: 'pointer',
-                  }}
-                >
-                  <AvatarBadge
-                    borderColor="papayawhip"
-                    bg="gray"
-                    boxSize="1.25em"
-                    children={<AiFillCamera color="#f5f5f5" />}
-                  />
-                </label>
-              )}
-            </Avatar>
-            <Input
-              type="file"
-              hidden
-              id="upload-avatar"
-              accept="image/png, image/gif, image/jpeg"
-              onChange={handleOnInputAvatarChange}
-            />
-          </div>
-        ) : (
-          <Avatar
-            width="72px"
-            height="72px"
-            src={renderAvatar(user.avatarUrl)}
-          ></Avatar>
-        )}
-        <Tooltip
-          hasArrow
-          label={errors.name?.message}
-          isOpen={errors.name ? true : false}
-          placement="top-end"
-        >
-          <Input
-            disabled={!isEnalbeInput}
-            _disabled={{
-              color: colorMode === 'light' ? 'black' : 'white',
-            }}
-            textAlign={'center'}
-            variant="unstyled"
-            border={'none'}
-            {...register('name')}
+              src={renderAvatar(user.avatarUrl)}
+            ></Avatar>
+          )}
+          <Name isEnableInput={isEnableInput} />
+          <Text fontSize={'12px'}>@{user.username}</Text>
+        </Flex>
+        <VStack spacing="3" divider={<StackDivider />}>
+          {/* Gender */}
+          <Gender
+            isEnableInput={isEnableInput}
+            control={method.control}
+            name="gender"
           />
-        </Tooltip>
-
-        <Text fontSize={'12px'}>@{user.username}</Text>
-      </Flex>
-      <VStack spacing="3" divider={<StackDivider />}>
-        <Flex alignItems="center" height="fit-content" width="100%" gap="1rem">
-          <Text fontWeight={700} minWidth="80px">
-            {t('Gender')}
-          </Text>
-          <Controller
-            control={control}
-            name={'gender'}
-            render={({ field }) => (
-              <RadioGroup isDisabled={!isEnalbeInput} {...field}>
-                <HStack gap="1rem">
-                  <Radio value="male">{t('Male')}</Radio>
-                  <Radio value="female">{t('Female')}</Radio>
-                  <Radio value="other">{t('Other')}</Radio>
-                </HStack>
-              </RadioGroup>
+          {/* DOB */}
+          <DOB isEnableInput={isEnableInput} />
+          {/* Email */}
+          <Email isEnableInput={isEnableInput} />
+          {/* PhoneNumber */}
+          <PhoneNumber isEnableInput={isEnableInput} />
+          {/* Password */}
+          {user._id === myId && <ChangePassword />}
+        </VStack>
+        {user._id === myId ? (
+          <React.Fragment>
+            {!isEnableInput ? (
+              <IconButton
+                display="flex"
+                width="90%"
+                marginY="10px"
+                marginX="auto"
+                aria-label="edit info"
+                gap="1rem"
+                onClick={() => handleEnalbeInput()}
+                icon={
+                  <>
+                    <AiOutlineEdit size="24px" />
+                    <Text fontSize={'12px'}>{t('Edit')}</Text>
+                  </>
+                }
+              />
+            ) : (
+              <Flex justifyContent="space-around" marginY="1rem">
+                <IconButton
+                  aria-label="Accept"
+                  padding="1rem"
+                  type="submit"
+                  icon={
+                    <Flex
+                      alignItems="center"
+                      justifyContent={'center'}
+                      gap="1rem"
+                    >
+                      <BsCheckLg size="24px" color="green" />
+                      {t('Accept')}
+                    </Flex>
+                  }
+                />
+                <IconButton
+                  aria-label="Decline"
+                  padding="1rem"
+                  onClick={() => {
+                    handleEnalbeInput();
+                    handleCancle();
+                  }}
+                  icon={
+                    <Flex
+                      alignItems="center"
+                      justifyContent={'center'}
+                      gap="1rem"
+                    >
+                      <FaTimes size="24px" color="red" />
+                      {t('Decline')}
+                    </Flex>
+                  }
+                />
+              </Flex>
             )}
-          />
-        </Flex>
-        <Flex alignItems="center" height="fit-content" width="100%" gap="1rem">
-          <Text fontWeight={700} minWidth="80px">
-            {t('DOB')}
-          </Text>
-          <Flex gap=".5rem">
-            <Tooltip
-              hasArrow
-              label={errors.date?.message}
-              isOpen={
-                errors.date && !errors.month && !errors.year ? true : false
-              }
-              placement="top"
-            >
-              <Input
-                w="30px"
-                type="number"
-                disabled={!isEnalbeInput}
-                variant={'unstyled'}
-                placeholder="dd"
-                {...register('date')}
-              />
-            </Tooltip>
-            /
-            <Tooltip
-              hasArrow
-              label={errors.month?.message}
-              isOpen={errors.month && !errors.year ? true : false}
-              placement="top-end"
-            >
-              <Input
-                w="30px"
-                type="number"
-                disabled={!isEnalbeInput}
-                variant={'unstyled'}
-                placeholder="mm"
-                max={12}
-                {...register('month')}
-              />
-            </Tooltip>
-            /
-            <Tooltip
-              hasArrow
-              label={errors.year?.message}
-              isOpen={errors.year ? true : false}
-              placement="top-end"
-            >
-              <Input
-                w="15%"
-                type="number"
-                disabled={!isEnalbeInput}
-                variant={'unstyled'}
-                placeholder="yyyy"
-                {...register('year')}
-              />
-            </Tooltip>
-          </Flex>
-        </Flex>
-        <Flex alignItems="center" height="fit-content" width="100%" gap="1rem">
-          <Text fontWeight={700} minWidth="80px">
-            {t('Email')}
-          </Text>
-          <Tooltip
-            hasArrow
-            label={errors.email?.message}
-            isOpen={errors.email ? true : false}
-            placement="top-end"
-          >
-            <Input
-              className="input__info"
-              disabled={!isEnalbeInput}
-              _disabled={{
-                color: colorMode === 'light' ? 'black' : 'white',
-              }}
-              outline="none"
-              border={'none'}
-              variant="unstyled"
-              {...register('email')}
-            />
-          </Tooltip>
-        </Flex>
-        <Flex alignItems="center" height="fit-content" width="100%" gap="1rem">
-          <Text fontWeight={700} minWidth="120px">
-            {t('Phone')}
-          </Text>
-          <Tooltip
-            hasArrow
-            label={errors.phone?.message}
-            isOpen={errors.phone ? true : false}
-            placement="top-end"
-          >
-            <Input
-              className="input__info"
-              {...register('phone')}
-              disabled={!isEnalbeInput}
-              _disabled={{
-                color: colorMode === 'light' ? 'black' : 'white',
-              }}
-              outline="none"
-              border={'none'}
-              variant="unstyled"
-            />
-          </Tooltip>
-        </Flex>
-      </VStack>
-      {user._id === myId ? (
-        !isEnalbeInput ? (
-          <IconButton
-            display="flex"
-            width="90%"
-            marginY="10px"
-            marginX="auto"
-            aria-label="edit info"
-            gap="1rem"
-            onClick={() => handleEnalbeInput()}
-            icon={
-              <>
-                <AiOutlineEdit size="24px" />
-                <Text fontSize={'12px'}>{t('Edit')}</Text>
-              </>
-            }
-          />
+          </React.Fragment>
         ) : (
-          <Flex justifyContent="space-around" marginY="1rem">
-            <IconButton
-              aria-label="Accept"
-              padding="1rem"
-              type="submit"
-              icon={
-                <Flex alignItems="center" justifyContent={'center'} gap="1rem">
-                  <BsCheckLg size="24px" color="green" />
-                  {t('Accept')}
-                </Flex>
-              }
-            />
-            <IconButton
-              aria-label="Decline"
-              padding="1rem"
-              onClick={() => {
-                handleEnalbeInput();
-                handleCancle();
-              }}
-              icon={
-                <Flex alignItems="center" justifyContent={'center'} gap="1rem">
-                  <FaTimes size="24px" color="red" />
-                  {t('Decline')}
-                </Flex>
-              }
-            />
-          </Flex>
-        )
-      ) : (
-        ''
-      )}
-    </form>
+          ''
+        )}
+      </form>
+    </FormProvider>
   );
 }

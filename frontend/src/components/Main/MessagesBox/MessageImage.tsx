@@ -102,7 +102,7 @@ export default function MessageImage({ isLast, messages, other }: Props) {
                 fallbackSrc="https://via.placeholder.com/270x370"
                 loading="lazy"
                 marginRight={0}
-                width={'270.1px'}
+                minWidth={'270.1px'}
                 height={'370px'}
                 key={messages[0]._id}
                 src={renderAvatar(messages[0].content)}

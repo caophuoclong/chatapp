@@ -36,9 +36,10 @@ export default function SearchBar({}: Props) {
         icon={<SearchIcon />}
       />
       <Input
+        variant={'unstyled'}
+        outline="none"
         height="20px"
         padding={0}
-        focusBorderColor={'none'}
         bg="transparent"
         placeholder={t('Search')}
         border="none"

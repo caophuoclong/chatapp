@@ -29,31 +29,12 @@ type Props = {
 };
 
 export default function ViewImages({ isOpen, onClose, imagesClicked }: Props) {
-  const [messageList, setMessageList] = useState<Array<IMessage>>([]);
   const [messageShow, setMessageShow] = useState<IMessage>();
   const dispatch = useAppDispatch();
   const conversationId = useAppSelector(
     (state) => state.globalSlice.conversation.choosenConversationID
   );
   const user = useAppSelector((state) => state.userSlice.info);
-  useEffect(() => {
-    (async () => {
-      const fakeListMessage = Array.from({ length: 30 }).map<IMessage>(() => ({
-        _id: faker.datatype.uuid(),
-        content: faker.image.avatar(),
-        createdAt: faker.date.past().getTime(),
-        type: MessageType.IMAGE,
-        destination: faker.datatype.uuid(),
-        isRecall: false,
-        sender: user,
-        status: MessageStatusType.SENT,
-        isDeleted: false,
-        scale: 1,
-        parentMessage: null,
-      }));
-      setMessageList(fakeListMessage);
-    })();
-  }, []);
   const isLoading = useAppSelector(
     (state) => state.messageSlice.isLoading.messagesImages
   );
@@ -67,7 +48,12 @@ export default function ViewImages({ isOpen, onClose, imagesClicked }: Props) {
       <ModalOverlay backdropFilter="blur(5px) grayscale(30%)" />
       <ModalContent bg={'transparent'}>
         <ModalCloseButton />
-        <ModalBody flex={1} paddingY="1rem">
+        <ModalBody
+          flex={1}
+          paddingY="1rem"
+          display={'flex'}
+          alignItems="center"
+        >
           {isLoading ? (
             <Image
               rounded="md"

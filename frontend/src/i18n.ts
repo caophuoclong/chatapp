@@ -157,7 +157,16 @@ const resources = {
       "RECALL": "Recall",
       "SENDING": "Sending",
       "SEND__FAIL": "Send fail",
-      "You": "You"
+      "You": "You",
+      "Old__Password": "Old password",
+      "Confirm__New__Password": "Confirm new password",
+      "Change__Password": "Change password",
+      "Change__Password__Success": "Change password success",
+      "Change__Password__Fail": "Change password fail",
+      "Password__Not__Strong": "Password is not strong enough",
+      "Change__Password__Fail__Old__Password__Not__Match": "Change password fail. Old password is wrong",
+      "Change__Password__Fail__New__Password__Not__Match": "Change password fail. New password does not match",
+
     }
   },
   vn: {
@@ -311,6 +320,14 @@ const resources = {
       "SEEN": "Đã xem",
       "SEND__FAIL": "Gửi lỗi",
       "You": "Bạn",
+      "Old__Password": "Mật khẩu cũ",
+      "Confirm__New__Password": "Xác nhận mật khẩu mới",
+      "Change__Password": "Đổi mật khẩu",
+      "Change__Password__Success": "Đổi mật khẩu thành công",
+      "Change__Password__Fail": "Đổi mật khẩu thất bại",
+      "Password__Not__Strong": "Mật khẩu không đủ mạnh",
+      "Change__Password__Fail__Old__Password__Not__Match": "Mật khẩu cũ không đúng",
+      "Change__Password__Fail__New__Password__Not__Match": "Mật khẩu mới không khớp",
     }
   }
 };
