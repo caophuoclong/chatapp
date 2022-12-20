@@ -213,13 +213,8 @@ export default function ChangePassword({}: Props) {
                   onChange={(e) => setOldPassword(e.target.value)}
                   id="oldPassword"
                   type="password"
-                  _placeholder={{
-                    fontWeight: 700,
-                    color: 'black',
-                    fontSize: '1.2rem',
-                  }}
                   value={oldPassword}
-                  placeholder={randomPassword.replaceAll(new RegExp(/./g), '.')}
+                  placeholder={t('Old__Password')}
                 />
               </Flex>
               <Flex
