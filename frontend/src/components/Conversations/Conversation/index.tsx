@@ -167,15 +167,7 @@ export default function Conversation({
             <RenderDirectConversationName participants={participants} />
           )}
         </Text>
-        {messagesSlice.isLoading.messages ? (
-          <SkeletonText
-            mt="4"
-            noOfLines={1}
-            spacing="4"
-            skeletonHeight="2"
-            width={'90%'}
-          />
-        ) : latestMessage ? (
+        {latestMessage ? (
           latestMessage.isRecall ? (
             <Text color="gray.500" size="sm">
               {t('This__Message__HasBeen__Recalled')}

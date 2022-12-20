@@ -175,15 +175,17 @@ export default function Info({ user, id }: Props) {
     }
   };
   useEffect(() => {
-    const [date, month, year] = user.birthday.split(/[-/.]/).map(Number);
-    setBirtday({
-      date,
-      month,
-      year,
-    });
-    method.setValue('date', date);
-    method.setValue('month', month);
-    method.setValue('year', year);
+    if (user.birthday) {
+      const [date, month, year] = user.birthday.split(/[-/.]/).map(Number);
+      setBirtday({
+        date,
+        month,
+        year,
+      });
+      method.setValue('date', date);
+      method.setValue('month', month);
+      method.setValue('year', year);
+    }
   }, [user]);
 
   useEffect(() => {
@@ -308,7 +310,7 @@ export default function Info({ user, id }: Props) {
           {/* PhoneNumber */}
           <PhoneNumber isEnableInput={isEnableInput} />
           {/* Password */}
-          <ChangePassword />
+          {user._id === myId && <ChangePassword />}
         </VStack>
         {user._id === myId ? (
           <React.Fragment>
