@@ -47,5 +47,5 @@ jobs:
       run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
     - 
       name: Deploy
-      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/private_env/bebes; docker-compose up server'
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/private_env/bebes; docker-compose pull server; docker-compose up server'
         
