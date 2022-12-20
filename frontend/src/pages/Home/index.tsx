@@ -95,6 +95,10 @@ export default function Home({}: Props) {
             )
         );
         await Promise.all(promises);
+        const token = (await AuthApi.getSocketToken()).data;
+        const socket = connectSocket(token);
+        socket.emit(SocketEvent.AUTHENTICATE);
+        dispatch(setSocket(socket));
       }
     })();
   }, []);
@@ -305,17 +309,6 @@ export default function Home({}: Props) {
       socket?.off('queryAgainConversation');
     };
   }, [socket]);
-  useEffect(() => {
-    (async () => {
-      const access_token = localStorage.getItem('access_token');
-      if (!access_token || access_token === 'undefined') {
-        const token = (await AuthApi.getSocketToken()).data;
-        const socket = connectSocket(token);
-        socket.emit(SocketEvent.AUTHENTICATE);
-        dispatch(setSocket(socket));
-      }
-    })();
-  }, []);
   const lan = useAppSelector((state) => state.globalSlice.lan);
   useEffect(() => {
     moment.locale(lan === 'en' ? 'en' : 'vi');
