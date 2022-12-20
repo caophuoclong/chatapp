@@ -307,10 +307,13 @@ export default function Home({}: Props) {
   }, [socket]);
   useEffect(() => {
     (async () => {
-      const token = (await AuthApi.getSocketToken()).data;
-      const socket = connectSocket(token);
-      socket.emit(SocketEvent.AUTHENTICATE);
-      dispatch(setSocket(socket));
+      const access_token = localStorage.getItem('access_token');
+      if (!access_token || access_token === 'undefined') {
+        const token = (await AuthApi.getSocketToken()).data;
+        const socket = connectSocket(token);
+        socket.emit(SocketEvent.AUTHENTICATE);
+        dispatch(setSocket(socket));
+      }
     })();
   }, []);
   const lan = useAppSelector((state) => state.globalSlice.lan);
