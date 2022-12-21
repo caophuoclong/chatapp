@@ -7,10 +7,12 @@ import {config} from "dotenv";
 config();
 @Module({
   imports: [
-    SendGridModule.forRoot({
-      apikey: process.env.SENDGRID_API_KEY,
-    }),
-    ConfigModule,
+    SendGridModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        apikey: configService.get('SENDGRID_API_KEY'),
+      })
+    })
   ],
   providers: [MailService],
   exports: [MailService], // 👈 export for DI
