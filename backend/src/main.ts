@@ -11,6 +11,7 @@ dotenv.config()
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const whiteList = process.env.CORS.split(",").map(item => item.trim());
+  console.log("white list", whiteList);
   app.enableCors({
     origin: whiteList,
     credentials: true
@@ -28,7 +29,7 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'images'), {
     prefix: '/images/',
   });
-  app.useStaticAssets(join(__dirname, '..',"assets" ),{
+  app.useStaticAssets(join(__dirname, '..', "assets"), {
     prefix: '/assets/',
   })
   const document = SwaggerModule.createDocument(app, config);

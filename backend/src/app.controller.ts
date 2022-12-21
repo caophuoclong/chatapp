@@ -17,13 +17,14 @@ export class AppController {
     private authService: AuthService,
     @Inject("REDIS_CLIENT")
     private readonly redisClient: RedisClientType
-  ) {}
+  ) { }
   @Post('/auth/login')
-  async login(@Body() loginUserDto: LoginUserDto, @Res({passthrough: true }) res) {
-    const {refreshToken, accessToken, _id} = await this.authService.login(loginUserDto);
+  async login(@Body() loginUserDto: LoginUserDto, @Res({ passthrough: true }) res) {
+    console.log("Someone is logging");
+    const { refreshToken, accessToken, _id } = await this.authService.login(loginUserDto);
     this.redisClient.hSet("refreshToken", refreshToken.token, "A");
     this.redisClient.hSet("user_refreshToken", _id, refreshToken.token)
-    res.cookie('refreshToken', refreshToken.token, {httpOnly: true});
+    res.cookie('refreshToken', refreshToken.token, { httpOnly: true });
     res.json(accessToken);
   }
   @Post('/auth/register')
@@ -33,39 +34,39 @@ export class AppController {
   @Get("/auth/refresh-token")
   async refreshToken(@Req() req: Request) {
     const refreshToken = req.cookies.refreshToken;
-    if(!refreshToken) throw new BadRequestException("No refresh token provided")
+    if (!refreshToken) throw new BadRequestException("No refresh token provided")
     const refrshTokenInDatabase = await this.redisClient.hGet("refreshToken", refreshToken);
-    if(refrshTokenInDatabase === null){
+    if (refrshTokenInDatabase === null) {
       throw new NotFoundException("No token found in database");
     }
-    if(refrshTokenInDatabase === "A"){
-      try{
+    if (refrshTokenInDatabase === "A") {
+      try {
         const response = await this.authService.generateToken(this.authService.verifyJWT(refreshToken));
         return response;
-      }catch(error){
+      } catch (error) {
         throw new UnauthorizedException("Token expired")
       }
     }
     throw new ForbiddenException("User had been blocked")
   }
   @Post("/auth/create_forgot_token")
-  createForgotToken(@Body() createForgotToken: CreateForgotToken){
+  createForgotToken(@Body() createForgotToken: CreateForgotToken) {
     return this.userService.createForgotToken(createForgotToken.email, createForgotToken.lan);
   }
   @Post("/auth/createNewPassword/:token")
   @ApiParam({
     name: "token",
   })
-  createNewPassword(@Param("token") token: string, @Body() resetPassword: ResetPassword){
+  createNewPassword(@Param("token") token: string, @Body() resetPassword: ResetPassword) {
     return this.userService.resetPassword(token, resetPassword.newPassword);
   }
   @Post("/auth/verifyAccount")
-  verifyAccount(@Body() body: {token: string}){
+  verifyAccount(@Body() body: { token: string }) {
     return this.userService.verifyAccount(body.token);
   }
   @Get("/auth/socket")
   @UseGuards(JWTAuthGuard)
-  async getSocketToken(@Req() request: Request){
-    return this.authService.generateSocketToken(request.user as {_id: string, username: string});
+  async getSocketToken(@Req() request: Request) {
+    return this.authService.generateSocketToken(request.user as { _id: string, username: string });
   }
 }
