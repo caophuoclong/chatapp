@@ -38,7 +38,7 @@ export class MailService {
   async sendMailRecovery(user: User, url: string, lan: 'en' | 'vn') {
     const subject = 'recoveryPassword';
     try {
-      return await this.mailerService.send(
+       const response = await this.mailerService.send(
         this.msg(
           user.email,
           subject,
@@ -50,8 +50,9 @@ export class MailService {
           lan,
         ),
       );
+      return response;
     } catch (error) {
-      console.log("mailserver 54", error);
+      console.log("mailserver 54", error.response.body.errors);
     }
   }
   private msg(
@@ -69,7 +70,10 @@ export class MailService {
       to: to,
       from: `Bebes <${from}>`,
       subject: mailSubject()[lang][subject],
-      html: mailBody(body.url, body.name)[lang][body.index],
+      content: [{
+        type: 'text/html',
+        value: mailBody(body.url, body.name)[lang][body.index],
+      }],
     };
     return msg;
   }
