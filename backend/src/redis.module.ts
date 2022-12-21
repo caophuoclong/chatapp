@@ -9,9 +9,7 @@ import {createClient} from "redis"
         {
             provide: "REDIS_CLIENT",
             useFactory: async(configService: ConfigService)=>{
-                let client;
-                console.log(configService.get("node_env") );
-                
+                let client;                
                 if(configService.get("node_env") === "production"){
                     client  = createClient({
                         url: "redis://"+configService.get("redis_host")+":"+configService.get("redis_port"),
