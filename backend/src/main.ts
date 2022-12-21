@@ -12,7 +12,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const whiteList = process.env.CORS.split(",").map(item => item.trim());
   app.enableCors({
-    origin: whiteList,
+    origin: "*",
     credentials: true
   });
   const config = new DocumentBuilder()
