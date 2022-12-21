@@ -69,7 +69,6 @@ export default function Home({}: Props) {
     navigate('/');
   }, [isLargerThanHD]);
   const dispatch = useAppDispatch();
-  const messages = useAppSelector((state) => state.messageSlice.messages);
   const toast = useToast();
   const { t } = useTranslation();
   const socket = useAppSelector((state) => state.globalSlice.socket);
