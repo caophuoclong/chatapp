@@ -30,17 +30,17 @@ jobs:
           context: ./backend
           push: true
           tags: caophuoclongse/chatappserver:latest
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Install SSH-KEY
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
-      # This action do: copy your know hosts to their know_hosts ex: to runners
-      - name: Adding known_hosts
-        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-      - name: Deploy
-        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/private_env/bebes; docker-compose pull server; docker-compose up -d server'
+#   deploy:
+#     runs-on: ubuntu-latest
+#     needs: build
+#     steps:
+#       - name: Install SSH-KEY
+#         uses: shimataro/ssh-key-action@v2
+#         with:
+#           key: ${{ secrets.SSH_PRIVATE_KEY }}
+#           known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+#       # This action do: copy your know hosts to their know_hosts ex: to runners
+#       - name: Adding known_hosts
+#         run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+#       - name: Deploy
+#         run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/private_env/bebes; docker-compose pull server; docker-compose up -d server'
