@@ -11,7 +11,7 @@ type Props = {};
 export default function TabContacts({}: Props) {
   const friends = useAppSelector(
     (state) => state.friendsSlice.friendShips
-  ).filter((f) => f.statusCode.code === 'a');
+  ).filter((f) => f.status.code === 'a');
   const { t } = useTranslation();
   return (
     <Tabs height="83%" boxSizing="border-box">

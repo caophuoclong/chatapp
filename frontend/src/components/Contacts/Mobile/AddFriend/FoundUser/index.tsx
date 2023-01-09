@@ -13,7 +13,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import FriendsApi from '../../../../../services/apis/Friends.api';
-import IFriendShip, { StatusCode } from '../../../../../interfaces/IFriendShip';
+import IFriendShip, { status } from '../../../../../interfaces/IFriendShip';
 import { default as FoundUserDesktop } from '~/components/Modals/FoundUser';
 import { IUser } from '../../../../../interfaces/IUser';
 import { useAppSelector } from '~/app/hooks';
@@ -43,7 +43,7 @@ export default function FoundUser({}: Props) {
     <FoundUserDesktop
       user={user}
       friendShipId={friendShip ? friendShip._id : ''}
-      friendShipStatusCode={friendShip ? friendShip.statusCode : null}
+      friendShipstatus={friendShip ? friendShip.status : null}
       flag={friendShip ? friendShip.flag : ''}
     />
   ) : (
@@ -119,7 +119,7 @@ export default function FoundUser({}: Props) {
   //           </Flex>
   //         }
   //       />
-  //       {friendShip?.statusCode ? (
+  //       {friendShip?.status ? (
   //         <IconButton
   //           aria-label="add"
   //           // _dark={{
@@ -129,7 +129,7 @@ export default function FoundUser({}: Props) {
   //           // bg="white"
   //           // color="black"
   //           fontSize={'18px'}
-  //           icon={RenderIcon(friendShip.statusCode.code)}
+  //           icon={RenderIcon(friendShip.status.code)}
   //         />
   //       ) : (
   //         <IconButton

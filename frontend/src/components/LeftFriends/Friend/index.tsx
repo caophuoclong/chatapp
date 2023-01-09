@@ -21,7 +21,7 @@ import { IUser } from '~/interfaces/IUser';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { useToast } from '@chakra-ui/react';
 import FriendsApi from '../../../services/apis/Friends.api';
-import { changeStatusCode, rejectFriendShip } from '~/app/slices/friends.slice';
+import { changestatus, rejectFriendShip } from '~/app/slices/friends.slice';
 import ConversationsApi from '../../../services/apis/Conversations.api';
 import IConversation from '../../../interfaces/IConversation';
 import { addConversation } from '~/app/slices/conversations.slice';
@@ -61,11 +61,10 @@ export default function Friend({
   const conversations = useAppSelector(
     (state) => state.conversationsSlice.conversations
   );
-  console.log(conversations);
   const createConversation = (e: React.MouseEvent<HTMLDivElement>) => {
     // query if in conversation exist friendship
-    const isExist = conversations.find(
-      (con) => con.friendship._id === friendShipId
+    const isExist = conversations.find((con) =>
+      con.friendship ? con.friendship._id === friendShipId : false
     );
     if (isExist) {
       dispatch(setChoosenConversationID(isExist._id));
@@ -74,7 +73,7 @@ export default function Friend({
       ConversationsApi.createConversationByFriendShip(friendShipId).then(
         (response) => {
           if (response) {
-            const data = response.data.data as IConversation;
+            const data = response.data as IConversation;
             dispatch(addConversation(data));
             dispatch(setChoosenConversationID(data._id));
             dispatch(setShowScreen(ENUM_SCREEN.CONVERSATIONS));
@@ -96,9 +95,9 @@ export default function Friend({
         position: 'top-right',
       });
       dispatch(
-        changeStatusCode({
+        changestatus({
           friendShipId: friendShipId,
-          statusCode: {
+          status: {
             code: 'a',
             name: 'Accept',
           },

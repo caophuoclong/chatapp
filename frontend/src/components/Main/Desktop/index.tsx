@@ -48,7 +48,9 @@ export default function Main({ choosenConversation }: Props) {
   useEffect(() => {
     if (choosenConversation.type === 'direct') {
       const friendShip = friendShips.find((friendShip) => {
-        return choosenConversation.friendship._id === friendShip._id;
+        return choosenConversation.friendship
+          ? choosenConversation.friendship._id === friendShip._id
+          : false;
       });
       setFriendShip(friendShip);
     }

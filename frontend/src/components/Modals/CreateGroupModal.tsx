@@ -72,7 +72,7 @@ export default function CreateGroupModal({ setShow }: Props) {
     ConversationsApi.createGroupConversation(data)
       .then((res) => {
         console.log(res);
-        dispatch(addConversation(res.data.data));
+        dispatch(addConversation(res.data));
         toast({
           title: t('Success'),
           description: t('Create__Group__Success'),
@@ -203,7 +203,7 @@ export default function CreateGroupModal({ setShow }: Props) {
           <CheckboxGroup value={value}>
             {friendList.map(
               (fri) =>
-                fri.statusCode.code === 'a' && (
+                fri.status.code === 'a' && (
                   <Flex padding="1rem">
                     <Contact
                       avatarUrl={fri.user.avatarUrl}

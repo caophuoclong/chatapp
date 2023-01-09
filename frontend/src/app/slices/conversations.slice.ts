@@ -9,6 +9,7 @@ import { IEmoji } from '../../interfaces/IConversation';
 // Define a type for the slice state
 export const getMyConversations = createAsyncThunk("Get my conversations",async ()=>{
   const {data} = await ConversationsApi.getConversations();
+  console.log(data);
     return  data.data;
 })
 interface Conversations {

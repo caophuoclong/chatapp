@@ -103,14 +103,12 @@ export class MessageService {
           _id: conversationId,
         },
         relations: {
-          participants: {
-            user: true,
-          },
+          members: true,
         },
       });
       // console.log(conversation);
-      // console.log(conversation.participants.find((m) => true));
-      if (!conversation || !conversation.participants.find((user) => user.user._id === userId)) {
+      // console.log(conversation.members.find((m) => true));
+      if (!conversation || !conversation.members.find((user) => user.user._id === userId)) {
         return {
           statusCode: 404,
           message: 'Conversation not found',
@@ -232,7 +230,7 @@ export class MessageService {
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      const conversationsId = user.conversations.map((conversation) => conversation.conversationId);
+      const conversationsId = user.conversations.map((conversation) => conversation._id);
       const messages = await this.messageRepository.find({
         where: {
           destination: In(conversationsId),

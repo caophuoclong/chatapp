@@ -41,18 +41,17 @@ export class UserController {
   getMe(@Req() req) {
 
     const _id = req.user._id;
-    return this.userService.getMe(_id);
+    console.log("hehehe it's haha");
+    return this.userService.getOne(_id);
   }
   @Get("friends")
-  getListFriend(@Request() req) {
-    const _id = req.user._id;
-    return this.userService.getListFriend(_id);
+  getListFriend(@Request() req, @Query("user") _id) {
+    return _id ? this.userService.getListFriend(_id) : this.userService.getListFriend(req.user._id);
   }
   @Get("conversations")
   async getConversations(@Request() req) {
     const _id = req.user._id;
     const response = await this.userService.getListConversations(_id);
-    console.log("🚀 ~ file: user.controller.ts:55 ~ UserController ~ getConversations ~ response", response.data[0].lastMessage)
     return response;
   }
   @Get('/:_id')

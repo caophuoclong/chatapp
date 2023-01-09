@@ -12,16 +12,20 @@ import { MailModule } from '../mail/mail.module';
 import { Confirmation } from '~/database/entities/confirmation.entity';
 import { Emoji } from '~/database/entities/Emoji';
 import { Member } from '~/database/entities/member.entity';
+import { UserResolver } from '~/graphQL/resolver/user';
+import { MemberModule } from '../member/member.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, PasswordResetToken, Confirmation, Emoji, Member]),
     FriendshipModule,
     forwardRef(() => ConversationModule),
     RedisModule,
-    MailModule
+    MailModule,
+    forwardRef(()=>MemberModule),
   ],
   controllers: [UserController],
   providers: [
+    UserResolver,
     UserService,
     {
       provide: 'IUtils',

@@ -7,17 +7,12 @@ import { IMail, mailBody, mailSubject } from './constant';
 
 @Injectable()
 export class MailService {
-  constructor(
-    private mailerService: SendGridService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private mailerService: SendGridService, private readonly configService: ConfigService) {}
 
   async sendUserConfirmation(user: User, token: string, lan: 'en' | 'vn') {
     const subject = 'confirmation';
 
-    const url = `${this.configService.get(
-      'client_host',
-    )}/auth/confirm?token=${token}&lan=${lan}`;
+    const url = `${this.configService.get('client_host')}/auth/confirm?token=${token}&lan=${lan}`;
     try {
       return await this.mailerService.send(
         this.msg(
@@ -32,7 +27,7 @@ export class MailService {
         ),
       );
     } catch (error) {
-      console.log("mailservice 35",error);
+      console.log('mailservice 35', error);
     }
   }
   async sendMailRecovery(user: User, url: string, lan: 'en' | 'vn') {
@@ -51,7 +46,7 @@ export class MailService {
         ),
       );
     } catch (error) {
-      console.log("mailserver 54", error);
+      console.log('mailserver 54', error);
     }
   }
   private msg(
@@ -62,7 +57,7 @@ export class MailService {
       url: string;
       index: keyof IMail['en'];
     },
-    lang: 'en' | 'vn',
+    lang: 'en' | 'vn' = 'en',
   ) {
     const from = this.configService.get('mail_from');
     const msg = {
@@ -71,6 +66,7 @@ export class MailService {
       subject: mailSubject()[lang][subject],
       html: mailBody(body.url, body.name)[lang][body.index],
     };
+
     return msg;
   }
 }

@@ -55,16 +55,16 @@ export class AppGateway
       if (!user) {
         this.disconect(client);
       } else {
-      const listFriend = (await this.userService.getListFriend(_id)).data;
+      const listFriend = (await this.userService.getListFriend(_id));
       if (listFriend)
         listFriend.forEach(async (friend) => {
-          if (friend.statusCode.code === 'a') {
+          if (friend.status.code === 'a') {
             this.NotiToMyFriendOnline(_id, friend.user._id);
           }
         });
         this.updateStatusUser(_id, client.id, 'ONLINE');
         this.userService.updateLastOnline(_id, 'ONLINE');
-        const conversations =  (await this.userService.getListConversations(user._id)).data;
+        const conversations =  (await this.userService.getListConversations(user._id));
         conversations.forEach((conversation) => {
           this.socketService.joinRoom(
             client.id,
@@ -72,7 +72,7 @@ export class AppGateway
           );
         });
          await this.messageServce.markAsReceived(_id);
-        // if (readMessage.statusCode === 200) {
+        // if (readMessage.status === 200) {
         //   const { data } = readMessage;
         //   for (let i = 0; i < data.length; i++) {
         //     const socket_id = await this.redisClient.get(data[i].senderId);
@@ -104,11 +104,11 @@ export class AppGateway
         const { _id } = user;
         await this.updateStatusUser(_id, client.id, 'OFFLINE');
         await this.userService.updateLastOnline(_id, 'OFFLINE');
-        const listFriend = (await this.userService.getListFriend(_id)).data;
-        const conversations = (await this.userService.getListConversations(_id)).data;
+        const listFriend = (await this.userService.getListFriend(_id));
+        const conversations = (await this.userService.getListConversations(_id));
         if (listFriend)
           listFriend.forEach(async (friend) => {
-            if (friend.statusCode.code === 'a') {
+            if (friend.status.code === 'a') {
               await this.NotiToMyFriendOffline(_id, friend.user._id);
             }
           });

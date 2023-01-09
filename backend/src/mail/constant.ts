@@ -129,3 +129,9 @@ export interface IMail {
     recoveryPassword: string;
   };
 }
+
+export enum FriendShipFlag {
+  SENDER = "sender",
+  TARGET = "target"
+
+}

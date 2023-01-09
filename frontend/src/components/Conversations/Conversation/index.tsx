@@ -83,14 +83,20 @@ export default function Conversation({
   const messages = messagesSlice.messages;
 
   const messagesInConversation = messages[_id];
+  console.log(
+    '🚀 ~ file: index.tsx:86 ~ messagesInConversation',
+    messagesInConversation
+  );
   const [latestMessage, setLatestMessage] = useState<IMessage>();
   useEffect(() => {
     if (messagesInConversation) {
       const messageGroups = messagesInConversation.data;
       messageGroups.forEach((group) =>
         group.forEach((message) => {
-          if (message._id === lastMessage._id) {
-            setLatestMessage(message);
+          if (lastMessage) {
+            if (message._id === lastMessage._id) {
+              setLatestMessage(message);
+            }
           }
         })
       );

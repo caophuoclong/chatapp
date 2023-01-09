@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import FriendsApi from '~/services/apis/Friends.api';
 import FoundUser from '../Modals/FoundUser';
 import { IUser } from '~/interfaces/IUser';
-import { StatusCode } from '../../interfaces/IFriendShip';
+import { status } from '../../interfaces/IFriendShip';
 import { useAppSelector } from '~/app/hooks';
 import { useForm } from 'react-hook-form';
 import IFriendShip from '../../interfaces/IFriendShip';
@@ -55,7 +55,7 @@ export default function AddFriendsModal({ setShow }: Props) {
         try {
           const response = await FriendsApi.getUserByUsername(username);
           console.log(response);
-          if (response.data.statusCode === 404) {
+          if (response.data.status === 404) {
             toast({
               title: t('Error'),
               description: t('User__Not__Found'),
@@ -65,9 +65,8 @@ export default function AddFriendsModal({ setShow }: Props) {
             });
             setFoundUsers(null);
           } else {
-            const data = response.data.data;
+            const data = response.data;
             const user = data.user as IUser;
-            console.log(user);
             setUsername(user.username);
             setFoundUsers(user);
           }
@@ -99,10 +98,6 @@ export default function AddFriendsModal({ setShow }: Props) {
                   placeholder={t('Username')}
                   variant={'flushed'}
                   onKeyDown={handleEnterPress}
-                  // value={username}
-                  // onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  //   setUsername(e.target.value);
-                  // }}
                   {...register('username')}
                 />
               </Flex>
@@ -115,9 +110,7 @@ export default function AddFriendsModal({ setShow }: Props) {
                 {foundUsers && (
                   <FoundUser
                     user={foundUsers}
-                    friendShipStatusCode={
-                      friendShip ? friendShip.statusCode : null
-                    }
+                    friendShipstatus={friendShip ? friendShip.status : null}
                     friendShipId={friendShip ? friendShip._id : ''}
                     flag={friendShip ? friendShip.flag : ''}
                   />

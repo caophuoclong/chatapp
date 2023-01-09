@@ -25,7 +25,10 @@ export class AppController {
     this.redisClient.hSet("refreshToken", refreshToken.token, "A");
     this.redisClient.hSet("user_refreshToken", _id, refreshToken.token)
     res.cookie('refreshToken', refreshToken.token, { httpOnly: true });
-    res.json(accessToken);
+    res.json({
+      ...accessToken,
+      userId: _id
+    });
   }
   @Post('/auth/register')
   register(@Body() createUserDto: CreateUserDto) {

@@ -252,7 +252,7 @@ export default function NewGroup({ height }: Props) {
         <CheckboxGroup value={value}>
           {friendList.map(
             (fri, index) =>
-              fri.statusCode.code === 'a' && (
+              fri.status.code === 'a' && (
                 <Flex key={index}>
                   <Contact
                     avatarUrl={fri.user.avatarUrl}

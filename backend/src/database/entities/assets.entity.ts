@@ -1,3 +1,4 @@
+import { Field, ObjectType } from "@nestjs/graphql";
 import { type } from "os";
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryColumn } from "typeorm";
 import { Message } from "~/message/entities/message.entity";
@@ -53,35 +54,35 @@ export const getAssetType = (ext: string): AssetType => {
             return AssetType.Other;
     }
 };
-
+@ObjectType()
 @Entity()
 export class Assets{
+    @Field()
     @PrimaryColumn({
         generated: "uuid",
     })
     _id: string;
+    @Field(type => User)
     @ManyToOne(type => User, {onDelete: "CASCADE"})
     @JoinColumn({
         name: "owner"
     })
     owner: User;
+    @Field()
     @Column()
     originalName: string;
+    @Field()
     @Column(
         "enum",
         {
             enum: AssetType,
         }
     )
-    fileType: AssetType
+    fileType: AssetType;
+    @Field()
     @Column({
         type: "bigint",
         default: Date.now()
     })
     createdAt: number;
-    @ManyToMany(type => Message)
-    @JoinTable({
-        name: "messageAttachment",
-    })
-    message: Message[]
 }

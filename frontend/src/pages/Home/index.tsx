@@ -255,7 +255,7 @@ export default function Home({}: Props) {
             addNewFriend({
               _id: data._id,
               user: data.userAddress,
-              statusCode: {
+              status: {
                 code: 'p',
                 name: 'Pending',
               },
@@ -269,7 +269,7 @@ export default function Home({}: Props) {
           addNewFriend({
             _id: data._id,
             user: data.userRequest,
-            statusCode: {
+            status: {
               code: 'p',
               name: 'Pending',
             },

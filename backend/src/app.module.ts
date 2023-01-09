@@ -35,11 +35,25 @@ import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { AppGateway } from './app.gateway';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { join } from 'path';
+import { MemberModule } from './member/member.module';
+import process from 'process';
 
 
 
 @Module({
   imports: [
+    GraphQLModule.forRoot<ApolloDriverConfig>(
+      {
+        cache: "bounded",
+        context: ({req})=>({req}),
+        driver: ApolloDriver,
+        autoSchemaFile: join(process.cwd(), "/src/graphQL/schema/schema.gql"),
+        playground: true
+      }
+    ),
     RedisModule,
     ConfigModule.forRoot({
       isGlobal: true,
@@ -56,6 +70,7 @@ import { AppGateway } from './app.gateway';
     AuthModule,
     TypeOrmModule.forFeature([Member]),
     GatewayModule,
+    MemberModule,
   ],
   controllers: [AppController],
   providers: [ AppGateway],

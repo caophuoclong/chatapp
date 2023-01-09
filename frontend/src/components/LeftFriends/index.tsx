@@ -40,13 +40,13 @@ export default function LeftFriends({}: Props) {
           {t('Friends__Request')} (
           {friendShips &&
             friendShips
-              .filter((friendship) => friendship.statusCode.code === 'p')
+              .filter((friendship) => friendship.status.code === 'p')
               .filter((f) => f.flag === 'target').length}
           )
         </Text>
         {friendShips &&
           friendShips
-            .filter((friendship) => friendship.statusCode.code === 'p')
+            .filter((friendship) => friendship.status.code === 'p')
             .map(
               (friendShip, index) =>
                 friendShip.flag === 'target' && (
@@ -66,14 +66,13 @@ export default function LeftFriends({}: Props) {
         <Text fontWeight={600}>
           {t('Friends')} (
           {friendShips &&
-            friendShips.filter(
-              (friendship) => friendship.statusCode.code === 'a'
-            ).length}
+            friendShips.filter((friendship) => friendship.status.code === 'a')
+              .length}
           )
         </Text>
         {friendShips &&
           friendShips
-            .filter((friendship) => friendship.statusCode.code === 'a')
+            .filter((friendship) => friendship.status.code === 'a')
             .map((friendShip, index) => (
               <Friend
                 key={index}

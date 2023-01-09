@@ -56,7 +56,7 @@ export default function DirectHeader({ friendShip }: Props) {
         </Text>
         {
           <>
-            {friendShip.statusCode.code === 'a' &&
+            {friendShip.status.code === 'a' &&
               friendShip &&
               friendShip.user &&
               (friendShip.user.isOnline ? (
@@ -68,7 +68,7 @@ export default function DirectHeader({ friendShip }: Props) {
                   )}
                 </Text>
               ))}
-            {friendShip.statusCode.code === 'p' && (
+            {friendShip.status.code === 'p' && (
               <Tag size="sm" colorScheme={'yellow'}>
                 {t('Pending')}
               </Tag>

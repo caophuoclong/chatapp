@@ -1,0 +1,101 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Emoji {
+  _id: String!
+  user: User!
+  conversation: Conversation!
+  emoji: String!
+  skinTone: String!
+}
+
+type Member {
+  user: User!
+  conversation: Conversation!
+  isBlocked: Boolean!
+  createdAt: Float!
+  deletedAt: Float!
+  isDeleted: Boolean!
+}
+
+type Assets {
+  _id: String!
+  owner: User!
+  originalName: String!
+  fileType: String!
+  createdAt: Float!
+}
+
+type Message {
+  _id: String!
+  sender: User!
+  destination: [Conversation!]!
+  parentMessage: [Message!]!
+  content: String!
+  isDeleted: Boolean!
+  createdAt: Float!
+  status: String!
+  type: String!
+  scale: Float!
+  isRecall: Boolean!
+  attach: Assets!
+}
+
+type Status {
+  code: String!
+  name: String!
+}
+
+type FriendShip {
+  _id: String!
+  userRequest: User!
+  userAddress: User!
+  status: Status!
+  user: User!
+  flag: String!
+}
+
+type Conversation {
+  _id: String!
+  name: String!
+  members: [Member!]!
+  type: String!
+  visible: Boolean!
+  messages: [Message!]!
+  owner: User!
+  avatarUrl: String!
+  isBlocked: Boolean!
+  isDeleted: Boolean!
+  deletedAt: Float!
+  createdAt: Float!
+  lastMessage: Message!
+  friendship: FriendShip!
+  updateAt: Float!
+  emoji: [Emoji!]!
+}
+
+type User {
+  _id: String!
+  username: String!
+  password: String!
+  name: String!
+  email: String!
+  phone: String!
+  avatarUrl: String!
+  birthday: String!
+  lastOnline: Float!
+  friendRequest: [FriendShip!]!
+  friendAddress: [FriendShip!]!
+  conversations: [Member!]!
+  owner: [Conversation!]!
+  gender: String!
+}
+
+type Query {
+  user(_id: String!): User!
+  getMe: User!
+  friends: [FriendShip!]!
+  conversations: [Conversation!]!
+  conversation(_id: String!): Conversation!
+}

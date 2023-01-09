@@ -17,7 +17,7 @@ export default interface IConversation {
   participants: Array<IUser>;
   lastMessage: IMessage;
   type: ConversationType;
-  friendship: IFriendShip;
+  friendship?: IFriendShip;
   owner: IUser;
   updateAt: number;
   emoji?: IEmoji;

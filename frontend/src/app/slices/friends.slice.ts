@@ -5,7 +5,7 @@ import IConversation from '../../interfaces/IConversation';
 import FriendsApi from '../../services/apis/Friends.api';
 import IFriendShip, { code } from '../../interfaces/IFriendShip';
 import { IoTerminal } from 'react-icons/io5';
-import { StatusCode } from '../../interfaces/IFriendShip';
+import { status } from '../../interfaces/IFriendShip';
 
 export const getFriendsList = createAsyncThunk('get friends list', async () => {
   try {
@@ -43,16 +43,16 @@ export const friendsSlice = createSlice({
     addNewFriend: (state: Friends, action: PayloadAction<IFriendShip>) => {
       state.friendShips.push(action.payload);
     },
-    changeStatusCode: (
+    changestatus: (
       state: Friends,
       action: PayloadAction<{
         friendShipId: string;
-        statusCode: StatusCode;
+        status: status;
       }>
     ) => {
       state.friendShips.forEach((friendShip) => {
         if (action.payload.friendShipId === friendShip._id) {
-          friendShip.statusCode = action.payload.statusCode;
+          friendShip.status = action.payload.status;
         }
       });
     },
@@ -83,7 +83,7 @@ export const friendsSlice = createSlice({
     updateAcceptFriend: (state: Friends, action: PayloadAction<string>) => {
       state.friendShips.forEach((friendShip) => {
         if (friendShip._id === action.payload) {
-          friendShip.statusCode = {
+          friendShip.status = {
             code: 'a',
             name: 'Accept',
           };
@@ -102,13 +102,13 @@ export const friendsSlice = createSlice({
       getFriendsList.fulfilled,
       (state: Friends, action: PayloadAction<any>) => {
         state.isLoading = false;
-        const friends = action.payload.data as Array<IFriendShip>;
-        // state.friendShips.friends = friends.filter(friend => friend.statusCode.code === 'a')
-        // state.friendShips.friendsRequest = friends.filter(friend => friend.statusCode.code === 'p')
+        const friends = action.payload as Array<IFriendShip>;
+        // state.friendShips.friends = friends.filter(friend => friend.status.code === 'a')
+        // state.friendShips.friendsRequest = friends.filter(friend => friend.status.code === 'p')
         // (action.payload.data as Array<IFriendShip>).forEach((item)=>{
-        //   if(item.statusCode.code === "a"){
+        //   if(item.status.code === "a"){
         //     state.friendShips.friends.push(item);
-        //   }else if (item.statusCode.code === "p"){
+        //   }else if (item.status.code === "p"){
         //     state.friendShips.friendsRequest.push(item);
         //   }
         // })
@@ -137,7 +137,7 @@ export const friendsSlice = createSlice({
 });
 
 export const {
-  changeStatusCode,
+  changestatus,
   rejectFriendShip,
   changeOnlineStatus,
   addNewFriend,

@@ -12,11 +12,14 @@ import { UserModule } from '../user/user.module';
 import { Member } from '~/database/entities/member.entity';
 import { SocketModule } from '../socket/socket.module';
 import { MessageSocket } from './message.socket';
+import { MessageResolver } from '~/graphQL/resolver/message';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Message, User, Conversation ,Member]), ConversationModule, UserModule, SocketModule],
+  imports: [
+    
+    TypeOrmModule.forFeature([Message, User, Conversation ,Member]), ConversationModule, UserModule, SocketModule],
   controllers: [MessageController],
-  providers: [MessageService,MessageSocket],
+  providers: [MessageResolver,MessageService,MessageSocket],
   exports: [MessageService]
 })
 export class MessageModule {}

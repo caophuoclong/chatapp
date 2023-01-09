@@ -19,12 +19,12 @@ import { GrGroup } from 'react-icons/gr';
 import { MdOutlineGroups, MdOutlineReportGmailerrorred } from 'react-icons/md';
 import { IUser } from '~/interfaces/IUser';
 import FriendsApi from '~/services/apis/Friends.api';
-import { StatusCode } from '~/interfaces/IFriendShip';
+import { status } from '~/interfaces/IFriendShip';
 import { useToast } from '@chakra-ui/react';
 import { useAppDispatch, useAppSelector } from '~/app/hooks';
 import {
   addNewFriend,
-  changeStatusCode,
+  changestatus,
   rejectFriendShip,
 } from '~/app/slices/friends.slice';
 import ConversationsApi from '~/services/apis/Conversations.api';
@@ -41,13 +41,13 @@ import { ArrowBackIcon } from '@chakra-ui/icons';
 
 type Props = {
   user: IUser;
-  friendShipStatusCode: StatusCode | null;
-  // setFrienShipStatus: (status: StatusCode) => void;
+  friendShipstatus: status | null;
+  // setFrienShipStatus: (status: status) => void;
   flag?: 'sender' | 'target' | '';
   friendShipId: string | '';
 };
 function ShowButton(
-  statusCode: StatusCode | null,
+  status: status | null,
   handleAddFriend: () => void,
   flag: 'sender' | 'target' | '' = '',
   friendShipId: string,
@@ -67,9 +67,9 @@ function ShowButton(
         position: 'top-right',
       });
       dispatch(
-        changeStatusCode({
+        changestatus({
           friendShipId: friendShipId,
-          statusCode: {
+          status: {
             code: 'a',
             name: 'Accept',
           },
@@ -109,15 +109,15 @@ function ShowButton(
       });
     }
   };
-  console.log(statusCode);
-  if (statusCode === null) {
+  console.log(status);
+  if (status === null) {
     return (
       <Button width="50%" onClick={handleAddFriend}>
         {t('AddFriend')}
       </Button>
     );
   } else {
-    switch (statusCode.code) {
+    switch (status.code) {
       case 'p':
         return flag === 'target' ? (
           <Menu>
@@ -203,7 +203,7 @@ function ShowButton(
 }
 export default function FoundUser({
   user,
-  friendShipStatusCode,
+  friendShipstatus,
   flag = '',
   friendShipId,
 }: Props) {
@@ -224,7 +224,7 @@ export default function FoundUser({
         addNewFriend({
           _id: _id,
           user: user,
-          statusCode: {
+          status: {
             code: 'p',
             name: 'Pending',
           },
@@ -308,7 +308,7 @@ export default function FoundUser({
       {myId !== user._id && (
         <Flex gap="1rem" justifyContent={'center'} marginX=".5rem">
           {ShowButton(
-            friendShipStatusCode,
+            friendShipstatus,
             handleAddFriend,
             flag,
             friendShipId,

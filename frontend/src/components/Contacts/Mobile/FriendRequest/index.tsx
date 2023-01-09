@@ -13,7 +13,7 @@ export default function FriendRequest({}: Props) {
       <Text fontWeight={600}>{t('Friends__Request')}</Text>
       {friendShips &&
         friendShips
-          .filter((friendship) => friendship.statusCode.code === 'p')
+          .filter((friendship) => friendship.status.code === 'p')
           .map(
             (friendShip, index) =>
               friendShip.flag === 'target' && (

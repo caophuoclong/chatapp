@@ -66,7 +66,8 @@ export class ConversationController {
     return this.conversationService.createFromFriendship(
       createConversationDtoFromFriendshipDto,
       req.user._id
-    );
+    )
+
   }
   @Patch("/update/:slug")
   @ApiParam({

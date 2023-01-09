@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { SocketService } from '~/socket/socket.service';
 import { User } from '~/user/entities/user.entity';
 import { FriendShip } from './entities/friendship.entity';
+import { Status } from '../database/entities/status.entity';
+import { filteredFriendships } from '~/interfaces/IListFriend';
 
 @Injectable()
 export class FriendshipService {
@@ -27,7 +29,7 @@ export class FriendshipService {
         .getOne()
       if (isFriendShip) {
         return {
-          statusCode: 200,
+          status: 200,
           message: 'Already existed friend ship with _id',
           _id: isFriendShip._id,
         };
@@ -41,7 +43,7 @@ export class FriendshipService {
           .getOne();
         if (isFriendShip) {
           return {
-            statusCode: 200,
+            status: 200,
             message: 'Already existed friend ship with _id',
             _id: isFriendShip._id,
           };
@@ -61,7 +63,7 @@ export class FriendshipService {
           const friendship = {
             userRequest,
             userAddress,
-            statusCode: {
+            status: {
               code: 'p',
               name: 'Pending',
             },
@@ -70,7 +72,7 @@ export class FriendshipService {
           await this.friendShip.save(friendship);
           this.socket.emitToUser(addressId, 'createFriendShipSuccess', friendship);
           return {
-            statusCode: 200,
+            status: 200,
             message: 'Friendship created successfully',
             friendShip: friendship,
           };
@@ -86,7 +88,7 @@ export class FriendshipService {
     const friendship = await this.friendShip.findOne({
       where: { _id: friendShipId },
       relations: {
-        statusCode: true,
+        status: true,
         userRequest: true,
         userAddress: true,
       },
@@ -100,18 +102,18 @@ export class FriendshipService {
       if (x.userAddress === requestId || x.userRequest === requestId) {
         await this.friendShip.delete(friendShipId);
         return {
-          statusCode: 200,
+          status: 200,
           message: 'Friendship deleted successfully',
         };
       } else {
         return {
-          statusCode: 403,
+          status: 403,
           message: 'You are not allowed to delete this friendship',
         };
       }
     }
     return {
-      statusCode: 404,
+      status: 404,
       message: 'Friendship not found',
     };
   }
@@ -121,7 +123,7 @@ export class FriendshipService {
         where: {
           _id: friendShipId,
         },
-        relations: ['statusCode', 'userRequest', 'userAddress'],
+        relations: ['status', 'userRequest', 'userAddress'],
       });
       if (friendShip) {
         const x = {
@@ -130,22 +132,22 @@ export class FriendshipService {
           userAddress: (friendShip.userAddress as User)._id,
         };
         if (x.userAddress === requestId || x.userRequest === requestId) {
-          friendShip.statusCode.code = 'a';
+          friendShip.status.code = 'a';
           await this.friendShip.save(friendShip);
           this.socket.emitToUser(x.userRequest, 'onAcceptFriend', friendShip);
           return {
-            statusCode: 200,
+            status: 200,
             message: 'Friendship accepted successfully',
           };
         } else {
           return {
-            statusCode: 403,
+            status: 403,
             message: 'You are not allowed to accept this friendship',
           };
         }
       }
       return {
-        statusCode: 404,
+        status: 404,
         message: 'Friendship not found',
       };
     } catch (error) {
@@ -160,7 +162,7 @@ export class FriendshipService {
         where: {
           _id: friendShipId,
         },
-        relations: ['statusCode', 'userRequest', 'userAddress'],
+        relations: ['status', 'userRequest', 'userAddress'],
       });
       if (friendShip) {
         const x = {
@@ -169,21 +171,21 @@ export class FriendshipService {
           userAddress: (friendShip.userAddress as User)._id,
         };
         if (x.userAddress === requestId || x.userRequest === requestId) {
-          friendShip.statusCode.code = 'r';
+          friendShip.status.code = 'r';
           await this.friendShip.save(friendShip);
           return {
-            statusCode: 200,
+            status: 200,
             message: 'Friendship accepted successfully',
           };
         } else {
           return {
-            statusCode: 403,
+            status: 403,
             message: 'You are not allowed to accept this friendship',
           };
         }
       }
       return {
-        statusCode: 404,
+        status: 404,
         message: 'Friendship not found',
       };
     } catch (error) {
@@ -198,7 +200,7 @@ export class FriendshipService {
         where: {
           _id: friendShipId,
         },
-        relations: ['statusCode', 'userRequest', 'userAddress'],
+        relations: ['status', 'userRequest', 'userAddress'],
       });
       if (friendship) {
         const x = {
@@ -207,21 +209,21 @@ export class FriendshipService {
           userAddress: (friendship.userAddress as User)._id,
         };
         if (x.userAddress === requestId || x.userRequest === requestId) {
-          friendship.statusCode.code = 'b';
+          friendship.status.code = 'b';
           await this.friendShip.save(friendship);
           return {
-            statusCode: 200,
+            status: 200,
             message: 'Friendship blocked successfully',
           };
         } else {
           return {
-            statusCode: 403,
+            status: 403,
             message: 'You are not allowed to block this friendship',
           };
         }
       }
       return {
-        statusCode: 404,
+        status: 404,
         message: 'Friendship not found',
       };
     } catch (error) {
@@ -230,46 +232,60 @@ export class FriendshipService {
       };
     }
   }
-  async getOne(friendShipId: string){
+  async getFriendShipById(_id: string){
     return this.friendShip.findOne({
-      where:{
-        _id: friendShipId
+      where: {
+        _id
       },
-      relations:["userRequest", "userAddress", "statusCode"],
+      relations: ["status", "userAddress", "userRequest"]
     })
   }
-  //   async getFriendShip(user1: string, user2: string) {
-  //     try {
-  //         let friendship = await this.friendShip.findOne({
-  //             where: {
-  //                 userRequest_id: user1,
-  //                 userAddress_id: user2,
-  //             }
-  //         })
-  //         if(!friendship){
-  //             friendship = await this.friendShip.findOne({
-  //                 where: {
-  //                     userRequest: user2,
-  //                     userAddress: user1,
-  //                 }
-  //             })
-  //             if(!friendship){
-  //                 return {
-  //                     statusCode: 404,
-  //                     message: 'Friendship not found',
-  //                 }
-  //             }else{
-  //                 return {
-  //                     statusCode: 200,
-  //                     message: 'Friendship found',
-  //                     friendship: friendship,
-  //                 }
-  //             }
-  //         }
-  //     } catch (error) {
-  //       return {
-  //         message: error.message,
-  //       };
-  //     }
-  //   }
+  async getFriendShip(...params: Array<string>){
+    return this.friendShip.findOne({
+      where:[
+        {
+          userRequest: {
+            _id: params[0]
+          },
+          userAddress: {
+            _id: params[1]
+          },
+        },{
+          userRequest: {
+            _id: params[1]
+          },
+          userAddress: {
+            _id: params[0]
+          },
+        }
+      ],
+      relations:["userRequest", "userAddress", "status"],
+    })
+  }
+  async getFriends(userId: string){
+    const friendShip = await this.friendShip.find({
+      where:[
+        {
+          userRequest:{
+            _id: userId
+          },
+        },{
+          userAddress: {
+            _id: userId
+          }
+        }
+      ],
+      relations:["status", "userAddress", "userRequest"]
+    })
+    
+    const filteredFriendShips : Array<filteredFriendships> = friendShip.map((value, index)=>{
+      const {userAddress, userRequest, ...x} = value;
+      return {
+        ...x,
+        user: userId === userAddress._id ? userRequest : userAddress,
+        flag: userId === userAddress._id ? "target" : "sender"
+      }
+    });
+    return filteredFriendShips;
+  }
 }

@@ -29,6 +29,8 @@ import { MailService } from '~/mail/mail.service';
 import { Confirmation } from '~/database/entities/confirmation.entity';
 import { Emoji } from '~/database/entities/Emoji';
 import { Member } from '~/database/entities/member.entity';
+import { FriendShipFlag } from '../mail/constant';
+import { MemberService } from '~/member/member.service';
 @Injectable()
 export class UserService {
   constructor(
@@ -50,6 +52,7 @@ export class UserService {
     private readonly emojiRepository: Repository<Emoji>,
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
+    private readonly memberService: MemberService,
   ) {}
   async register(createUserDto: CreateUserDto) {
     const lan = createUserDto.lan;
@@ -169,9 +172,7 @@ export class UserService {
           _id: In(usersId),
         },
       });
-      return {
-        data: users,
-      };
+      return users;
     } catch (error) {
       throw new BadGatewayException(error.message);
     }
@@ -193,7 +194,7 @@ export class UserService {
       throw new ForbiddenException(error.message);
     }
   }
-  async getMe(_id: string) {
+  async getOne(_id: string) {
     try {
       const user = await this.userRepository.findOne({
         where: {
@@ -205,90 +206,20 @@ export class UserService {
       }
       delete user.salt;
       delete user.password;
+      delete user.active;
 
       return {
-        statusCode: 200,
-        message: 'User found',
-        data: user,
+        ...user
       };
     } catch (error) {
       throw new HttpException(error.message, 400);
     }
   }
   async getListFriend(_id: string) {
-    try {
-      const user = await this.userRepository.findOne({
-        where: {
-          _id,
-        },
-        relations: {
-          friendRequest: {
-            userAddress: true,
-            statusCode: true,
-          },
-          friendAddress: {
-            userRequest: true,
-            statusCode: true,
-          },
-        },
-      });
-      if (!user) {
-        throw new HttpException('User not found', 400);
-      }
-
-      const friends = user.friendRequest.filter((friend) => {
-        delete friend.userAddress.salt;
-        delete friend.userAddress.password;
-        return friend.statusCode;
-      });
-      const friends1 = user.friendAddress.filter((friend) => {
-        delete friend.userRequest.salt;
-        delete friend.userRequest.password;
-        return friend.statusCode;
-      });
-      const mergeFriend = [];
-      friends.forEach((friend) => {
-        mergeFriend.push({
-          _id: friend._id,
-          statusCode: friend.statusCode,
-          user: friend.userAddress,
-          flag: 'sender',
-        });
-      });
-      friends1.forEach((friend) => {
-        mergeFriend.push({
-          _id: friend._id,
-          statusCode: friend.statusCode,
-          user: friend.userRequest,
-          flag: 'target',
-        });
-      });
-      return new Promise<Array<IListFriend>>(async (resolve, reject) => {
-        const x = [];
-        for (let i = 0; i < mergeFriend.length; i++) {
-          const isExist = async (_id: string) => {
-            const hihi = await this.redisClient.get(_id);
-            if (hihi) {
-              return true;
-            } else return false;
-          };
-          mergeFriend[i].user.isOnline = await isExist(mergeFriend[i].user._id);
-          x.push(mergeFriend[i]);
-        }
-        resolve(x);
-      }).then((res) => {
-        return {
-          statusCode: 200,
-          message: 'User found',
-          data: [...res],
-        };
-      });
-    } catch (error) {
-      throw new HttpException(error.message, 400);
-    }
+      const response = await this.friendShipService.getFriends(_id)
+      return response;
   }
   async getListConversations(userId: string) {
-    
     try {
       if (!userId) {
         throw new NotFoundException('User not found');
@@ -311,12 +242,10 @@ export class UserService {
           conversationsId,
         );
       
-      return {
-        data: conversations.map((conversation)=>({
+      return conversations.map((conversation)=>({
           ...conversation,
-          participants: conversation.participants.map(par => par.user)
-        }))
-      };
+          participants: conversation.members
+        }));
     } catch (error) {
       console.log('hi', error);
       throw new InternalServerErrorException(error.message);
@@ -369,81 +298,27 @@ export class UserService {
       .catch((error) => new HttpException(error, 400));
   }
   async getFriendShip(_id: string, otherUserId: string) {
-    const user = await this.userRepository.findOne({
-      where: { _id: _id },
-      relations: [
-        'friendRequest',
-        'friendRequest.userAddress',
-        'friendRequest.statusCode',
-        'friendAddress',
-        'friendAddress.userRequest',
-        'friendAddress.statusCode',
-      ],
-    });
-    if (user) {
-      const isFriend = user.friendRequest.find(
-        (friend) => friend.userAddress._id === otherUserId,
-      );
-      if (isFriend) {
-        return {
-          statusCode: 200,
-          message: 'Friendship found',
-          data: isFriend.statusCode,
-          flag: 'sender',
-          friendShipId: isFriend._id,
-        };
-      } else {
-        const isFriend = user.friendAddress.find(
-          (friend) => friend.userRequest._id === otherUserId,
-        );
-        if (isFriend) {
-          return {
-            statusCode: 200,
-            message: 'Friendship found',
-            data: isFriend.statusCode,
-            flag: 'target',
-            friendShipId: isFriend._id,
-          };
-        } else {
-          return {
-            statusCode: 404,
-            message: 'Friendship not found',
-            data: null,
-          };
-        }
-      }
-    } else {
-      return {
-        statusCode: 404,
-        message: 'User not found',
-      };
-    }
+    const response = await this.friendShipService.getFriendShip(_id, otherUserId);
+    return response;
   }
   async getUserByUsername(_id: string, username: string) {
     const user = await this.userRepository.findOne({
-      where: {
-        username: username,
+      where:{
+        username
       },
-    });
-    if (user) {
-      delete user.password;
-      delete user.salt;
-      const friendShip = await this.getFriendShip(_id, user._id);
+    })
+    if(!user) throw new NotFoundException("user not found");
+    const isFriend = await this.getFriendShip(_id, user._id);
+    if(!isFriend){
       return {
-        statusCode: 200,
-        message: 'User found',
-        data: {
-          user: user,
-          friendShip: friendShip.data,
-          flag: friendShip.flag,
-          friendShipId: friendShip.friendShipId,
-        },
-      };
-    } else {
-      return {
-        statusCode: 404,
-        message: 'User not found',
-      };
+        user
+      }
+    }
+    return {
+      user,
+      friendShipId: isFriend._id,
+      flag: _id === isFriend.userAddress._id ? FriendShipFlag.TARGET : FriendShipFlag.SENDER,
+      friendShip: isFriend
     }
   }
   async blockFriend(_id: string, friendShipId: string) {
@@ -575,4 +450,5 @@ export class UserService {
       };
     }
   }
+
 }

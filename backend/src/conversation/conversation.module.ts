@@ -12,6 +12,7 @@ import { SocketModule } from '~/socket/socket.module';
 import { Emoji } from '~/database/entities/Emoji';
 import { Member } from '~/database/entities/member.entity';
 import { ConversationSocket } from './conversation.socket';
+import { ConversationResolver } from '~/graphQL/resolver/conversation';
 
 @Module({
   imports: [
@@ -21,7 +22,9 @@ import { ConversationSocket } from './conversation.socket';
     SocketModule
   ],
   controllers: [ConversationController],
-  providers: [ConversationService, ConversationSocket],
+  providers: [    
+    ConversationResolver,
+    ConversationService, ConversationSocket],
   exports: [ConversationService]
 })
 export class ConversationModule {}

@@ -55,6 +55,7 @@ export class AuthService {
       expiresIn
     })
     return {
+      userId: _id,
       token,
       expired_time: expiresIn + new Date().getTime()
     }
