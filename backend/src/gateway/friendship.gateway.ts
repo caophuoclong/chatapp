@@ -26,10 +26,10 @@ export class FriendShipGateway{
     }
     @SubscribeMessage("createFriendShip")
     async createFriendShip(@ConnectedSocket()client: CustomSocket, @MessageBody() userId: string){
-        const res_event_sender = "createFriendShipSuccess_sender"
-        const res_event_target = "createFriendShipSuccess_target"
-        const [response, socketId]  = await Promise.all([this.friendShipService.addFreiend(client.user._id, userId), this.redisClient.get(userId)])        
-        client.emit(res_event_sender, response.friendShip);
-        this.server.to(socketId).emit(res_event_target, response.friendShip);
+        // const res_event_sender = "createFriendShipSuccess_sender"
+        // const res_event_target = "createFriendShipSuccess_target"
+        // const [response, socketId]  = await Promise.all([this.friendShipService.addFreiend(client.user._id, userId), this.redisClient.get(userId)])        
+        // client.emit(res_event_sender, response.friendShip);
+        // this.server.to(socketId).emit(res_event_target, response.friendShip);
     }
 }

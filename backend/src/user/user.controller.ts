@@ -42,22 +42,23 @@ export class UserController {
 
     const _id = req.user._id;
     console.log("hehehe it's haha");
-    return this.userService.getOne(_id);
+    return this.userService.getOne({_id});
   }
-  @Get("friends")
-  getListFriend(@Request() req, @Query("user") _id) {
-    return _id ? this.userService.getListFriend(_id) : this.userService.getListFriend(req.user._id);
-  }
-  @Get("conversations")
-  async getConversations(@Request() req) {
-    const _id = req.user._id;
-    const response = await this.userService.getListConversations(_id);
-    return response;
-  }
+  // @Get("friends")
+  // // getListFriend(@Request() req, @Query("user") _id) {
+  // //   return _id ? this.userService.getListFriend(_id) : this.userService.getListFriend(req.user._id);
+  // // }
+  // // @Get("conversations")
+  // // async getConversations(@Request() req) {
+  // //   const _id = req.user._id;
+  // //   const response = await this.userService.getListConversations(_id);
+  // //   return response;
+  // // }
   @Get('/:_id')
-  getOther(@Param('_id') id) {
-    const _id = id;
-    return this.userService.get(_id);
+  getOther(@Param('_id') _id) {
+    return this.userService.getOne({
+      _id
+    });
   }
   @Patch('update-password')
   updatePassword(@Body() updatePasswordDto: UpdatePasswordDto, @Request() req) {
@@ -71,39 +72,13 @@ export class UserController {
       req.user._id,
     );
   }
-  @Post("/friends/add/")
-  @ApiQuery({ name: '_id', description: 'User id' })
-  addFriend(@Request() req, @Query("_id") _id){
 
-    return this.userService.addFriend(req.user._id, _id)
-  }
-  @Post("/friends/remove/")
-  @ApiQuery({ name: '_id', description: 'friendship id' })
-
-  removeFriend(@Request() req,  @Query( "_id", ParseUUIDPipe) _id){
-    return this.userService.removeFriend(req.user._id, _id)
-  }
-  @Post("/friends/accept/")
-  @ApiQuery({ name: '_id', description: 'friendship id' })
-  acceptFriend(@Request() req, @Query( "_id", ParseUUIDPipe) _id){
-    return this.userService.acceptFriend(req.user._id, _id)
-  }
-  @Post("/friends/reject/")
-  @ApiQuery({ name: '_id', description: 'friendship id' })
-  rejectFriend(@Request() req, @Query( "_id", ParseUUIDPipe) _id){
-    return this.userService.rejectFriend(req.user._id, _id)
-  }
-  @Get("/friend/username/")
+  @Get("/username/:username")
   @ApiQuery({ name: 'username', description: 'Username' })
-  getUserByUsername(@Request() req, @Query("username") username){
-    const _id = req.user._id;
-   return this.userService.getUserByUsername(_id, username)
+  getUserByUsername(@Param() username){
+   return this.userService.getOne({username})
   }
-  @Get("/friend/")
-  @ApiQuery({ name: 'userId', description: 'User id' })
-  getFriendShip(@Request() req, @Query("userId") userId){
-    return this.userService.getFriendShip(req.user._id, userId)
-  }
+
   @Post("/update-avatar")
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({

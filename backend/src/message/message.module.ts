@@ -1,5 +1,5 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { MessageController } from './message.controller';
 import { Message } from './entities/message.entity';
@@ -16,8 +16,11 @@ import { MessageResolver } from '~/graphQL/resolver/message';
 
 @Module({
   imports: [
-    
-    TypeOrmModule.forFeature([Message, User, Conversation ,Member]), ConversationModule, UserModule, SocketModule],
+    TypeOrmModule.forFeature([Message, User, Conversation ,Member]), 
+    forwardRef(()=>ConversationModule), 
+    forwardRef(()=> UserModule)
+    , SocketModule
+  ],
   controllers: [MessageController],
   providers: [MessageResolver,MessageService,MessageSocket],
   exports: [MessageService]

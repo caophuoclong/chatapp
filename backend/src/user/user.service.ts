@@ -12,7 +12,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, JoinTable, In } from 'typeorm';
+import { Repository, JoinTable, In, FindOptionsSelect } from 'typeorm';
 import { IUtils } from '~/interfaces/IUtils';
 import Utils from '~/utils';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -54,7 +54,7 @@ export class UserService {
     private readonly memberRepository: Repository<Member>,
     private readonly memberService: MemberService,
   ) {}
-  async register(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     const lan = createUserDto.lan;
     delete createUserDto.lan;
     try {
@@ -77,71 +77,22 @@ export class UserService {
           console.log(result);
         });
       return {
-        statusCode: 200,
         message: 'User created successfully',
       };
     } catch (error) {
-      throw new HttpException(error.message, 400);
-    }
-  }
-  async login(loginUserDto: LoginUserDto) {
-    try {
-      const user = await this.userRepository.findOne({
-        where: {
-          username: loginUserDto.username,
-        },
-        select: {
-          _id: true,
-          salt: true,
-          password: true,
-          username: true,
-          active: true,
-          email: true,
-        },
-      });
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-      const verified = await this.utils.verify(
-        loginUserDto.password,
-        user.salt,
-        user.password,
-      );
-      if (!verified) {
-        throw new HttpException(
-          'Password does not match',
-          HttpStatus.FORBIDDEN,
-        );
-      }
-      const { _id, email, username, active } = user;
-      if (!active) {
-        throw new HttpException('INACTIVE', HttpStatus.FORBIDDEN);
-      }
-      return {
-        _id,
-        username,
-        email,
-      };
-    } catch (error) {
-      throw new HttpException(error.message, error.status);
+      throw new InternalServerErrorException(error.message);
     }
   }
   async updatePassword(updatePasswordDto: UpdatePasswordDto, _id: string) {
     try {
-      const user = await this.userRepository.findOne({
-        where: {
-          _id: _id,
-        },
-        select:{
-          _id: true,
-          password: true,
-          salt: true
-        }
-      });
+      const user = await this.getOne({_id}, {
+        username: true,
+        password: true,
+        salt: true
+      })
       if (!user) {
         throw new NotFoundException("user not found")
       }
-      console.log(user);
       const verified = await this.utils.verify(
         updatePasswordDto.oldPassword,
         user.salt,
@@ -158,96 +109,29 @@ export class UserService {
       user.password = hashedPassowrd;
       await this.userRepository.save(user);
       return {
-        statusCode: 200,
         message: 'Password updated successfully',
       };
     } catch (error) {
       throw new ForbiddenException(error.message);
     }
   }
-  async getUsers(usersId: Array<string>) {
-    try {
-      const users = await this.userRepository.find({
-        where: {
-          _id: In(usersId),
-        },
-      });
-      return users;
-    } catch (error) {
-      throw new BadGatewayException(error.message);
-    }
-  }
-  async get(_id: string) {
+  async getOne({_id, username}: Partial<{
+    _id: string,
+    username: string
+  }>, select?:FindOptionsSelect<User>) {
     try {
       const user = await this.userRepository.findOne({
-        where: { _id },
+        where: [
+          {_id},
+          {username}
+        ],
+        select: select
       });
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      return {
-        statusCode: 200,
-        message: 'User found',
-        data: user,
-      };
+      return user;
     } catch (error) {
-      throw new ForbiddenException(error.message);
-    }
-  }
-  async getOne(_id: string) {
-    try {
-      const user = await this.userRepository.findOne({
-        where: {
-          _id,
-        },
-      });
-      if (!user) {
-        throw new HttpException('User not found', 400);
-      }
-      delete user.salt;
-      delete user.password;
-      delete user.active;
-
-      return {
-        ...user
-      };
-    } catch (error) {
-      throw new HttpException(error.message, 400);
-    }
-  }
-  async getListFriend(_id: string) {
-      const response = await this.friendShipService.getFriends(_id)
-      return response;
-  }
-  async getListConversations(userId: string) {
-    try {
-      if (!userId) {
-        throw new NotFoundException('User not found');
-      }
-      const members = await this.memberRepository.find({
-        where: {
-          user: {
-            _id: userId,
-          },
-          isDeleted: false,
-        },
-        select: {
-          conversationId: true,
-        }
-      });
-      
-      const conversationsId = members.map((member) => member.conversationId);
-      const conversations =
-        await this.conversationService.getListConversationsById(
-          conversationsId,
-        );
-      
-      return conversations.map((conversation)=>({
-          ...conversation,
-          participants: conversation.members
-        }));
-    } catch (error) {
-      console.log('hi', error);
       throw new InternalServerErrorException(error.message);
     }
   }
@@ -269,63 +153,6 @@ export class UserService {
     } catch (error) {
       throw new HttpException(error.message, 400);
     }
-  }
-  async addFriend(_id: string, friendId: string) {
-    if (_id === friendId) {
-      throw new HttpException('You can not add yourself as friend', 400);
-    }
-    return this.friendShipService
-      .addFreiend(_id, friendId)
-      .then((response) => response)
-      .catch((error) => new HttpException(error.message, 400));
-  }
-  async removeFriend(_id: string, friendShipId: string) {
-    return this.friendShipService
-      .removeFriend(_id, friendShipId)
-      .then((response) => response)
-      .catch((error) => new HttpException(error.message, error.code));
-  }
-  async acceptFriend(_id: string, friendShipId: string) {
-    return this.friendShipService
-      .acceptFriend(_id, friendShipId)
-      .then((response) => response)
-      .catch((error) => new HttpException(error, 400));
-  }
-  async rejectFriend(_id: string, friendShipId: string) {
-    return this.friendShipService
-      .rejectFriend(_id, friendShipId)
-      .then((response) => response)
-      .catch((error) => new HttpException(error, 400));
-  }
-  async getFriendShip(_id: string, otherUserId: string) {
-    const response = await this.friendShipService.getFriendShip(_id, otherUserId);
-    return response;
-  }
-  async getUserByUsername(_id: string, username: string) {
-    const user = await this.userRepository.findOne({
-      where:{
-        username
-      },
-    })
-    if(!user) throw new NotFoundException("user not found");
-    const isFriend = await this.getFriendShip(_id, user._id);
-    if(!isFriend){
-      return {
-        user
-      }
-    }
-    return {
-      user,
-      friendShipId: isFriend._id,
-      flag: _id === isFriend.userAddress._id ? FriendShipFlag.TARGET : FriendShipFlag.SENDER,
-      friendShip: isFriend
-    }
-  }
-  async blockFriend(_id: string, friendShipId: string) {
-    return this.friendShipService
-      .blockFriend(_id, friendShipId)
-      .then((response) => response)
-      .catch((error) => new HttpException(error, 400));
   }
   async createForgotToken(email: string, lan: 'en' | 'vn') {
     const user = await this.userRepository.findOneBy({

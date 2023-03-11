@@ -26,13 +26,12 @@ export class Message {
     @Field(type=>User)
     @ManyToOne(type => User, user => user._id)
     sender: User;
-        @Field(type => [Conversation])
-
+    @Field(type => Conversation)
     @ManyToOne(type => Conversation, con => con._id,{
         onDelete: "CASCADE"
     })
     destination: Conversation;
-        @Field(type => [Message])
+        @Field(type => Message)
 
     @OneToOne(type => Message, mes => mes._id)
     parentMessage: Message;

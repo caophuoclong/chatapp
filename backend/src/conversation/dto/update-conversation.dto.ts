@@ -22,16 +22,6 @@ export class UpdateConversationDto {
     })
     @Optional()
     visible: boolean;
-    @ApiProperty({
-        type: Array<String>,
-        description: "The list of users need to be added to conversation"
-    })
-    @Optional()
-    participants: Array<string>;
-    @ApiProperty({
-        type: Array<String>,
-        description: "The list of users need to be removed from conversation"})
-    @Optional()
-    removeParticipants: Array<string>;
+
 
 }

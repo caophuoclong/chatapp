@@ -29,14 +29,23 @@ export class MessageService {
   async sendMessage(DTO: CreateMessageDto) {
     const { _id: tempId } = DTO;
     const { message, updateAt } = await this.create(DTO);
-    const { destination } = message;
-    const participants = await this.conversationService.getUserOfConversation(destination);
     this.messageSocket.sendMessage(message);
     return {
       message,
       tempId,
     };
   }
+  async getCount(destination: string){
+    const [messages, count] = await this.messageRepository.findAndCount({
+      where:{
+        destination:{
+          _id: destination
+        }
+      }
+    })
+    return count;
+  }
+  
   async getImageMessages(conversationId: string) {
     const messages = await this.messageRepository.find({
       where: {
@@ -300,10 +309,33 @@ export class MessageService {
       throw new HttpException(error.message, 500);
     }
   }
-  findAll() {
-    return `This action returns all message`;
+  async getMany(convesationId: string, options: Partial<{
+    take: number,
+    skip: number
+  }>) {    
+    const {take = 10, skip = 0} = options;
+     const [messages, count] = await this.messageRepository.findAndCount({
+      where:{
+        destination:{
+          _id: convesationId
+        }
+      },
+      relations:["sender", "destination"],
+      order: {
+        createdAt: "DESC"
+      },
+      take: take,
+      skip: skip       
+     })     
+     return messages
   }
-
+  async getOne(_id: string){
+    return this.messageRepository.findOne({
+      where: {
+        _id
+      }
+    })
+  }
   findOne(id: number) {
     return `This action returns a #${id} message`;
   }

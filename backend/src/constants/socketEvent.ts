@@ -15,3 +15,18 @@ export enum SocketEvent {
     RECEIVED_MESSAGE="receivedMessage",
     NEW_MESSAGE="newMessage",
 }
+
+export abstract class FriendShipStatus{
+    static ACCEPT = {
+        code: "a",
+        name: "Accept"
+    }
+    static PENDING = {
+        code: "p",
+        name: "Pending"
+    }
+    static BLOCK = {
+        code: "b",
+        name: "Block"
+    }
+}

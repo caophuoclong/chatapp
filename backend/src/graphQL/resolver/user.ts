@@ -19,21 +19,16 @@ export class UserResolver{
     ){}
     @Query(()=> User, {name: "user"})
     findOneById(@Args("_id", {type: ()=> String}) _id: string){
-         return this.userService.getOne(_id);
+         return this.userService.getOne({_id});
     }
     @Query(()=> User, {name: "getMe"})
     findOne(@UserDecorator() {username, _id}: {
         _id: string,
         username: string
     }){
-        return this.userService.getOne(_id);
+        console.log("some one get them");
+        
+        return this.userService.getOne({_id});
     }
-    @Query(()=> [FriendShip], {name: "friends"})
-    async getFriends(@UserDecorator() {username, _id}: {
-        _id: string,
-        username: string
-    }){
-        const response = await this.userService.getListFriend(_id);        
-        return response;
-    }
+   
 }

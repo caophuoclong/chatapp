@@ -7,6 +7,7 @@ import * as dotenv from 'dotenv';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { CatchHttpException } from './exceptions/HttpException';
+import { GraphQlException } from './exceptions/GraphQlException';
 dotenv.config()
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -23,6 +24,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .build()
   app.useGlobalFilters(new CatchHttpException())
+  app.useGlobalFilters(new GraphQlException())
   app.use(cookieParser())
   app.setGlobalPrefix("/api")
   app.useGlobalPipes(new ValidationPipe())

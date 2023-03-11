@@ -36,7 +36,7 @@ export class ConversationController {
     description: 'The _id of conversation need to get',
   })
   getConversationById(@Param("slug") slug, @Req() req){
-    return this.conversationService.getConversationById(slug)
+    return this.conversationService.getOne(slug)
   }
   @Post('/create/group')
   @UseInterceptors(FileInterceptor('file', {
@@ -79,23 +79,12 @@ export class ConversationController {
     return this.conversationService.updateConversation(_id,updateConversationDto,slug);
 
   }
-  @Get()
-  @ApiQuery({ name: '_id', description: 'Conversation id' })
-  getConversation(@Query('_id', ParseUUIDPipe) _id) {
-    return this.conversationService.getConversationById(_id);
-  }
   @Patch("/out/:slug")
   @ApiParam({name: "slug", description: "The _id of conversation"})
   outConversation(@Param("slug", ParseUUIDPipe) slug , @Request() req){
     const {_id} = req.user;
     return this.conversationService.outConversation(_id,slug);
   }
-  // @Delete("/delete/:slug")
-  // @ApiParam({name: "slug", description: "The _id of conversation"})
-  // deleteConversation(@Param("slug", ParseUUIDPipe) slug , @Request() req){
-  //   const {_id} = req.user;
-  //   return this.conversationService.deleteConversation(_id,slug);
-  // }
   @Get("/:slug/emoji")
   @ApiParam({name: "slug", description: "The _id of conversation"})
   getEmoji(@Param("slug", ParseUUIDPipe) slug, @Request() req){
@@ -114,7 +103,7 @@ export class ConversationController {
   @ApiParam({name: "slug", description: "The _id of conversation"})
   removeConversation(@Param("slug", ParseUUIDPipe) slug, @Request() req){
     const {_id} = req.user;
-    return this.conversationService.removeConversation(slug, _id);
+    return this.conversationService.deleteConversation(slug, _id);
   }
   @Patch("/get-again/:slug")
   @ApiParam({name: "slug", description: "The _id of conversation"})

@@ -13,18 +13,23 @@ import { Emoji } from '~/database/entities/Emoji';
 import { Member } from '~/database/entities/member.entity';
 import { ConversationSocket } from './conversation.socket';
 import { ConversationResolver } from '~/graphQL/resolver/conversation';
+import { MemberModule } from '~/member/member.module';
+import { MessageModule } from '~/message/message.module';
+import { AuthModule } from '~/auth/auth.module';
 
 @Module({
   imports: [
+        forwardRef(()=> AuthModule),
+
     TypeOrmModule.forFeature([User, FriendShip, Conversation, Emoji, Member]),
-    forwardRef(()=> UserModule),
+    forwardRef(() => UserModule),
+    forwardRef(() => MemberModule),
+    forwardRef(() => MessageModule),
     FriendshipModule,
-    SocketModule
+    SocketModule,
   ],
   controllers: [ConversationController],
-  providers: [    
-    ConversationResolver,
-    ConversationService, ConversationSocket],
-  exports: [ConversationService]
+  providers: [ConversationResolver, ConversationService, ConversationSocket],
+  exports: [ConversationService],
 })
 export class ConversationModule {}

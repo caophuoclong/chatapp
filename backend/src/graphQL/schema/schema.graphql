@@ -1,7 +1,3 @@
-# ------------------------------------------------------
-# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
-# ------------------------------------------------------
-
 type Emoji {
   _id: String!
   user: User!
@@ -11,8 +7,6 @@ type Emoji {
 }
 
 type Member {
-  user: User!
-  conversation: Conversation!
   isBlocked: Boolean!
   createdAt: Float!
   deletedAt: Float!
@@ -30,8 +24,8 @@ type Assets {
 type Message {
   _id: String!
   sender: User!
-  destination: Conversation!
-  parentMessage: Message!
+  destination: [Conversation!]!
+  parentMessage: [Message!]!
   content: String!
   isDeleted: Boolean!
   createdAt: Float!
@@ -58,19 +52,19 @@ type FriendShip {
 
 type Conversation {
   _id: String!
-  name: String
+  name: String!
   members: [User!]!
   type: String!
   visible: Boolean!
   messages: [Message!]!
-  owner: User
-  avatarUrl: String
+  owner: User!
+  avatarUrl: String!
   isBlocked: Boolean!
   isDeleted: Boolean!
   deletedAt: Float!
   createdAt: Float!
-  lastMessage: Message
-  friendship: FriendShip
+  lastMessage: Message!
+  friendship: FriendShip!
   updateAt: Float!
   emoji: [Emoji!]!
 }
@@ -81,32 +75,19 @@ type User {
   password: String!
   name: String!
   email: String!
-  phone: String
-  avatarUrl: String
-  birthday: String
+  phone: String!
+  avatarUrl: String!
+  birthday: String!
   lastOnline: Float!
-  friendRequest: [FriendShip!]!
-  friendAddress: [FriendShip!]!
-  conversations: [Member!]!
+  friends: [User!]!
   owner: [Conversation!]!
   gender: String!
-  createdAt: Float!
-  updatedAt: Float!
-}
-
-type RefreshToken {
-  userId: String!
-  token: String!
-  expired_time: Float!
 }
 
 type Query {
   user(_id: String!): User!
   getMe: User!
-  refreshtoken(refreshToken: String!): RefreshToken!
   conversations: [Conversation!]!
   conversation(_id: String!): Conversation!
-  memberDetails(userId: String!, conversationId: String!): Member!
-  getCount(destination: String!): Float!
-  messages(destination: String!, take: Float, skip: Float): [Message!]!
+  memberDetails(userId: String!, conversationId: String!): [Member!]!
 }

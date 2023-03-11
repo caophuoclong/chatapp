@@ -39,9 +39,8 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { MemberModule } from './member/member.module';
+import { FriendshipController } from "./friendship/friendship.controller";
 import process from 'process';
-
-
 
 @Module({
   imports: [
@@ -72,7 +71,7 @@ import process from 'process';
     GatewayModule,
     MemberModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, FriendshipController],
   providers: [ AppGateway],
 })
 export class AppModule {}

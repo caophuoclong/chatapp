@@ -24,13 +24,14 @@ export class Conversation {
   @Field()
   @PrimaryGeneratedColumn('uuid')
   _id: string;
-  @Field()
+  @Field( {
+    nullable: true
+  })
   @Column({
     nullable: true,
   })
-  
   name: string;
-  @Field(type=> [Member])
+  @Field(type=> [User])
   @OneToMany(type => Member, member => member.conversation)
   members: Member[];
   @Field()
@@ -47,10 +48,14 @@ export class Conversation {
   @Field( type => [Message])
   @OneToMany((type) => Message, (message) => message.destination)
   messages: Message[];
-  @Field(type => User)
+  @Field(type => User, {
+    nullable: true
+  })
   @ManyToOne((type) => User, (user) => user._id)
   owner: User;
-  @Field()
+  @Field( {
+    nullable: true
+  })
   @Column({
     nullable: true
   })
@@ -79,7 +84,9 @@ export class Conversation {
     default: new Date().getTime()
 })
 createdAt: number;
-@Field(type=> Message)
+@Field(type=> Message, {
+    nullable: true
+  })
   @OneToOne(type => Message, m => m._id, {
     onDelete: "CASCADE"
   })
@@ -87,7 +94,9 @@ createdAt: number;
     name: "lastmessage"
   })
   lastMessage: Message;
-  @Field(type => FriendShip)
+  @Field(type => FriendShip, {
+    nullable: true
+  })
   @OneToOne(type => FriendShip, f => f._id,{
     onDelete: "CASCADE",
   })
@@ -105,5 +114,5 @@ createdAt: number;
   @OneToMany(type => Emoji, e => e.conversation,{
     cascade: true
   })
-  emoji: Emoji[]
+  emoji: Emoji[];
 }

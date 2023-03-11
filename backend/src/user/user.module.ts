@@ -14,8 +14,10 @@ import { Emoji } from '~/database/entities/Emoji';
 import { Member } from '~/database/entities/member.entity';
 import { UserResolver } from '~/graphQL/resolver/user';
 import { MemberModule } from '../member/member.module';
+import { AuthModule } from '~/auth/auth.module';
 @Module({
   imports: [
+    forwardRef(()=> AuthModule),
     TypeOrmModule.forFeature([User, PasswordResetToken, Confirmation, Emoji, Member]),
     FriendshipModule,
     forwardRef(() => ConversationModule),

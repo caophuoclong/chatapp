@@ -1,9 +1,11 @@
-import { HttpException, Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '~/user/dto/create-user.dto';
 import ms from "ms";
 import { ConfigService } from '@nestjs/config';
+import Utils from '../utils/index';
+import { IUtils } from '~/interfaces/IUtils';
 
 @Injectable()
 export class AuthService {
@@ -11,19 +13,51 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    @Inject('IUtils')
+    private readonly utils: IUtils,
   ) {}
   async validateUser(username: string, password: string){
-    const user = await this.userService.login({username, password});
-    return {...user};
+    const user = await this.userService.getOne({username},{
+      _id: true,
+      username: true,
+      email: true,
+      password: true,
+      salt: true,
+      active: true
+    });
+        if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      const verified = await this.utils.verify(
+        password,
+        user.salt,
+        user.password,
+      );
+      if (!verified) {
+        throw new ForbiddenException(
+          'Password does not match',
+        );
+      }
+      const { _id, email, active } = user;
+      
+      if (!active) {
+        throw new ForbiddenException('user is not active');
+      }
+      return {
+        _id,
+        username,
+        email,
+      };
   }
   async register(user: CreateUserDto){
-    return await this.userService.register(user);
+    return await this.userService.create(user);
   }
   async login(rest: {
     username: string,
     password: string
   }){
     const user = await this.validateUser(rest.username, rest.password);
+    console.log(user);
     const accessToken = await this.generateToken({_id: user._id, username: user.username});
     const refreshToken = await this.generateToken({_id: user._id, username: user.username},true);
     return {
@@ -68,7 +102,7 @@ export class AuthService {
       username: string;
     };
     }catch(error){
-      throw new Error(error);
+      throw new UnauthorizedException("Token expired");
     }
   }
 }
